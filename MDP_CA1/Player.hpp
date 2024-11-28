@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-class State
+class Player
 {
 public:
     
