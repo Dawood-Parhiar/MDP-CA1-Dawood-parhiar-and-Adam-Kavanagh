@@ -158,23 +158,57 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Button.cpp" />
+    <ClCompile Include="Command.cpp" />
+    <ClCompile Include="CommandQueue.cpp" />
+    <ClCompile Include="Component.cpp" />
+    <ClCompile Include="Container.cpp" />
+    <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="Label.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MenuState.cpp" />
+    <ClCompile Include="PirateShip.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="SceneNode.cpp" />
+    <ClCompile Include="SpriteNode.cpp" />
     <ClCompile Include="State.cpp" />
     <ClCompile Include="StateStack.cpp" />
+    <ClCompile Include="TextNode.cpp" />
+    <ClCompile Include="TitleState.cpp" />
+    <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Action.hpp" />
     <ClInclude Include="Application.hpp" />
+    <ClInclude Include="Button.hpp" />
+    <ClInclude Include="Command.hpp" />
+    <ClInclude Include="CommandQueue.hpp" />
+    <ClInclude Include="Component.hpp" />
+    <ClInclude Include="Container.hpp" />
+    <ClInclude Include="Entity.hpp" />
     <ClInclude Include="FontID.hpp" />
+    <ClInclude Include="Label.hpp" />
+    <ClInclude Include="MenuOptions.hpp" />
+    <ClInclude Include="MenuState.hpp" />
+    <ClInclude Include="PirateShip.hpp" />
     <ClInclude Include="Player.hpp" />
+    <ClInclude Include="ProjectileType.hpp" />
+    <ClInclude Include="ReceiverCategories.hpp" />
     <ClInclude Include="ResourceHolder.hpp" />
     <ClInclude Include="ResourceHolder.inl" />
     <ClInclude Include="ResourceIdentifiers.hpp" />
+    <ClInclude Include="SceneLayers.hpp" />
+    <ClInclude Include="SceneNode.hpp" />
+    <ClInclude Include="ShipType.hpp" />
+    <ClInclude Include="SpriteNode.hpp" />
     <ClInclude Include="StackAction.hpp" />
     <ClInclude Include="State.hpp" />
     <ClInclude Include="StateID.hpp" />
     <ClInclude Include="StateStack.hpp" />
+    <ClInclude Include="TextNode.hpp" />
     <ClInclude Include="TextureID.hpp" />
+    <ClInclude Include="TitleState.hpp" />
+    <ClInclude Include="Utility.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
