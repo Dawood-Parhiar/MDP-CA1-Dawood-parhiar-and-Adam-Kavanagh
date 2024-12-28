@@ -10,10 +10,12 @@ class PirateShip : public Entity
 public:
     PirateShip(ShipType type,const TextureHolder& textures, const FontHolder& fonts);
 
-    void CollectMissile();
+	unsigned int GetCategory() const override;
+	
+    void CollectMissile(unsigned int count);
 
     void UpdateTexts();
-    void UpdateMovementPattern();
+    void UpdateMovementPattern(sf::Time dt);
 
     float GetMaxSpeed();
     void LaunchMissile();

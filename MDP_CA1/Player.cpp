@@ -1,14 +1,14 @@
 ﻿#include "Player.hpp"
 #include "ReceiverCategories.hpp"
-#include "Aircraft.hpp"
+#include "PirateShip.hpp"
 
-struct AircraftMover
+struct ShipMover
 {
-    AircraftMover(float vx, float vy) :velocity(vx, vy)
+    ShipMover(float vx, float vy) :velocity(vx, vy)
     {}
-    void operator()(Aircraft& aircraft, sf::Time) const
+    void operator()(PirateShip& prtShip, sf::Time) const
     {
-        aircraft.Accelerate(velocity);
+        prtShip.Accelerate(velocity);
     }
 
     sf::Vector2f velocity;
@@ -22,7 +22,7 @@ Player::Player()
     m_key_binding[sf::Keyboard::W] = Action::kMoveUp;
     m_key_binding[sf::Keyboard::S] = Action::kMoveDown;
     m_key_binding[sf::Keyboard::M] = Action::kMissileFire;
-    m_key_binding[sf::Keyboard::Space] = Action::kBulletFire;
+    
 
     //Set initial action bindings
     InitialiseActions();
@@ -30,7 +30,7 @@ Player::Player()
     //Assign all categories to a player's aircraft
     for (auto& pair : m_action_binding)
     {
-        pair.second.category = static_cast<unsigned int>(ReceiverCategories::kPlayerAircraft);
+        pair.second.category = static_cast<unsigned int>(ReceiverCategories::kPlayerShip);
     }
 }
 
@@ -90,17 +90,12 @@ sf::Keyboard::Key Player::GetAssignedKey(Action action) const
 void Player::InitialiseActions()
 {
     const float kPlayerSpeed = 200.f;
-    m_action_binding[Action::kMoveLeft].action = DerivedAction<Aircraft>(AircraftMover(-kPlayerSpeed, 0.f));
-    m_action_binding[Action::kMoveRight].action = DerivedAction<Aircraft>(AircraftMover(kPlayerSpeed, 0.f));
-    m_action_binding[Action::kMoveUp].action = DerivedAction<Aircraft>(AircraftMover(0.f, -kPlayerSpeed));
-    m_action_binding[Action::kMoveDown].action = DerivedAction<Aircraft>(AircraftMover(0.f, kPlayerSpeed));
-    m_action_binding[Action::kBulletFire].action = DerivedAction<Aircraft>([](Aircraft& a, sf::Time dt)
-        {
-            a.Fire();
-        }
-    );
-
-    m_action_binding[Action::kMissileFire].action = DerivedAction<Aircraft>([](Aircraft& a, sf::Time dt)
+    m_action_binding[Action::kMoveLeft].action = DerivedAction<PirateShip>(ShipMover(-kPlayerSpeed, 0.f));
+    m_action_binding[Action::kMoveRight].action = DerivedAction<PirateShip>(ShipMover(kPlayerSpeed, 0.f));
+    m_action_binding[Action::kMoveUp].action = DerivedAction<PirateShip>(ShipMover(0.f, -kPlayerSpeed));
+    m_action_binding[Action::kMoveDown].action = DerivedAction<PirateShip>(ShipMover(0.f, kPlayerSpeed));
+    
+    m_action_binding[Action::kMissileFire].action = DerivedAction<PirateShip>([](ShipMover& a, sf::Time dt)
         {
             a.LaunchMissile();
         }

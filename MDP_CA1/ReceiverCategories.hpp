@@ -3,15 +3,13 @@ enum class ReceiverCategories
 {
 	kNone = 0,
 	kScene = 1 << 0,
-	kPlayerAircraft = 1 << 1,
-	kAlliedAircraft = 1 << 2,
-	kEnemyAircraft = 1 << 3,
-	kAlliedProjectile = 1 << 4,
-	kEnemyProjectile = 1 << 5,
-	kPickup = 1 << 6,
+	kPlayerShip = 1 << 1,
+	kEnemyShip = 1 << 2,
+	kEnemyProjectile = 1 << 3,
+	kPickup = 1 << 4,
 
-	kAircraft = kPlayerAircraft | kAlliedAircraft | kEnemyAircraft,
-	kProjectile = kAlliedProjectile | kEnemyProjectile
+	kShip = kPlayerShip  | kEnemyShip,
+	
 };
 
 // A message would be sent to all aircraft

@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "Player.hpp"
 #include "ResourceIdentifiers.hpp"
+#include "ResourceHolder.hpp"
 #include "StateStack.hpp"
 
 
