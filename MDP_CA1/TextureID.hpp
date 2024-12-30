@@ -10,4 +10,7 @@ enum class TextureID
     kMissile,
     KPirate,
     kEnemy,
+    kEntities,
+    kParticle,
+    kEnemyTwo
 };

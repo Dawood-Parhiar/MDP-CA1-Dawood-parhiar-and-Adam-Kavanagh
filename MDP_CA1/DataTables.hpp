@@ -3,7 +3,7 @@
 #include <SFML/System/Time.hpp>
 #include "ResourceIdentifiers.hpp"
 #include <functional>
-#include "Aircraft.hpp"
+#include "PirateShip.hpp"
 
 
 struct Direction
@@ -14,7 +14,7 @@ struct Direction
 	float m_distance;
 };
 
-struct AircraftData
+struct PirateShipData
 {
 	int m_hitpoints;
 	float m_speed;
@@ -35,7 +35,7 @@ struct ProjectileData
 
 struct PickupData
 {
-	std::function<void(Aircraft&)> m_action;
+	std::function<void(PirateShip&)> m_action;
 	TextureID m_texture;
 	sf::IntRect m_texture_rect;
 };
@@ -46,7 +46,7 @@ struct ParticleData
 	sf::Time m_lifetime;
 };
 
-std::vector<AircraftData> InitializeAircraftData();
+std::vector<PirateShipData> InitializePirateShipData();
 std::vector<ProjectileData> InitializeProjectileData();
 std::vector<PickupData> InitializePickupData();
 std::vector<ParticleData> InitializeParticleData();

@@ -6,7 +6,7 @@
 
 namespace 
 {
-    const std::vector<PirateShip> Table = InitializePirateShipData();
+    const std::vector<PirateShipData> Table = InitializePirateShipData();
 }
 
 TextureID ToTextureID(ShipType type)
@@ -16,8 +16,11 @@ TextureID ToTextureID(ShipType type)
     case ShipType::kPirateShip:
         return TextureID::KPirate;
         break;
-    case ShipType::KEnemyShip:
+    case ShipType::KEnemyShipOne:
         return TextureID::kEnemy;
+        break;
+    case ShipType::KEnemyShipTwo:
+        return TextureID::kEnemyTwo;
         break;
     }
     return TextureID::KPirate;
@@ -149,6 +152,8 @@ sf::FloatRect PirateShip::GetBoundingRect() const
 
 bool PirateShip::IsMarkedForRemoval() const
 {
+    return IsDestroyed(); //&& (m_explosion.IsFinished() || !m_show_explosion);
+
 }
 
 void PirateShip::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const

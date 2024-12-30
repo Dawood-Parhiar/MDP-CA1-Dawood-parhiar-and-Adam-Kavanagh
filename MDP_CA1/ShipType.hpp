@@ -1,5 +1,8 @@
+#pragma once
 enum class ShipType
 {
+    kShipCount,
     kPirateShip,
-    KEnemyShip,
+    KEnemyShipOne,
+    KEnemyShipTwo,
 };

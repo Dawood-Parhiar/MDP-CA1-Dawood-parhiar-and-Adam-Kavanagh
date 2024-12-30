@@ -168,6 +168,8 @@
     <ClCompile Include="Label.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MenuState.cpp" />
+    <ClCompile Include="ParticleNode.cpp" />
+    <ClCompile Include="Pickup.cpp" />
     <ClCompile Include="PirateShip.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="SceneNode.cpp" />
@@ -192,6 +194,11 @@
     <ClInclude Include="Label.hpp" />
     <ClInclude Include="MenuOptions.hpp" />
     <ClInclude Include="MenuState.hpp" />
+    <ClInclude Include="Particle.hpp" />
+    <ClInclude Include="ParticleNode.hpp" />
+    <ClInclude Include="ParticleType.hpp" />
+    <ClInclude Include="Pickup.hpp" />
+    <ClInclude Include="PickupType.hpp" />
     <ClInclude Include="PirateShip.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="ProjectileType.hpp" />
