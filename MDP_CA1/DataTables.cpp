@@ -88,14 +88,14 @@ std::vector<PickupData> InitializePickupData()
 
     //dont need bullets or fire spreads for a pirate ship
     
-    // data[static_cast<int>(PickupType::kFireSpread)].m_texture = TextureID::kEntities;
-    // data[static_cast<int>(PickupType::kFireSpread)].m_texture_rect = sf::IntRect(80, 64, 40, 40);
-    // data[static_cast<int>(PickupType::kFireSpread)].m_action = std::bind(&PirateShip::IncreaseFireSpread, std::placeholders::_1);
-    //
-    // data[static_cast<int>(PickupType::kFireRate)].m_texture = TextureID::kEntities;
-    // data[static_cast<int>(PickupType::kFireRate)].m_texture_rect = sf::IntRect(120, 64, 40, 40);
-    // data[static_cast<int>(PickupType::kFireRate)].m_action = std::bind(&PirateShip::IncreaseFireRate, std::placeholders::_1);
-    //
+    data[static_cast<int>(PickupType::kFireSpread)].m_texture = TextureID::kEntities;
+    data[static_cast<int>(PickupType::kFireSpread)].m_texture_rect = sf::IntRect(80, 64, 40, 40);
+    data[static_cast<int>(PickupType::kFireSpread)].m_action = std::bind(&PirateShip::IncreaseFireSpread, std::placeholders::_1);
+    
+    data[static_cast<int>(PickupType::kFireRate)].m_texture = TextureID::kEntities;
+    data[static_cast<int>(PickupType::kFireRate)].m_texture_rect = sf::IntRect(120, 64, 40, 40);
+    data[static_cast<int>(PickupType::kFireRate)].m_action = std::bind(&PirateShip::IncreaseFireRate, std::placeholders::_1);
+    
     return data;
 }
 

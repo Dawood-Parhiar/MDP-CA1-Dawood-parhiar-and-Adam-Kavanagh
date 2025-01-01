@@ -1,4 +1,4 @@
-﻿#include "Player.hpp"
+#include "Player.hpp"
 #include "ReceiverCategories.hpp"
 #include "PirateShip.hpp"
 
@@ -6,15 +6,15 @@ struct ShipMover
 {
     ShipMover(float vx, float vy) :velocity(vx, vy)
     {}
-    void operator()(PirateShip& prtShip, sf::Time) const
+    void operator()(PirateShip& aircraft, sf::Time) const
     {
-        prtShip.Accelerate(velocity);
+        aircraft.Accelerate(velocity);
     }
 
     sf::Vector2f velocity;
 };
 
-Player::Player()
+Player::Player(): m_current_mission_status(MissionStatus::kMissionRunning)
 {
     //Set initial key bindings
     m_key_binding[sf::Keyboard::A] = Action::kMoveLeft;
@@ -22,7 +22,7 @@ Player::Player()
     m_key_binding[sf::Keyboard::W] = Action::kMoveUp;
     m_key_binding[sf::Keyboard::S] = Action::kMoveDown;
     m_key_binding[sf::Keyboard::M] = Action::kMissileFire;
-    
+    m_key_binding[sf::Keyboard::Space] = Action::kBulletFire;
 
     //Set initial action bindings
     InitialiseActions();
@@ -87,6 +87,16 @@ sf::Keyboard::Key Player::GetAssignedKey(Action action) const
     return sf::Keyboard::Unknown;
 }
 
+void Player::SetMissionStatus(MissionStatus status)
+{
+    m_current_mission_status = status;
+}
+
+MissionStatus Player::GetMissionStatus() const
+{
+    return m_current_mission_status;
+}
+
 void Player::InitialiseActions()
 {
     const float kPlayerSpeed = 200.f;
@@ -94,7 +104,12 @@ void Player::InitialiseActions()
     m_action_binding[Action::kMoveRight].action = DerivedAction<PirateShip>(ShipMover(kPlayerSpeed, 0.f));
     m_action_binding[Action::kMoveUp].action = DerivedAction<PirateShip>(ShipMover(0.f, -kPlayerSpeed));
     m_action_binding[Action::kMoveDown].action = DerivedAction<PirateShip>(ShipMover(0.f, kPlayerSpeed));
-    
+    m_action_binding[Action::kBulletFire].action = DerivedAction<PirateShip>([](PirateShip& a, sf::Time dt)
+        {
+            a.LaunchMissile();
+        }
+    );
+
     m_action_binding[Action::kMissileFire].action = DerivedAction<PirateShip>([](PirateShip& a, sf::Time dt)
         {
             a.LaunchMissile();

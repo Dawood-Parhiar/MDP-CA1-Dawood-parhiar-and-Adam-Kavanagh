@@ -12,5 +12,6 @@ enum class TextureID
     kEnemy,
     kEntities,
     kParticle,
-    kEnemyTwo
+    kEnemyTwo, kHealthRefill, kMissileRefill, kFinishLine, kExplosion, kJungle, kLandscape,
+    kRaptor, kAvenger, kBullet, kFireSpread, kFireRate, kButtons
 };

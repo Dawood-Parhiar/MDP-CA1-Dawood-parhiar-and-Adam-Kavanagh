@@ -11,7 +11,9 @@ public:
     PirateShip(ShipType type,const TextureHolder& textures, const FontHolder& fonts);
 
 	unsigned int GetCategory() const override;
-	
+
+	void IncreaseFireRate();
+	void IncreaseFireSpread();
     void CollectMissile(unsigned int count);
 
     void UpdateTexts();
@@ -42,7 +44,7 @@ private:
     Command m_missile_command;
     Command m_drop_pickup_command;
 	
-    //unsigned int m_fire_rate;
+    unsigned int m_fire_rate;
     unsigned int m_missile_ammo;
     unsigned int m_spread_level;
 	

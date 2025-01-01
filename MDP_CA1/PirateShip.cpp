@@ -34,6 +34,7 @@ m_sprite(textures.Get(ToTextureID(type)))
     , m_missile_display(nullptr)
     , m_distance_travelled(0.f)
     , m_directions_index(0)
+    , m_fire_rate(1)
     , m_spread_level(1)
     , m_is_launching_missile(false)
     , m_fire_countdown(sf::Time::Zero)
@@ -72,6 +73,22 @@ m_sprite(textures.Get(ToTextureID(type)))
 unsigned int PirateShip::GetCategory() const
 {
     return Entity::GetCategory();
+}
+
+void PirateShip::IncreaseFireRate()
+{
+ if(m_fire_rate < 5)
+ {
+     ++m_fire_rate;
+ }
+}
+
+void PirateShip::IncreaseFireSpread()
+{
+    if(m_spread_level < 3)
+    {
+        ++m_spread_level;
+    }
 }
 
 void PirateShip::CollectMissile(unsigned int count)
