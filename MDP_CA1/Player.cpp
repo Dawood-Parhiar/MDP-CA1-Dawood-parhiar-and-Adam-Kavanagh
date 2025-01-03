@@ -106,7 +106,7 @@ void Player::InitialiseActions()
     m_action_binding[Action::kMoveDown].action = DerivedAction<PirateShip>(ShipMover(0.f, kPlayerSpeed));
     m_action_binding[Action::kBulletFire].action = DerivedAction<PirateShip>([](PirateShip& a, sf::Time dt)
         {
-            a.LaunchMissile();
+            a.Fire();
         }
     );
 

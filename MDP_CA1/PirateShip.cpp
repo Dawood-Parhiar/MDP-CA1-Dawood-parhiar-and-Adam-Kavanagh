@@ -27,19 +27,23 @@ TextureID ToTextureID(ShipType type)
 }
 
 PirateShip::PirateShip(ShipType type, const TextureHolder& textures, const FontHolder& fonts)
-:Entity(GetHitPoints()),
-m_type(type),
-m_sprite(textures.Get(ToTextureID(type)))
-, m_health_display(nullptr)
+: Entity(Table[static_cast<int>(type)].m_hitpoints)
+    , m_type(type)
+    , m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
+    //, m_explosion(textures.Get(TextureID::kExplosion))
+    , m_health_display(nullptr)
     , m_missile_display(nullptr)
     , m_distance_travelled(0.f)
     , m_directions_index(0)
     , m_fire_rate(1)
     , m_spread_level(1)
+    , m_is_firing(false)
     , m_is_launching_missile(false)
     , m_fire_countdown(sf::Time::Zero)
     , m_missile_ammo(2)
     , m_is_marked_for_removal(false)
+    // , m_show_explosion(true)
+    // , m_spawned_pickup(false)
 {
     Utility::CentreOrigin(m_sprite);
 
@@ -146,6 +150,14 @@ float PirateShip::GetMaxSpeed()
     return Table[static_cast<int>(m_type)].m_speed;
 
 
+}
+
+void PirateShip::Fire()
+{
+    if (Table[static_cast<int>(m_type)].m_fire_interval != sf::Time::Zero)
+    {
+        m_is_firing = true;
+    }
 }
 
 void PirateShip::LaunchMissile()

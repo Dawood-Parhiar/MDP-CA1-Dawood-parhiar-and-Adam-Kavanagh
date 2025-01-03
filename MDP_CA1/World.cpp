@@ -1,4 +1,7 @@
 #include "World.hpp"
+
+#include <iostream>
+
 #include "Pickup.hpp"
 #include "Projectile.hpp"
 #include "ParticleNode.hpp"
@@ -25,9 +28,11 @@ void World::Update(sf::Time dt)
 	//Scroll the world
 	m_camera.move(0, m_scrollspeed * dt.asSeconds());
 
+	if(m_player_ship != nullptr)
+	{
+		m_player_ship->SetVelocity(0.f, 0.f);
+	}
 	
-	m_player_ship->SetVelocity(0.f, 0.f);
-
 	DestroyEntitiesOutsideView();
 	GuideMissiles();
 

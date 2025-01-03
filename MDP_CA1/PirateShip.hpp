@@ -20,6 +20,7 @@ public:
     void UpdateMovementPattern(sf::Time dt);
 
     float GetMaxSpeed();
+	void Fire();
     void LaunchMissile();
     void CreateProjectile(SceneNode& node, ProjectileType type, float x_float, float y_offset, const TextureHolder& textures) const;
 
@@ -48,7 +49,7 @@ private:
     unsigned int m_missile_ammo;
     unsigned int m_spread_level;
 	
-    //bool m_is_firing;
+    bool m_is_firing;
     bool m_is_launching_missile;
     sf::Time m_fire_countdown;
 

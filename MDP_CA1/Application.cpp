@@ -22,6 +22,7 @@ Application::Application() : m_window(sf::VideoMode(1024, 768), "States", sf::St
 
     RegisterStates();
     m_stack.PushState(StateID::kTitle);
+    
 }
 
 void Application::Run()
