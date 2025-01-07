@@ -1,4 +1,4 @@
-#include "Aircraft.hpp"
+#include "Ship.hpp"
 #include "TextureID.hpp"
 #include "ResourceHolder.hpp"
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -10,30 +10,31 @@
 
 namespace
 {
-	const std::vector<AircraftData> Table = InitializeAircraftData();
+	const std::vector<ShipData> Table = InitializeShipData();
 }
 
-TextureID ToTextureID(AircraftType type)
+TextureID ToTextureID(ShipType type)
 {
 	switch (type)
 	{
-	case AircraftType::kEagle:
-		return TextureID::kEagle;
+	case ShipType::kPirateShip:
+		return TextureID::kPirateShip;
 		break;
-	case AircraftType::kRaptor:
+	case ShipType::kRaptor:
 		return TextureID::kRaptor;
 		break;
-	case AircraftType::kAvenger:
+	case ShipType::kAvenger:
 		return TextureID::kAvenger;
 		break;
 	}
-	return TextureID::kEagle;
+	return TextureID::kPirateShip;
 }
 
-Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontHolder& fonts)  
+Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts)  
 	: Entity(Table[static_cast<int>(type)].m_hitpoints)
 	, m_type(type)
-	, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
+	//, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
+	, m_sprite(textures.Get(ToTextureID(type)))
 	, m_explosion(textures.Get(TextureID::kExplosion))
 	, m_health_display(nullptr)
 	, m_missile_display(nullptr)
@@ -80,7 +81,7 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 	m_health_display = health_display.get();
 	AttachChild(std::move(health_display));
 
-	if (Aircraft::GetCategory() == static_cast<int>(ReceiverCategories::kPlayerAircraft))
+	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayerAircraft))
 	{
 		std::string* missile_ammo = new std::string("");
 		std::unique_ptr<TextNode> missile_display(new TextNode(fonts, *missile_ammo));
@@ -91,7 +92,7 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 	UpdateTexts();
 }
 
-unsigned int Aircraft::GetCategory() const
+unsigned int Ship::GetCategory() const
 {
 	if (IsAllied())
 	{
@@ -101,7 +102,7 @@ unsigned int Aircraft::GetCategory() const
 
 }
 
-void Aircraft::IncreaseFireRate()
+void Ship::IncreaseFireRate()
 {
 	if (m_fire_rate < 5)
 	{
@@ -109,7 +110,7 @@ void Aircraft::IncreaseFireRate()
 	}
 }
 
-void Aircraft::IncreaseFireSpread()
+void Ship::IncreaseFireSpread()
 {
 	if (m_spread_level < 3)
 	{
@@ -117,12 +118,12 @@ void Aircraft::IncreaseFireSpread()
 	}
 }
 
-void Aircraft::CollectMissile(unsigned int count)
+void Ship::CollectMissile(unsigned int count)
 {
 	m_missile_ammo += count;
 }
 
-void Aircraft::UpdateTexts()
+void Ship::UpdateTexts()
 {
 	m_health_display->SetString(std::to_string(GetHitPoints()) + "HP");
 	m_health_display->setPosition(0.f, 50.f);
@@ -142,7 +143,7 @@ void Aircraft::UpdateTexts()
 	}
 }
 
-void Aircraft::UpdateMovementPattern(sf::Time dt)
+void Ship::UpdateMovementPattern(sf::Time dt)
 {
 	//Enemy AI
 	const std::vector<Direction>& directions = Table[static_cast<int>(m_type)].m_directions;
@@ -167,12 +168,12 @@ void Aircraft::UpdateMovementPattern(sf::Time dt)
 	}
 }
 
-float Aircraft::GetMaxSpeed() const
+float Ship::GetMaxSpeed() const
 {
 	return Table[static_cast<int>(m_type)].m_speed;
 }
 
-void Aircraft::Fire()
+void Ship::Fire()
 {
 	if (Table[static_cast<int>(m_type)].m_fire_interval != sf::Time::Zero)
 	{
@@ -181,7 +182,7 @@ void Aircraft::Fire()
 }
 
 
-void Aircraft::LaunchMissile()
+void Ship::LaunchMissile()
 {
 	if (m_missile_ammo > 0)
 	{
@@ -190,7 +191,7 @@ void Aircraft::LaunchMissile()
 	}
 }
 
-void Aircraft::CreateBullet(SceneNode& node, const TextureHolder& textures) const
+void Ship::CreateBullet(SceneNode& node, const TextureHolder& textures) const
 {
 	ProjectileType type = IsAllied() ? ProjectileType::kAlliedBullet : ProjectileType::kEnemyBullet;
 	switch (m_spread_level)
@@ -211,7 +212,7 @@ void Aircraft::CreateBullet(SceneNode& node, const TextureHolder& textures) cons
 	
 }
 
-void Aircraft::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
+void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
 {
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
 	sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().width, y_offset * m_sprite.getGlobalBounds().height);
@@ -223,17 +224,17 @@ void Aircraft::CreateProjectile(SceneNode& node, ProjectileType type, float x_of
 	node.AttachChild(std::move(projectile));
 }
 
-sf::FloatRect Aircraft::GetBoundingRect() const
+sf::FloatRect Ship::GetBoundingRect() const
 {
 	return GetWorldTransform().transformRect(m_sprite.getGlobalBounds());
 }
 
-bool Aircraft::IsMarkedForRemoval() const
+bool Ship::IsMarkedForRemoval() const
 {
 	return IsDestroyed() && (m_explosion.IsFinished() || !m_show_explosion);
 }
 
-void Aircraft::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
+void Ship::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	if (IsDestroyed() && m_show_explosion)
 	{
@@ -245,7 +246,7 @@ void Aircraft::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) co
 	}
 }
 
-void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
+void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 {
 	if (IsDestroyed())
 	{
@@ -272,7 +273,7 @@ void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 	CheckProjectileLaunch(dt, commands);
 }
 
-void Aircraft::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
+void Ship::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 {
 	if (!IsAllied())
 	{
@@ -302,12 +303,12 @@ void Aircraft::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 	}
 }
 
-bool Aircraft::IsAllied() const
+bool Ship::IsAllied() const
 {
-	return m_type == AircraftType::kEagle;
+	return m_type == ShipType::kPirateShip;
 }
 
-void Aircraft::CreatePickup(SceneNode& node, const TextureHolder& textures) const
+void Ship::CreatePickup(SceneNode& node, const TextureHolder& textures) const
 {
 	auto type = static_cast<PickupType>(Utility::RandomInt(static_cast<int>(PickupType::kPickupCount)));
 	std::unique_ptr<Pickup> pickup(new Pickup(type, textures));
@@ -316,7 +317,7 @@ void Aircraft::CreatePickup(SceneNode& node, const TextureHolder& textures) cons
 	node.AttachChild(std::move(pickup));
 }
 
-void Aircraft::CheckPickupDrop(CommandQueue& commands)
+void Ship::CheckPickupDrop(CommandQueue& commands)
 {
 	//TODO Get rid of the magic number 3 here 
 	if (!IsAllied() && Utility::RandomInt(3) == 0 && !m_spawned_pickup)
@@ -326,7 +327,7 @@ void Aircraft::CheckPickupDrop(CommandQueue& commands)
 	m_spawned_pickup = true;
 }
 
-void Aircraft::UpdateRollAnimation()
+void Ship::UpdateRollAnimation()
 {
 	if (Table[static_cast<int>(m_type)].m_has_roll_animation)
 	{
@@ -346,7 +347,7 @@ void Aircraft::UpdateRollAnimation()
 	}
 }
 
-void Aircraft::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
+void Ship::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
 {
 	sf::Vector2f world_position = GetWorldPosition();
 

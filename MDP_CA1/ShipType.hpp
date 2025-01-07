@@ -1,7 +1,7 @@
 #pragma once
-enum class AircraftType
+enum class ShipType
 {
-	kEagle,
+	kPirateShip,
 	kRaptor,
 	kAvenger,
 	kAircraftCount

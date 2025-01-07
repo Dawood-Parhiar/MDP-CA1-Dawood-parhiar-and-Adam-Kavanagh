@@ -1,12 +1,12 @@
 #include "Player.hpp"
 #include "ReceiverCategories.hpp"
-#include "Aircraft.hpp"
+#include "Ship.hpp"
 
 struct AircraftMover
 {
     AircraftMover(float vx, float vy) :velocity(vx, vy)
     {}
-    void operator()(Aircraft& aircraft, sf::Time) const
+    void operator()(Ship& aircraft, sf::Time) const
     {
         aircraft.Accelerate(velocity);
     }
@@ -100,17 +100,17 @@ MissionStatus Player::GetMissionStatus() const
 void Player::InitialiseActions()
 {
     const float kPlayerSpeed = 200.f;
-    m_action_binding[Action::kMoveLeft].action = DerivedAction<Aircraft>(AircraftMover(-kPlayerSpeed, 0.f));
-    m_action_binding[Action::kMoveRight].action = DerivedAction<Aircraft>(AircraftMover(kPlayerSpeed, 0.f));
-    m_action_binding[Action::kMoveUp].action = DerivedAction<Aircraft>(AircraftMover(0.f, -kPlayerSpeed));
-    m_action_binding[Action::kMoveDown].action = DerivedAction<Aircraft>(AircraftMover(0.f, kPlayerSpeed));
-    m_action_binding[Action::kBulletFire].action = DerivedAction<Aircraft>([](Aircraft& a, sf::Time dt)
+    m_action_binding[Action::kMoveLeft].action = DerivedAction<Ship>(AircraftMover(-kPlayerSpeed, 0.f));
+    m_action_binding[Action::kMoveRight].action = DerivedAction<Ship>(AircraftMover(kPlayerSpeed, 0.f));
+    m_action_binding[Action::kMoveUp].action = DerivedAction<Ship>(AircraftMover(0.f, -kPlayerSpeed));
+    m_action_binding[Action::kMoveDown].action = DerivedAction<Ship>(AircraftMover(0.f, kPlayerSpeed));
+    m_action_binding[Action::kBulletFire].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
         {
             a.Fire();
         }
     );
 
-    m_action_binding[Action::kMissileFire].action = DerivedAction<Aircraft>([](Aircraft& a, sf::Time dt)
+    m_action_binding[Action::kMissileFire].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
         {
             a.LaunchMissile();
         }

@@ -1,6 +1,6 @@
 #pragma once
 #include "Entity.hpp"
-#include "AircraftType.hpp"
+#include "ShipType.hpp"
 #include "ResourceIdentifiers.hpp"
 #include "TextNode.hpp"
 #include "Utility.hpp"
@@ -8,10 +8,10 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include "Animation.hpp"
 
-class Aircraft : public Entity
+class Ship : public Entity
 {
 public:
-	Aircraft(AircraftType type, const TextureHolder& textures, const FontHolder& fonts);
+	Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts);
 	unsigned int GetCategory() const override;
 
 	void IncreaseFireRate();
@@ -41,7 +41,7 @@ private:
 	void UpdateRollAnimation();
 
 private:
-	AircraftType m_type;
+	ShipType m_type;
 	sf::Sprite m_sprite;
 	Animation m_explosion;
 

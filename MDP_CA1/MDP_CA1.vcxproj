@@ -157,7 +157,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Aircraft.cpp" />
+    <ClCompile Include="Ship.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="BloomEffect.cpp" />
@@ -197,8 +197,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.hpp" />
-    <ClInclude Include="Aircraft.hpp" />
-    <ClInclude Include="AircraftType.hpp" />
+    <ClInclude Include="Ship.hpp" />
+    <ClInclude Include="ShipType.hpp" />
     <ClInclude Include="Animation.hpp" />
     <ClInclude Include="Application.hpp" />
     <ClInclude Include="BloomEffect.hpp" />

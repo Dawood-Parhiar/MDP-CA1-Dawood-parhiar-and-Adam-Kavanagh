@@ -10,8 +10,25 @@ namespace
     const std::vector<ProjectileData> Table = InitializeProjectileData();
 }
 
+TextureID ToTextureID(ProjectileType type)
+{
+    switch(type)
+    {
+        case ProjectileType::kMissile:
+            return TextureID::kMissile;
+            break;
+        case ProjectileType::kAlliedBullet:
+            return TextureID::kBullet;
+            break; 
+        case ProjectileType::kEnemyBullet:
+            return TextureID::kBullet;
+            break;
+    }
+    return TextureID::kMissile;
+};
 Projectile::Projectile(ProjectileType type, const TextureHolder& textures)
-    : Entity(1), m_type(type), m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
+    : Entity(1), m_type(type), //m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
+    m_sprite(textures.Get(ToTextureID(type)))
 {
     Utility::CentreOrigin(m_sprite);
 

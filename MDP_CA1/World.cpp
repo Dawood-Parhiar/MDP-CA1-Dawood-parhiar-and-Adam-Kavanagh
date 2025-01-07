@@ -84,13 +84,13 @@ bool World::HasPlayerReachedEnd() const
 
 void World::LoadTextures()
 {
-	m_textures.Load(TextureID::kEagle, "Media/Textures/Eagle.png");
+	m_textures.Load(TextureID::kPirateShip, "Media/Textures/ship.png");
 	m_textures.Load(TextureID::kRaptor, "Media/Textures/Raptor.png");
 	
 	m_textures.Load(TextureID::kAvenger, "Media/Textures/Avenger.png");
 	m_textures.Load(TextureID::kLandscape, "Media/Textures/Desert.png");
 	m_textures.Load(TextureID::kBullet, "Media/Textures/Bullet.png");
-	m_textures.Load(TextureID::kMissile, "Media/Textures/Missile.png");
+	m_textures.Load(TextureID::kMissile, "Media/Textures/cannon_ball.png");
 
 	m_textures.Load(TextureID::kHealthRefill, "Media/Textures/HealthRefill.png");
 	m_textures.Load(TextureID::kMissileRefill, "Media/Textures/MissileRefill.png");
@@ -102,6 +102,10 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kJungle, "Media/Textures/Jungle.png");
 	m_textures.Load(TextureID::kExplosion, "Media/Textures/Explosion.png");
 	m_textures.Load(TextureID::kParticle, "Media/Textures/Particle.png");
+
+	//Textures for the Ship Battle game
+	m_textures.Load(TextureID::kWater, "Media/Textures/water.png");
+	//m_textures.Load(TextureID::kCannonBall, "Media/Textures/cannonball.png"); using missile with different texture
 
 
 }
@@ -118,7 +122,7 @@ void World::BuildScene()
 	}
 
 	//Prepare the background
-	sf::Texture& texture = m_textures.Get(TextureID::kJungle);
+	sf::Texture& texture = m_textures.Get(TextureID::kWater);
 	sf::IntRect textureRect(m_world_bounds);
 	texture.setRepeated(true);
 
@@ -134,7 +138,7 @@ void World::BuildScene()
 	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(finish_sprite));
 
 	//Add the player's aircraft
-	std::unique_ptr<Aircraft> leader(new Aircraft(AircraftType::kEagle, m_textures, m_fonts));
+	std::unique_ptr<Ship> leader(new Ship(ShipType::kPirateShip, m_textures, m_fonts));
 	m_player_aircraft = leader.get();
 	m_player_aircraft->setPosition(m_spawn_position);
 	m_player_aircraft->SetVelocity(40.f, m_scrollspeed);
@@ -153,11 +157,11 @@ void World::BuildScene()
 
 	AddEnemies();
 
-	/*std::unique_ptr<Aircraft> left_escort(new Aircraft(AircraftType::kRaptor, m_textures, m_fonts));
+	/*std::unique_ptr<Ship> left_escort(new Ship(ShipType::kRaptor, m_textures, m_fonts));
 	left_escort->setPosition(-80.f, 50.f);
 	m_player_aircraft->AttachChild(std::move(left_escort));
 
-	std::unique_ptr<Aircraft> right_escort(new Aircraft(AircraftType::kRaptor, m_textures, m_fonts));
+	std::unique_ptr<Ship> right_escort(new Ship(ShipType::kRaptor, m_textures, m_fonts));
 	right_escort->setPosition(80.f, 50.f);
 	m_player_aircraft->AttachChild(std::move(right_escort));*/
 }
@@ -195,7 +199,7 @@ void World::SpawnEnemies()
 	while (!m_enemy_spawn_points.empty() && m_enemy_spawn_points.back().m_y > GetBattleFieldBounds().top)
 	{
 		SpawnPoint spawn = m_enemy_spawn_points.back();
-		std::unique_ptr<Aircraft> enemy(new Aircraft(spawn.m_type, m_textures, m_fonts));
+		std::unique_ptr<Ship> enemy(new Ship(spawn.m_type, m_textures, m_fonts));
 		enemy->setPosition(spawn.m_x, spawn.m_y);
 		enemy->setRotation(180.f);
 		m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(enemy));
@@ -205,13 +209,13 @@ void World::SpawnEnemies()
 
 void World::AddEnemies()
 {
-	AddEnemy(AircraftType::kRaptor, 0.f, 500.f);
-	AddEnemy(AircraftType::kRaptor, 0.f, 1000.f);
-	AddEnemy(AircraftType::kRaptor, 100.f, 1100.f);
-	AddEnemy(AircraftType::kRaptor, -100.f, 1100.f);
-	AddEnemy(AircraftType::kAvenger, -70.f, 1400.f);
-	AddEnemy(AircraftType::kAvenger, 70.f, 1400.f);
-	AddEnemy(AircraftType::kAvenger, 70.f, 1600.f);
+	AddEnemy(ShipType::kRaptor, 0.f, 500.f);
+	AddEnemy(ShipType::kRaptor, 0.f, 1000.f);
+	AddEnemy(ShipType::kRaptor, 100.f, 1100.f);
+	AddEnemy(ShipType::kRaptor, -100.f, 1100.f);
+	AddEnemy(ShipType::kAvenger, -70.f, 1400.f);
+	AddEnemy(ShipType::kAvenger, 70.f, 1400.f);
+	AddEnemy(ShipType::kAvenger, 70.f, 1600.f);
 
 	//Sort the enemies according to y-value so that enemies are checked first
 	std::sort(m_enemy_spawn_points.begin(), m_enemy_spawn_points.end(), [](SpawnPoint lhs, SpawnPoint rhs)
@@ -221,7 +225,7 @@ void World::AddEnemies()
 
 }
 
-void World::AddEnemy(AircraftType type, float relx, float rely)
+void World::AddEnemy(ShipType type, float relx, float rely)
 {
 	SpawnPoint spawn(type, m_spawn_position.x + relx, m_spawn_position.y - rely);
 	m_enemy_spawn_points.emplace_back(spawn);
@@ -263,7 +267,7 @@ void World::GuideMissiles()
 	//Target the closest enemy in the world
 	Command enemyCollector;
 	enemyCollector.category = static_cast<int>(ReceiverCategories::kEnemyAircraft);
-	enemyCollector.action = DerivedAction<Aircraft>([this](Aircraft& enemy, sf::Time)
+	enemyCollector.action = DerivedAction<Ship>([this](Ship& enemy, sf::Time)
 		{
 			if (!enemy.IsDestroyed())
 			{
@@ -281,9 +285,9 @@ void World::GuideMissiles()
 			}
 
 			float min_distance = std::numeric_limits<float>::max();
-			Aircraft* closest_enemy = nullptr;
+			Ship* closest_enemy = nullptr;
 
-			for (Aircraft* enemy : m_active_enemies)
+			for (Ship* enemy : m_active_enemies)
 			{
 				float enemy_distance = Distance(missile, *enemy);
 				if (enemy_distance < min_distance)
@@ -332,8 +336,8 @@ void World::HandleCollisions()
 	{
 		if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kEnemyAircraft))
 		{
-			auto& player = static_cast<Aircraft&>(*pair.first);
-			auto& enemy = static_cast<Aircraft&>(*pair.second);
+			auto& player = static_cast<Ship&>(*pair.first);
+			auto& enemy = static_cast<Ship&>(*pair.second);
 			//Collision response
 			player.Damage(enemy.GetHitPoints());
 			enemy.Destroy();
@@ -341,7 +345,7 @@ void World::HandleCollisions()
 
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kPickup))
 		{
-			auto& player = static_cast<Aircraft&>(*pair.first);
+			auto& player = static_cast<Ship&>(*pair.first);
 			auto& pickup = static_cast<Pickup&>(*pair.second);
 			//Collision response
 			pickup.Apply(player);
@@ -350,7 +354,7 @@ void World::HandleCollisions()
 		}
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kEnemyProjectile) || MatchesCategories(pair, ReceiverCategories::kEnemyAircraft, ReceiverCategories::kAlliedProjectile))
 		{
-			auto& aircraft = static_cast<Aircraft&>(*pair.first);
+			auto& aircraft = static_cast<Ship&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
 			//Collision response
 			aircraft.Damage(projectile.GetDamage());

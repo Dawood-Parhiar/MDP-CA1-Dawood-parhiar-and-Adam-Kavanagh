@@ -2,7 +2,7 @@
 enum class TextureID
 {
 	kLandscape,
-	kEagle,
+	kPirateShip,
 	kRaptor,
 	kAvenger,
 	kMissile,
@@ -20,6 +20,6 @@ enum class TextureID
 	kJungle,
 	kButtons,
 	kExplosion,
-	kParticle
-
+	kParticle,
+	kWater, kCannonBall
 };

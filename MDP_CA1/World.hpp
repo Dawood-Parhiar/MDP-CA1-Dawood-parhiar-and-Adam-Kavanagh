@@ -4,7 +4,7 @@
 #include "ResourceHolder.hpp"
 #include "SceneNode.hpp"
 #include "SceneLayers.hpp"
-#include "Aircraft.hpp"
+#include "Ship.hpp"
 #include "TextureID.hpp"
 #include "SpriteNode.hpp"
 #include "CommandQueue.hpp"
@@ -33,7 +33,7 @@ private:
 
 	void SpawnEnemies();
 	void AddEnemies();
-	void AddEnemy(AircraftType type, float relx, float rely);
+	void AddEnemy(ShipType type, float relx, float rely);
 	sf::FloatRect GetViewBounds() const;
 	sf::FloatRect GetBattleFieldBounds() const;
 
@@ -47,11 +47,11 @@ private:
 private:
 	struct SpawnPoint
 	{
-		SpawnPoint(AircraftType type, float x, float y) :m_type(type), m_x(x), m_y(y)
+		SpawnPoint(ShipType type, float x, float y) :m_type(type), m_x(x), m_y(y)
 		{
 
 		}
-		AircraftType m_type;
+		ShipType m_type;
 		float m_x;
 		float m_y;
 	};
@@ -68,12 +68,12 @@ private:
 	sf::FloatRect m_world_bounds;
 	sf::Vector2f m_spawn_position;
 	float m_scrollspeed;
-	Aircraft* m_player_aircraft;
+	Ship* m_player_aircraft;
 
 	CommandQueue m_command_queue;
 
 	std::vector<SpawnPoint> m_enemy_spawn_points;
-	std::vector<Aircraft*> m_active_enemies;
+	std::vector<Ship*> m_active_enemies;
 
 	BloomEffect m_bloom_effect;
 };
