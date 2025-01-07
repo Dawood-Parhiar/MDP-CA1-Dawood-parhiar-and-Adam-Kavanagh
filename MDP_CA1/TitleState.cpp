@@ -6,7 +6,7 @@
 TitleState::TitleState(StateStack& stack, Context context) : State(stack, context), m_show_text(true), m_text_effect_time(sf::Time::Zero)
 {
     m_background_sprite.setTexture(context.textures->Get(TextureID::kTitleScreen));
-    m_text.setFont(context.fonts->Get(FontID::kMain));
+    m_text.setFont(context.fonts->Get(Font::kMain));
     m_text.setString("Press any key to continue");
     Utility::CentreOrigin(m_text);
     m_text.setPosition(context.window->getView().getSize() / 2.f);

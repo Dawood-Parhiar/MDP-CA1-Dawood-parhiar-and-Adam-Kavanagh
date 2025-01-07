@@ -1,17 +1,25 @@
 #pragma once
-
 enum class TextureID
 {
-    kNone,
-    kTitleScreen,
-    kButtonNormal,
-    kButtonSelected,
-    kButtonActivated,
-    kMissile,
-    KPirate,
-    kEnemy,
-    kEntities,
-    kParticle,
-    kEnemyTwo, kHealthRefill, kMissileRefill, kFinishLine, kExplosion, kJungle, kLandscape,
-    kRaptor, kAvenger, kBullet, kFireSpread, kFireRate, kButtons
+	kLandscape,
+	kEagle,
+	kRaptor,
+	kAvenger,
+	kMissile,
+	kTitleScreen,
+	kButtonNormal,
+	kButtonSelected,
+	kButtonActivated,
+	kBullet,
+	kHealthRefill,
+	kMissileRefill,
+	kFireSpread,
+	kFireRate,
+	kFinishLine,
+	kEntities,
+	kJungle,
+	kButtons,
+	kExplosion,
+	kParticle
+
 };

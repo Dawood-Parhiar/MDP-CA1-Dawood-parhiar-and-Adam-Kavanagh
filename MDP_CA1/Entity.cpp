@@ -1,7 +1,7 @@
 #include "Entity.hpp"
 
-Entity::Entity(int hitPoints)
-   :m_hitpoints(hitPoints)
+Entity::Entity(int hitpoints)
+    :m_hitpoints(hitpoints)
 {
 }
 

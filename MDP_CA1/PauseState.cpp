@@ -9,7 +9,7 @@ PauseState::PauseState(StateStack& stack, Context context)
     , m_paused_text()
     , m_instruction_text()
 {
-    sf::Font& font = context.fonts->Get(FontID::kMain);
+    sf::Font& font = context.fonts->Get(Font::kMain);
     sf::Vector2f view_size = context.window->getView().getSize();
 
     m_paused_text.setFont(font);
@@ -22,6 +22,9 @@ PauseState::PauseState(StateStack& stack, Context context)
     m_instruction_text.setString("Press backspace to return to main menu, esc to game");
     Utility::CentreOrigin(m_instruction_text);
     m_instruction_text.setPosition(0.5f * view_size.x, 0.6f * view_size.y);
+
+    //Pause the music
+    GetContext().music->SetPaused(true);
 }
 
 void PauseState::Draw()
@@ -61,4 +64,9 @@ bool PauseState::HandleEvent(const sf::Event& event)
         RequestStackPush(StateID::kMenu);
     }
     return false;
+}
+
+PauseState::~PauseState()
+{
+    GetContext().music->SetPaused(false);
 }

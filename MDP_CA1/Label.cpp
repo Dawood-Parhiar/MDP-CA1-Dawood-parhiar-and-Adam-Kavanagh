@@ -2,7 +2,7 @@
 #include "ResourceHolder.hpp"
 
 gui::Label::Label(const std::string& text, const FontHolder& fonts)
-    :m_text(text, fonts.Get(FontID::kMain), 16)
+    :m_text(text, fonts.Get(Font::kMain), 16)
 {
 }
 

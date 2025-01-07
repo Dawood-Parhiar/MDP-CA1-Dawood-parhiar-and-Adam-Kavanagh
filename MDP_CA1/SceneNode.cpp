@@ -1,15 +1,9 @@
 #include "SceneNode.hpp"
+#include "Utility.hpp"
 #include <cassert>
 
-#include "Utility.hpp"
-
-SceneNode::SceneNode():m_children(), m_parent(nullptr)
+SceneNode::SceneNode(ReceiverCategories category):m_children(), m_parent(nullptr), m_default_category(category)
 {
-}
-
-SceneNode::SceneNode(ReceiverCategories category):m_children(), m_parent(nullptr),m_default_category(category)
-{
-    
 }
 
 void SceneNode::AttachChild(Ptr child)
@@ -81,13 +75,12 @@ void SceneNode::DrawBoundingRect(sf::RenderTarget& target, sf::RenderStates stat
     shape.setOutlineColor(sf::Color::Green);
     shape.setOutlineThickness(1.f);
     target.draw(shape);
-    
 }
 
 void SceneNode::CheckSceneCollision(SceneNode& scene_graph, std::set<Pair>& collision_pairs)
 {
-    CheckNodeCollisions(scene_graph, collision_pairs);
-    for(Ptr& child : scene_graph.m_children)
+    CheckNodeCollision(scene_graph, collision_pairs);
+    for (Ptr& child : scene_graph.m_children)
     {
         CheckSceneCollision(*child, collision_pairs);
     }
@@ -97,7 +90,6 @@ bool Collision(const SceneNode& lhs, const SceneNode& rhs)
 {
     return lhs.GetBoundingRect().intersects(rhs.GetBoundingRect());
 }
-
 
 void SceneNode::RemoveWrecks()
 {
@@ -126,6 +118,8 @@ void SceneNode::draw(sf::RenderTarget& target, sf::RenderStates states) const
     //Draw the node and its children with the changed transform
     DrawCurrent(target, states);
     DrawChildren(target, states);
+    sf::FloatRect rect = GetBoundingRect();
+    DrawBoundingRect(target, states, rect);
 }
 
 void SceneNode::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
@@ -143,18 +137,18 @@ void SceneNode::DrawChildren(sf::RenderTarget& target, sf::RenderStates states) 
 
 unsigned int SceneNode::GetCategory() const
 {
-    return static_cast<unsigned int>(ReceiverCategories::kScene);
+    return static_cast<unsigned int>(m_default_category);
 }
 
-void SceneNode::CheckNodeCollisions(SceneNode& node, std::set<Pair>& collision_pairs)
+void SceneNode::CheckNodeCollision(SceneNode& node, std::set<Pair>& collision_pairs)
 {
-    if(this != &node && Collision(*this, node) && !IsDestroyed() && !node.IsDestroyed())//Check if the nodes are not the same and they are not destroyed
+    if (this != &node && Collision(*this, node) && !IsDestroyed() && !node.IsDestroyed())
     {
         collision_pairs.insert(std::minmax(this, &node));
     }
-    for(Ptr& child : m_children)
+    for (Ptr& child : m_children)
     {
-        child->CheckNodeCollisions(node, collision_pairs);
+        child->CheckNodeCollision(node, collision_pairs);
     }
 }
 

@@ -1,8 +1,6 @@
 #include "GameOverState.hpp"
 #include "ResourceHolder.hpp"
 #include <SFML/Graphics/RenderWindow.hpp>
-
-#include "MissionStatus.hpp"
 #include "Player.hpp"
 #include "Utility.hpp"
 
@@ -12,7 +10,7 @@ GameOverState::GameOverState(StateStack& stack, Context context)
     , m_game_over_text()
     , m_elapsed_time(sf::Time::Zero)
 {
-    sf::Font& font = context.fonts->Get(FontID::kMain);
+    sf::Font& font = context.fonts->Get(Font::kMain);
     sf::Vector2f window_size(context.window->getSize());
 
     m_game_over_text.setFont(font);

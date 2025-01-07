@@ -5,5 +5,4 @@ enum class ProjectileType
 	kEnemyBullet,
 	kMissile,
 	kProjectileCount
-	
 };

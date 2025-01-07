@@ -3,7 +3,7 @@
 #include "Utility.hpp"
 
 TextNode::TextNode(const FontHolder& fonts, std::string& text)
-	:m_text(text, fonts.Get(FontID::kMain), 20)
+	:m_text(text, fonts.Get(Font::kMain), 20)
 {
 }
 

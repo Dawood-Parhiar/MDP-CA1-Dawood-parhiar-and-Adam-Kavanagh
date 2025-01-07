@@ -1,10 +1,9 @@
 #define _USE_MATH_DEFINES
 #include "Utility.hpp"
 #include <math.h>
-#include <random>
 
 
-namespace 
+namespace
 {
 	std::default_random_engine CreateRandomEngine()
 	{
@@ -13,6 +12,7 @@ namespace
 	}
 	auto RandomEngine = CreateRandomEngine();
 }
+
 
 sf::Vector2f Utility::UnitVector(const sf::Vector2f& source)
 {
@@ -38,6 +38,13 @@ void Utility::CentreOrigin(sf::Text& text)
     sf::FloatRect bounds = text.getLocalBounds();
     text.setOrigin(std::floor(bounds.left + bounds.width / 2.f), std::floor(bounds.top + bounds.height / 2.f));
 }
+
+void Utility::CentreOrigin(Animation& animation)
+{
+	sf::FloatRect bounds = animation.GetLocalBounds();
+	animation.setOrigin(std::floor(bounds.left + bounds.width / 2.f), std::floor(bounds.top + bounds.height / 2.f));
+}
+
 
 std::string Utility::toString(sf::Keyboard::Key key)
 {
@@ -168,8 +175,7 @@ int Utility::RandomInt(int exclusive_max)
 	return distr(RandomEngine);
 }
 
-int Utility::Length(sf::Vector2f vector2)
+int Utility::Length(sf::Vector2f vector)
 {
-	return sqrt(powf(vector2.x, 2) + powf(vector2.y, 2));
+	return sqrtf(powf(vector.x, 2) + powf(vector.y, 2));
 }
-
