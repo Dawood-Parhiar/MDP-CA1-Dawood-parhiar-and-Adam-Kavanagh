@@ -52,13 +52,22 @@ void World::Update(sf::Time dt)
 
 void World::Draw()
 {
+	//m_textures.Load(TextureID::kWater, "Media/Textures/water.png");
+	
 	if (PostEffect::IsSupported())
 	{
 		m_scene_texture.clear();
 		m_scene_texture.setView(m_camera);
 		m_scene_texture.draw(m_scenegraph);
+		//m_scene_texture.draw(*m_scene_layers[static_cast<int>(SceneLayers::kBackground)]);
 		m_scene_texture.display();
 		m_bloom_effect.Apply(m_scene_texture, m_target);
+		m_water_effect.Apply(m_scene_texture, m_target);
+		
+		// for (int i = static_cast<int>(SceneLayers::kBackground) + 1; i < static_cast<int>(SceneLayers::kLayerCount); ++i)
+		// {
+		// 	m_target.draw(*m_scene_layers[i]);
+		// }
 	}
 	else
 	{
@@ -81,6 +90,7 @@ bool World::HasPlayerReachedEnd() const
 {
 	return !m_world_bounds.contains(m_player_aircraft->getPosition());
 }
+
 
 void World::LoadTextures()
 {

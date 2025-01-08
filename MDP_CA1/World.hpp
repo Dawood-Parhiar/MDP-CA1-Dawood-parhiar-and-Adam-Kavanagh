@@ -13,6 +13,8 @@
 
 #include <array>
 
+#include "WaterEffects.h"
+
 class World : private sf::NonCopyable
 {
 public:
@@ -24,6 +26,7 @@ public:
 
 	bool HasAlivePlayer() const;
 	bool HasPlayerReachedEnd() const;
+
 
 private:
 	void LoadTextures();
@@ -76,5 +79,6 @@ private:
 	std::vector<Ship*> m_active_enemies;
 
 	BloomEffect m_bloom_effect;
+	WaterEffects m_water_effect;
 };
 
