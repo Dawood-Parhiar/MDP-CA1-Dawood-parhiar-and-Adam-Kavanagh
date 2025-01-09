@@ -56,21 +56,40 @@ void World::Draw()
 	
 	if (PostEffect::IsSupported())
 	{
+		// Step 1: Clear the render texture
 		m_scene_texture.clear();
 		m_scene_texture.setView(m_camera);
-		m_scene_texture.draw(m_scenegraph);
-		//m_scene_texture.draw(*m_scene_layers[static_cast<int>(SceneLayers::kBackground)]);
-		m_scene_texture.display();
-		m_bloom_effect.Apply(m_scene_texture, m_target);
-		m_water_effect.Apply(m_scene_texture, m_target);
+		//m_scene_texture.draw(m_scenegraph);
+		// Step 2: Draw the background layer into the render texture
+		//if (m_scene_layers[static_cast<int>(SceneLayers::kBackground)] != nullptr)
 		
-		// for (int i = static_cast<int>(SceneLayers::kBackground) + 1; i < static_cast<int>(SceneLayers::kLayerCount); ++i)
-		// {
-		// 	m_target.draw(*m_scene_layers[i]);
-		// }
+		m_scene_texture.draw(*m_scene_layers[static_cast<int>(SceneLayers::kBackground)]);
+		
+
+		// Step 3: Apply the water effect shader
+		m_scene_texture.display(); // Finalize the render texture
+		
+		// Pass background size and offset to the shader
+		
+		
+
+		
+		m_water_effect.Apply(m_scene_texture, m_target); // Apply shader to m_scene_texture and render to m_target
+
+		// Step 4: Draw the lowerAir and upperAir layers to the render target
+		m_target.setView(m_camera);
+		for (int i = static_cast<int>(SceneLayers::kLowerAir); i < static_cast<int>(SceneLayers::kLayerCount); ++i)
+		{
+			if (m_scene_layers[i] != nullptr)
+			{
+				m_target.draw(*m_scene_layers[i]);
+			}
+		}
+		
 	}
 	else
 	{
+		// No shader support, render everything normally
 		m_target.setView(m_camera);
 		m_target.draw(m_scenegraph);
 	}
@@ -114,7 +133,7 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kParticle, "Media/Textures/Particle.png");
 
 	//Textures for the Ship Battle game
-	m_textures.Load(TextureID::kWater, "Media/Textures/water.png");
+	m_textures.Load(TextureID::kWater, "Media/Textures/Water2.jpg");
 	//m_textures.Load(TextureID::kCannonBall, "Media/Textures/cannonball.png"); using missile with different texture
 
 

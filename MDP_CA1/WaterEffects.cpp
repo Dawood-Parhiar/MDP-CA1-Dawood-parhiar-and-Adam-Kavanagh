@@ -16,6 +16,8 @@ void WaterEffects::Apply(const sf::RenderTexture& input, sf::RenderTarget& outpu
     waterShader.setUniform("time", m_clock.getElapsedTime().asSeconds());
     waterShader.setUniform("resolution", sf::Vector2f(input.getSize()));
     waterShader.setUniform("texture", input.getTexture());
+    
+    waterShader.setUniform("resolution", sf::Vector2f(input.getSize()));
 
     ApplyShader(waterShader, output);
     

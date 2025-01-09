@@ -2,13 +2,13 @@
 #include "ReceiverCategories.hpp"
 #include "Ship.hpp"
 
-struct AircraftMover
+struct ShipMover
 {
-    AircraftMover(float vx, float vy) :velocity(vx, vy)
+    ShipMover(float vx, float vy) :velocity(vx, vy)
     {}
-    void operator()(Ship& aircraft, sf::Time) const
+    void operator()(Ship& ship, sf::Time) const
     {
-        aircraft.Accelerate(velocity);
+        ship.Accelerate(velocity);
     }
 
     sf::Vector2f velocity;
@@ -22,7 +22,7 @@ Player::Player(): m_current_mission_status(MissionStatus::kMissionRunning)
     m_key_binding[sf::Keyboard::W] = Action::kMoveUp;
     m_key_binding[sf::Keyboard::S] = Action::kMoveDown;
     m_key_binding[sf::Keyboard::M] = Action::kMissileFire;
-    m_key_binding[sf::Keyboard::Space] = Action::kBulletFire;
+    //m_key_binding[sf::Keyboard::Space] = Action::kBulletFire;
 
     //Set initial action bindings
     InitialiseActions();
@@ -100,15 +100,15 @@ MissionStatus Player::GetMissionStatus() const
 void Player::InitialiseActions()
 {
     const float kPlayerSpeed = 200.f;
-    m_action_binding[Action::kMoveLeft].action = DerivedAction<Ship>(AircraftMover(-kPlayerSpeed, 0.f));
-    m_action_binding[Action::kMoveRight].action = DerivedAction<Ship>(AircraftMover(kPlayerSpeed, 0.f));
-    m_action_binding[Action::kMoveUp].action = DerivedAction<Ship>(AircraftMover(0.f, -kPlayerSpeed));
-    m_action_binding[Action::kMoveDown].action = DerivedAction<Ship>(AircraftMover(0.f, kPlayerSpeed));
-    m_action_binding[Action::kBulletFire].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
-        {
-            a.Fire();
-        }
-    );
+    m_action_binding[Action::kMoveLeft].action = DerivedAction<Ship>(ShipMover(-kPlayerSpeed, 0.f));
+    m_action_binding[Action::kMoveRight].action = DerivedAction<Ship>(ShipMover(kPlayerSpeed, 0.f));
+    m_action_binding[Action::kMoveUp].action = DerivedAction<Ship>(ShipMover(0.f, -kPlayerSpeed));
+    m_action_binding[Action::kMoveDown].action = DerivedAction<Ship>(ShipMover(0.f, kPlayerSpeed));
+    // m_action_binding[Action::kBulletFire].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
+    //     {
+    //         a.Fire();
+    //     }
+    // );
 
     m_action_binding[Action::kMissileFire].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
         {
@@ -126,7 +126,7 @@ bool Player::IsRealTimeAction(Action action)
     case Action::kMoveRight:
     case Action::kMoveDown:
     case Action::kMoveUp:
-    case Action::kBulletFire:
+    //case Action::kBulletFire:
         return true;
     default:
         return false;
