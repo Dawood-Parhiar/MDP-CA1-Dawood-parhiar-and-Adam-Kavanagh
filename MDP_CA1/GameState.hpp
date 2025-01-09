@@ -1,4 +1,5 @@
 #pragma once
+#include "Player.hpp"
 #include "State.hpp"
 #include "World.hpp"
 
@@ -12,6 +13,6 @@ public:
 
 private:
 	World m_world;
-	Player& m_player;
+	Player m_player;
 };
 

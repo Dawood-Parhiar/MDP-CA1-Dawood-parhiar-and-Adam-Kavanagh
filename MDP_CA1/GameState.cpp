@@ -2,7 +2,8 @@
 #include "Player.hpp"
 #include "MissionStatus.hpp"
 
-GameState::GameState(StateStack& stack, Context context) : State(stack, context), m_world(*context.window, *context.fonts, *context.sounds), m_player(*context.player)
+GameState::GameState(StateStack& stack, Context context) : State(stack, context)
+, m_world(*context.window, *context.fonts, *context.sounds)
 {
 	//Play the music
 	context.music->Play(MusicThemes::kMissionTheme);

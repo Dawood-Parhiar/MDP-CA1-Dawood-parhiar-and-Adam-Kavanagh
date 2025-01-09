@@ -9,9 +9,12 @@
 const sf::Time Application::kTimePerFrame = sf::seconds(1.f/60.f);
 
 Application::Application() : m_window(sf::VideoMode(1024, 768), "States", sf::Style::Close)
-	, m_stack(State::Context(m_window, m_textures, m_fonts, m_player, m_music, m_sound))
+                             , m_stack(State::Context(m_window, m_textures, m_fonts, m_music, m_sound, m_key_binding_1, m_key_binding_2)),
+                             m_key_binding_1(1),
+                             m_key_binding_2(2)
 {
 	m_window.setKeyRepeatEnabled(false);
+
 	m_fonts.Load(Font::kMain, "Media/Fonts/Sansation.ttf");
 	m_textures.Load(TextureID::kTitleScreen, "Media/Textures/TitleScreen.png");
 	m_textures.Load(TextureID::kButtonNormal, "Media/Textures/ButtonNormal.png");
@@ -79,5 +82,5 @@ void Application::RegisterStates()
 	m_stack.RegisterState<GameState>(StateID::kGame);
 	m_stack.RegisterState<PauseState>(StateID::kPause);
 	m_stack.RegisterState<SettingsState>(StateID::kSettings);
-	m_stack.RegisterState<GameOverState>(StateID::kGameOver);
+	m_stack.RegisterState<GameOverState>(StateID::kGameOver,"Mission Failed!");
 }
