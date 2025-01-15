@@ -30,6 +30,7 @@ public:
 	sf::FloatRect GetBoundingRect() const override;
 	bool IsMarkedForRemoval() const override;
 	void PlayLocalSound(CommandQueue& commands, SoundEffect effect);
+	void RotateShip();
 
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
@@ -38,7 +39,7 @@ private:
 	bool IsAllied() const;
 	void CreatePickup(SceneNode& node, const TextureHolder& textures) const;
 	void CheckPickupDrop(CommandQueue& commands);
-	void UpdateRollAnimation();
+	void UpdateRollAnimation(sf::Time dt);
 
 private:
 	ShipType m_type;
@@ -66,6 +67,10 @@ private:
 	bool m_show_explosion;
 	bool m_spawned_pickup;
 	bool m_played_explosion_sound;
+
+	//variables for animation
+	float original_x;
+	float original_y;
 
 };
 

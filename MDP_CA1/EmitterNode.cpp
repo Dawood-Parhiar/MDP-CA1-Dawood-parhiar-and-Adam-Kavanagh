@@ -32,7 +32,7 @@ void EmitterNode::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 void EmitterNode::EmitParticles(sf::Time dt)
 {
-	const float emissionRate = 30.f;
+	const float emissionRate = (m_type == ParticleType::kSmoke || m_type == ParticleType::kPropellant)? 30.5: 100.f;
 	const sf::Time interval = sf::seconds(1.f) / emissionRate;
 
 	m_accumulated_time += dt;

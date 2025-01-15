@@ -14,7 +14,7 @@ std::vector<ShipData> InitializeShipData()
     data[static_cast<int>(ShipType::kPirateShip)].m_fire_interval = sf::seconds(1);
     data[static_cast<int>(ShipType::kPirateShip)].m_texture = TextureID::kPirateShip;
     //data[static_cast<int>(ShipType::kPirateShip)].m_texture_rect = sf::IntRect(0, 0, 48, 64);
-    data[static_cast<int>(ShipType::kPirateShip)].m_has_roll_animation = false;
+    data[static_cast<int>(ShipType::kPirateShip)].m_has_roll_animation = true;
 
     //Raptor
     
@@ -105,6 +105,13 @@ std::vector<ParticleData> InitializeParticleData()
 
     data[static_cast<int>(ParticleType::kSmoke)].m_color = sf::Color(50, 50, 50);
     data[static_cast<int>(ParticleType::kSmoke)].m_lifetime = sf::seconds(2.5f);
+
+    data[static_cast<int>(ParticleType::kWaterMist)].m_color = sf::Color(200, 200, 255, 150);
+    data[static_cast<int>(ParticleType::kWaterMist)].m_lifetime = sf::seconds(2.5f);
+
+    data[static_cast<int>(ParticleType::kWaterSplashes)].m_color = sf::Color(100, 150, 255); // Light blue color
+    data[static_cast<int>(ParticleType::kWaterSplashes)].m_lifetime = sf::seconds(0.5f);    // Short lifespan for quick splashes
+
 
     return data;
 }

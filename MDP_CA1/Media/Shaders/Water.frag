@@ -1,6 +1,6 @@
 #version 120
 
-//Shader to give water effects to the background
+//Shader to give water effects to the background 
 
  uniform float time; //for waves
  uniform vec2 resolution;

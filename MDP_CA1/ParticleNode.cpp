@@ -1,7 +1,7 @@
 #include "ParticleNode.hpp"
 #include "DataTables.hpp"
 #include "ResourceHolder.hpp"
-
+#include <random>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
@@ -19,6 +19,14 @@ ParticleNode::ParticleNode(ParticleType type, const TextureHolder& textures)
 {
 }
 
+float RandomRange(float min, float max)
+{
+    static std::random_device rd;  // Seed
+    static std::mt19937 gen(rd()); // Random number generator
+    std::uniform_real_distribution<float> dis(min, max);
+    return dis(gen);
+}
+
 void ParticleNode::AddParticle(sf::Vector2f position)
 {
     Particle particle;
@@ -26,6 +34,22 @@ void ParticleNode::AddParticle(sf::Vector2f position)
     particle.m_color = Table[static_cast<int>(m_type)].m_color;
     particle.m_lifetime = Table[static_cast<int>(m_type)].m_lifetime;
 
+   
+    // Add type-specific customizations
+    if (m_type == ParticleType::kWaterSplashes)
+    {
+        // Randomize velocity for splash effect
+        float angle = RandomRange(-45.f, 45.f); // Splash spread
+        float speed = RandomRange(50.f, 100.f);
+        double angleRad = Utility::ToRadians(angle);
+        particle.m_position = sf::Vector2f(speed * std::cos(angleRad), speed * std::sin(angleRad));
+    }
+    else if (m_type == ParticleType::kPropellant)
+    {
+        // Straight trail particles
+        particle.m_position = sf::Vector2f(0.f, -50.f); // Example velocity
+    }
+    
     m_particles.emplace_back(particle);
 }
 

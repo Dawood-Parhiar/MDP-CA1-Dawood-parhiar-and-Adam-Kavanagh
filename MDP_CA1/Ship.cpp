@@ -3,6 +3,7 @@
 #include "ResourceHolder.hpp"
 #include <SFML/Graphics/RenderTarget.hpp>
 #include "DataTables.hpp"
+#include "EmitterNode.hpp"
 #include "Projectile.hpp"
 #include "PickupType.hpp"
 #include "Pickup.hpp"
@@ -50,8 +51,14 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_show_explosion(true)
 	, m_spawned_pickup(false)
 	, m_played_explosion_sound(false)
+	, original_x(0.f)
+	, original_y(0.f)
 
 {
+	//positions for animation of the ship
+	original_x = m_sprite.getPosition().x;
+	original_y = m_sprite.getPosition().y;
+	
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
 	m_explosion.SetNumFrames(16);
 	m_explosion.SetDuration(sf::seconds(1));
@@ -90,6 +97,16 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	}
 
 	UpdateTexts();
+
+	//Add particle system for ships
+	std::unique_ptr<EmitterNode> splashes(new EmitterNode(ParticleType::kWaterSplashes));
+	splashes->setPosition(0.f, GetBoundingRect().height/2.f);
+	AttachChild(std::move(splashes));
+
+	std::unique_ptr<EmitterNode> mist(new EmitterNode(ParticleType::kWaterMist));
+	mist->setPosition(0.f, GetBoundingRect().height/2.f);
+	AttachChild(std::move(mist));
+
 }
 
 unsigned int Ship::GetCategory() const
@@ -216,7 +233,8 @@ void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset
 {
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
 	sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().width, y_offset * m_sprite.getGlobalBounds().height);
-	sf::Vector2f velocity(0, projectile->GetMaxSpeed());
+	//fire the projectile from the center of the ship
+	sf::Vector2f velocity(projectile->GetMaxSpeed(), 0);// fire the projectile horizontally
 
 	float sign = IsAllied() ? -1.f : 1.f;
 	projectile->setPosition(GetWorldPosition() + offset * sign);
@@ -267,7 +285,7 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 	UpdateTexts();
 	UpdateMovementPattern(dt);
 
-	UpdateRollAnimation();
+	UpdateRollAnimation(dt);
 
 	//Check if bullets or misiles are fired
 	CheckProjectileLaunch(dt, commands);
@@ -327,24 +345,48 @@ void Ship::CheckPickupDrop(CommandQueue& commands)
 	m_spawned_pickup = true;
 }
 
-void Ship::UpdateRollAnimation()
+void Ship::UpdateRollAnimation(sf::Time dt)
 {
+	// if (Table[static_cast<int>(m_type)].m_has_roll_animation)
+	// {
+	// 	sf::IntRect textureRect = Table[static_cast<int>(m_type)].m_texture_rect;
+	//
+	// 	//Roll left: Texture rect is offset once
+	// 	if (GetVelocity().x < 0.f)
+	// 	{
+	// 		textureRect.left += textureRect.width;
+	// 	}
+	// 	else if (GetVelocity().x > 0.f)
+	// 	{
+	// 		textureRect.left += 2 * textureRect.width;
+	// 	}
+	// 	m_sprite.setTextureRect(textureRect);
+	//
+	// }
+
+	
+	// Check if the ship type has roll animation enabled
 	if (Table[static_cast<int>(m_type)].m_has_roll_animation)
 	{
-		sf::IntRect textureRect = Table[static_cast<int>(m_type)].m_texture_rect;
-
-		//Roll left: Texture rect is offset once
-		if (GetVelocity().x < 0.f)
-		{
-			textureRect.left += textureRect.width;
-		}
-		else if (GetVelocity().x > 0.f)
-		{
-			textureRect.left += 2 * textureRect.width;
-		}
-		m_sprite.setTextureRect(textureRect);
-
+		// Time-based animation using sine waves
+		static float timeAccumulator = 0.0f; // Accumulate elapsed time for smooth animation
+		timeAccumulator += dt.asSeconds();
+	
+		// Bobbing effect (up and down movement)
+		const float bobAmplitude = 0.2f;  // Adjust for how high/low the boat moves
+		const float bobFrequency = 0.2f;  // Speed of bobbing
+		float bobOffset = bobAmplitude * sin(timeAccumulator * bobFrequency);
+	
+		// Rotational tilt (left-right tilting)
+		const float tiltAmplitude = 4.0f;  // Maximum tilt in degrees
+		const float tiltFrequency = 1.5f;  // Speed of tilting
+		float tiltAngle = tiltAmplitude * sin(timeAccumulator * tiltFrequency + 2.0f); // Offset phase for natural motion
+	
+		// Apply transformations
+		m_sprite.setPosition(original_x, original_y + bobOffset); // Adjust Y position for bobbing
+		m_sprite.setRotation(tiltAngle);                       // Apply tilt to the sprite
 	}
+
 }
 
 void Ship::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
@@ -360,4 +402,20 @@ void Ship::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
 		});
 
 	commands.Push(command);
+}
+
+void Ship::RotateShip()
+{
+	// if player presses the left arrow key, the ship will rotate left
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+	{
+		//rotate the ship to the left
+		rotate(-1);
+	}
+	// if player presses the right arrow key, the ship will rotate right
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+	{
+		//rotate the ship to the right
+		rotate(1);
+	}
 }

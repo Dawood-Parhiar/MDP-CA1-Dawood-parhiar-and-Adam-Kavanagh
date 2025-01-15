@@ -22,6 +22,8 @@ Player::Player(): m_current_mission_status(MissionStatus::kMissionRunning)
     m_key_binding[sf::Keyboard::W] = Action::kMoveUp;
     m_key_binding[sf::Keyboard::S] = Action::kMoveDown;
     m_key_binding[sf::Keyboard::M] = Action::kMissileFire;
+    m_key_binding[sf::Keyboard::Left] = Action::kRotateLeft;
+    m_key_binding[sf::Keyboard::Right] = Action::kRotateRight;
     //m_key_binding[sf::Keyboard::Space] = Action::kBulletFire;
 
     //Set initial action bindings
@@ -115,6 +117,16 @@ void Player::InitialiseActions()
             a.LaunchMissile();
         }
     );
+    m_action_binding[Action::kRotateLeft].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
+        {
+            a.RotateShip();
+        }
+    );
+    m_action_binding[Action::kRotateRight].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
+        {
+            a.RotateShip();
+        }
+    );
 
 }
 
@@ -126,6 +138,8 @@ bool Player::IsRealTimeAction(Action action)
     case Action::kMoveRight:
     case Action::kMoveDown:
     case Action::kMoveUp:
+    case Action::kRotateLeft:
+    case Action::kRotateRight:
     //case Action::kBulletFire:
         return true;
     default:
