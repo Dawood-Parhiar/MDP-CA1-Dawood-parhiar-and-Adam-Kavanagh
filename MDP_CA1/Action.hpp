@@ -9,5 +9,6 @@ enum class Action
 	kBulletFire,
 	kRotateLeft,
 	kRotateRight,
+	kAim,
 	kActionCount
 };

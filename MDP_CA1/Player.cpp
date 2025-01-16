@@ -14,8 +14,11 @@ struct ShipMover
     sf::Vector2f velocity;
 };
 
-Player::Player(): m_current_mission_status(MissionStatus::kMissionRunning)
+Player::Player()
+: m_current_mission_status(MissionStatus::kMissionRunning)
+
 {
+    
     //Set initial key bindings
     m_key_binding[sf::Keyboard::A] = Action::kMoveLeft;
     m_key_binding[sf::Keyboard::D] = Action::kMoveRight;
@@ -24,6 +27,7 @@ Player::Player(): m_current_mission_status(MissionStatus::kMissionRunning)
     m_key_binding[sf::Keyboard::M] = Action::kMissileFire;
     m_key_binding[sf::Keyboard::Left] = Action::kRotateLeft;
     m_key_binding[sf::Keyboard::Right] = Action::kRotateRight;
+    m_key_binding[sf::Keyboard::RShift] = Action::kAim;
     //m_key_binding[sf::Keyboard::Space] = Action::kBulletFire;
 
     //Set initial action bindings
@@ -127,6 +131,12 @@ void Player::InitialiseActions()
             a.RotateShip();
         }
     );
+    m_action_binding[Action::kAim].action = DerivedAction<Ship>([this](Ship& a, sf::Time dt)
+    {
+       
+        a.Aim();
+        
+    });
 
 }
 
@@ -140,6 +150,7 @@ bool Player::IsRealTimeAction(Action action)
     case Action::kMoveUp:
     case Action::kRotateLeft:
     case Action::kRotateRight:
+    case Action::kAim:
     //case Action::kBulletFire:
         return true;
     default:

@@ -21,11 +21,11 @@ TextureID ToTextureID(ShipType type)
 	case ShipType::kPirateShip:
 		return TextureID::kPirateShip;
 		break;
-	case ShipType::kRaptor:
-		return TextureID::kRaptor;
+	case ShipType::kEnemyShip1:
+		return TextureID::kEnemyShip1;
 		break;
-	case ShipType::kAvenger:
-		return TextureID::kAvenger;
+	case ShipType::kEnemyShip2:
+		return TextureID::kEnemyShip2;
 		break;
 	}
 	return TextureID::kPirateShip;
@@ -210,7 +210,7 @@ void Ship::LaunchMissile()
 
 void Ship::CreateBullet(SceneNode& node, const TextureHolder& textures) const
 {
-	ProjectileType type = IsAllied() ? ProjectileType::kAlliedBullet : ProjectileType::kEnemyBullet;
+	ProjectileType type = IsAllied() ? ProjectileType::kAlliedCannonBall : ProjectileType::kEnemyCannonBall;
 	switch (m_spread_level)
 	{
 	case 1:
@@ -261,6 +261,7 @@ void Ship::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 	else
 	{
 		target.draw(m_sprite, states);
+		Aim();
 	}
 }
 
@@ -419,3 +420,47 @@ void Ship::RotateShip()
 		rotate(1);
 	}
 }
+void Ship::SetRenderTargets(sf::RenderTarget& target)
+{
+	m_render_target = &target;
+}
+
+void Ship::Aim() const
+{
+	if (!m_render_target) return;
+	
+	// Draw an aiming arc on the target
+	const float radius = 300.f; 
+	const float arcAngle = 90.f; 
+	const int numSegments = 50;
+	const float transparency = 128; 
+
+	// Base position and rotation of the ship
+	sf::Vector2f shipPosition = GetWorldPosition();
+	float shipRotation = m_sprite.getRotation(); // Assuming GetRotation() gives the ship's current angle in degrees
+
+	// Create the aiming arc
+	sf::VertexArray aimingArc(sf::TriangleStrip, (numSegments + 1) * 2);
+
+	for (int i = 0; i <= numSegments; ++i)
+	{
+		// Calculate the angle for this segment
+		float angle = shipRotation - arcAngle / 2.f + (arcAngle * i / numSegments);
+		float angleRadians = Utility::ToRadians(angle);
+
+		// Outer and inner points for the thick line
+		sf::Vector2f outerPoint = shipPosition + sf::Vector2f(radius * std::cos(angleRadians), radius * std::sin(angleRadians));
+		sf::Vector2f innerPoint = shipPosition + sf::Vector2f((radius - 20.f) * std::cos(angleRadians), (radius - 20.f) * std::sin(angleRadians)); // Adjust thickness
+
+		// Add points to the vertex array
+		aimingArc[i * 2].position = outerPoint;
+		aimingArc[i * 2].color = sf::Color(255, 255, 255, transparency); // Transparent white
+		aimingArc[i * 2 + 1].position = innerPoint;
+		aimingArc[i * 2 + 1].color = sf::Color(255, 255, 255, transparency);
+	}
+
+	// Draw the aiming arc on the target
+	m_render_target->draw(aimingArc);
+}
+
+

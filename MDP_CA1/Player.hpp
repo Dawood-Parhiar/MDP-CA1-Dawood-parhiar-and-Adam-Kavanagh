@@ -4,6 +4,7 @@
 #include "CommandQueue.hpp"
 #include "MissionStatus.hpp"
 #include <map>
+#include <SFML/Graphics/RenderTarget.hpp>
 
 class Command;
 

@@ -31,6 +31,8 @@ public:
 	bool IsMarkedForRemoval() const override;
 	void PlayLocalSound(CommandQueue& commands, SoundEffect effect);
 	void RotateShip();
+	void Aim() const;
+	void SetRenderTargets(sf::RenderTarget& target);
 
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
@@ -72,5 +74,6 @@ private:
 	float original_x;
 	float original_y;
 
+	sf::RenderTarget* m_render_target;
 };
 

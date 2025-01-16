@@ -3,8 +3,8 @@ enum class TextureID
 {
 	kLandscape,
 	kPirateShip,
-	kRaptor,
-	kAvenger,
+	kEnemyShip1,
+	kEnemyShip2,
 	kMissile,
 	kTitleScreen,
 	kButtonNormal,
@@ -21,5 +21,7 @@ enum class TextureID
 	kButtons,
 	kExplosion,
 	kParticle,
-	kWater, kCannonBall
+	kWater,
+	kCannonBall,
+	kEnemyCannonBall
 };

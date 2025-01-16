@@ -17,10 +17,10 @@ TextureID ToTextureID(ProjectileType type)
         case ProjectileType::kMissile:
             return TextureID::kMissile;
             break;
-        case ProjectileType::kAlliedBullet:
+        case ProjectileType::kAlliedCannonBall:
             return TextureID::kBullet;
             break; 
-        case ProjectileType::kEnemyBullet:
+        case ProjectileType::kEnemyCannonBall:
             return TextureID::kBullet;
             break;
     }
@@ -56,9 +56,10 @@ bool Projectile::IsGuided() const
     return m_type == ProjectileType::kMissile;
 }
 
+
 unsigned int Projectile::GetCategory() const
 {
-    if (m_type == ProjectileType::kEnemyBullet)
+    if (m_type == ProjectileType::kEnemyCannonBall)
     {
         return static_cast<int>(ReceiverCategories::kEnemyProjectile);
     }

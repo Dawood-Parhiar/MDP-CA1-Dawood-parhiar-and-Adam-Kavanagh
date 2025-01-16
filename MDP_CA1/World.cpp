@@ -56,17 +56,18 @@ void World::Draw()
 	
 	if (PostEffect::IsSupported())
 	{
-		// Step 1: Clear the render texture
+		// Clear the render texture
 		m_scene_texture.clear();
 		m_scene_texture.setView(m_camera);
 		//m_scene_texture.draw(m_scenegraph);
-		// Step 2: Draw the background layer into the render texture
+
+		// Draw the background layer into the render texture
 		//if (m_scene_layers[static_cast<int>(SceneLayers::kBackground)] != nullptr)
 		
 		m_scene_texture.draw(*m_scene_layers[static_cast<int>(SceneLayers::kBackground)]);
 		
 
-		// Step 3: Apply the water effect shader
+		// Apply the water effect shader
 		m_scene_texture.display(); // Finalize the render texture
 		
 		// Pass background size and offset to the shader
@@ -76,7 +77,7 @@ void World::Draw()
 		
 		m_water_effect.Apply(m_scene_texture, m_target); // Apply shader to m_scene_texture and render to m_target
 
-		// Step 4: Draw the lowerAir and upperAir layers to the render target
+		//Draw the lowerAir and upperAir layers to the render target
 		m_target.setView(m_camera);
 		for (int i = static_cast<int>(SceneLayers::kLowerAir); i < static_cast<int>(SceneLayers::kLayerCount); ++i)
 		{
@@ -114,11 +115,13 @@ bool World::HasPlayerReachedEnd() const
 void World::LoadTextures()
 {
 	m_textures.Load(TextureID::kPirateShip, "Media/Textures/ship.png");
-	m_textures.Load(TextureID::kRaptor, "Media/Textures/Raptor.png");
+	m_textures.Load(TextureID::kEnemyShip1, "Media/EnemyShips/EnemyShip1.png");
 	
-	m_textures.Load(TextureID::kAvenger, "Media/Textures/Avenger.png");
+	m_textures.Load(TextureID::kEnemyShip2, "Media/EnemyShips/EnemyShip2.png");
 	m_textures.Load(TextureID::kLandscape, "Media/Textures/Desert.png");
 	m_textures.Load(TextureID::kBullet, "Media/Textures/Bullet.png");
+
+	//changed the texture
 	m_textures.Load(TextureID::kMissile, "Media/Textures/cannon_ball.png");
 
 	m_textures.Load(TextureID::kHealthRefill, "Media/Textures/HealthRefill.png");
@@ -134,6 +137,7 @@ void World::LoadTextures()
 
 	//Textures for the Ship Battle game
 	m_textures.Load(TextureID::kWater, "Media/Textures/Water3.jpg");
+	m_textures.Load(TextureID::kEnemyCannonBall, "Media/Textures/EnemyBall.png");
 	//m_textures.Load(TextureID::kCannonBall, "Media/Textures/cannonball.png"); using missile with different texture
 
 
@@ -193,11 +197,11 @@ void World::BuildScene()
 
 	AddEnemies();
 
-	/*std::unique_ptr<Ship> left_escort(new Ship(ShipType::kRaptor, m_textures, m_fonts));
+	/*std::unique_ptr<Ship> left_escort(new Ship(ShipType::kEnemyShip1, m_textures, m_fonts));
 	left_escort->setPosition(-80.f, 50.f);
 	m_player_aircraft->AttachChild(std::move(left_escort));
 
-	std::unique_ptr<Ship> right_escort(new Ship(ShipType::kRaptor, m_textures, m_fonts));
+	std::unique_ptr<Ship> right_escort(new Ship(ShipType::kEnemyShip1, m_textures, m_fonts));
 	right_escort->setPosition(80.f, 50.f);
 	m_player_aircraft->AttachChild(std::move(right_escort));*/
 }
@@ -237,7 +241,7 @@ void World::SpawnEnemies()
 		SpawnPoint spawn = m_enemy_spawn_points.back();
 		std::unique_ptr<Ship> enemy(new Ship(spawn.m_type, m_textures, m_fonts));
 		enemy->setPosition(spawn.m_x, spawn.m_y);
-		enemy->setRotation(180.f);
+		enemy->setRotation(0);
 		m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(enemy));
 		m_enemy_spawn_points.pop_back();
 	}
@@ -245,13 +249,13 @@ void World::SpawnEnemies()
 
 void World::AddEnemies()
 {
-	AddEnemy(ShipType::kRaptor, 0.f, 500.f);
-	AddEnemy(ShipType::kRaptor, 0.f, 1000.f);
-	AddEnemy(ShipType::kRaptor, 100.f, 1100.f);
-	AddEnemy(ShipType::kRaptor, -100.f, 1100.f);
-	AddEnemy(ShipType::kAvenger, -70.f, 1400.f);
-	AddEnemy(ShipType::kAvenger, 70.f, 1400.f);
-	AddEnemy(ShipType::kAvenger, 70.f, 1600.f);
+	AddEnemy(ShipType::kEnemyShip1, 0.f, 500.f);
+	AddEnemy(ShipType::kEnemyShip1, 0.f, 1000.f);
+	AddEnemy(ShipType::kEnemyShip1, 100.f, 1100.f);
+	AddEnemy(ShipType::kEnemyShip1, -100.f, 1100.f);
+	AddEnemy(ShipType::kEnemyShip2, -70.f, 1400.f);
+	AddEnemy(ShipType::kEnemyShip2, 70.f, 1400.f);
+	AddEnemy(ShipType::kEnemyShip2, 70.f, 1600.f);
 
 	//Sort the enemies according to y-value so that enemies are checked first
 	std::sort(m_enemy_spawn_points.begin(), m_enemy_spawn_points.end(), [](SpawnPoint lhs, SpawnPoint rhs)
@@ -264,6 +268,9 @@ void World::AddEnemies()
 void World::AddEnemy(ShipType type, float relx, float rely)
 {
 	SpawnPoint spawn(type, m_spawn_position.x + relx, m_spawn_position.y - rely);
+	//add second spawn point for the enemy, spawn them at the right side of the screen and the enemies should move to the left
+
+
 	m_enemy_spawn_points.emplace_back(spawn);
 }
 
@@ -300,48 +307,62 @@ void World::DestroyEntitiesOutsideView()
 
 void World::GuideMissiles()
 {
-	//Target the closest enemy in the world
-	Command enemyCollector;
-	enemyCollector.category = static_cast<int>(ReceiverCategories::kEnemyAircraft);
-	enemyCollector.action = DerivedAction<Ship>([this](Ship& enemy, sf::Time)
-		{
-			if (!enemy.IsDestroyed())
-			{
-				m_active_enemies.emplace_back(&enemy);
-			}
-		});
-
+	//Target the trajectory of the missiles in a radius around the player
 	Command missileGuider;
 	missileGuider.category = static_cast<int>(ReceiverCategories::kAlliedProjectile);
-	missileGuider.action = DerivedAction<Projectile>([this](Projectile& missile, sf::Time dt)
+	missileGuider.action = DerivedAction<Projectile>([this](Projectile& missile, sf::Time)
 		{
 			if (!missile.IsGuided())
 			{
 				return;
 			}
-
-			float min_distance = std::numeric_limits<float>::max();
-			Ship* closest_enemy = nullptr;
-
-			for (Ship* enemy : m_active_enemies)
+			//assign a trajectory if it doesnt have a target
+			if(!missile.GetCategory())
 			{
-				float enemy_distance = Distance(missile, *enemy);
-				if (enemy_distance < min_distance)
-				{
-					closest_enemy = enemy;
-					min_distance = enemy_distance;
-				}
-			}
+				float radius = 200.f;
+				float angle = std::rand() % 360;
+				float angleRad = Utility::ToRadians(angle);
 
-			if (closest_enemy)
-			{
-				missile.GuideTowards(closest_enemy->GetWorldPosition());
+				sf::Vector2f target = missile.GetWorldPosition() + sf::Vector2f(radius * std::cos(angleRad), radius * std::sin(angleRad));
+				missile.GuideTowards(target);
 			}
+			//guide with a curve instead of a straight line
+			
 		});
 
-	m_command_queue.Push(enemyCollector);
+		
+	// Command missileGuider;
+	// missileGuider.category = static_cast<int>(ReceiverCategories::kAlliedProjectile);
+	// missileGuider.action = DerivedAction<Projectile>([this](Projectile& missile, sf::Time dt)
+	// 	{
+	// 		if (!missile.IsGuided())
+	// 		{
+	// 			return;
+	// 		}
+	//
+	// 		float min_distance = std::numeric_limits<float>::max();
+	// 		Ship* closest_enemy = nullptr;
+	//
+	// 		for (Ship* enemy : m_active_enemies)
+	// 		{
+	// 			float enemy_distance = Distance(missile, *enemy);
+	// 			if (enemy_distance < min_distance)
+	// 			{
+	// 				closest_enemy = enemy;
+	// 				min_distance = enemy_distance;
+	// 			}
+	// 		}
+	//
+	// 		if (closest_enemy)
+	// 		{
+	// 			missile.GuideTowards(closest_enemy->GetWorldPosition());
+	// 		}
+	// 	});
+
+	//m_command_queue.Push(enemyCollector);
+	//m_active_enemies.clear();
+
 	m_command_queue.Push(missileGuider);
-	m_active_enemies.clear();
 }
 
 bool MatchesCategories(SceneNode::Pair& colliders, ReceiverCategories type1, ReceiverCategories type2)

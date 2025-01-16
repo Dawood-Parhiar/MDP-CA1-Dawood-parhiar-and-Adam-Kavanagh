@@ -16,34 +16,35 @@ std::vector<ShipData> InitializeShipData()
     //data[static_cast<int>(ShipType::kPirateShip)].m_texture_rect = sf::IntRect(0, 0, 48, 64);
     data[static_cast<int>(ShipType::kPirateShip)].m_has_roll_animation = true;
 
-    //Raptor
+    //Enemy Skeleton Ship
     
-    data[static_cast<int>(ShipType::kRaptor)].m_hitpoints = 20;
-    data[static_cast<int>(ShipType::kRaptor)].m_speed = 80.f;
-    data[static_cast<int>(ShipType::kRaptor)].m_fire_interval = sf::Time::Zero;
-    data[static_cast<int>(ShipType::kRaptor)].m_texture = TextureID::kRaptor;
-    //data[static_cast<int>(ShipType::kRaptor)].m_texture_rect = sf::IntRect(144, 0, 84, 64);
-    data[static_cast<int>(ShipType::kRaptor)].m_has_roll_animation = false;
+    data[static_cast<int>(ShipType::kEnemyShip1)].m_hitpoints = 20;
+    data[static_cast<int>(ShipType::kEnemyShip1)].m_speed = 80.f;
+    data[static_cast<int>(ShipType::kEnemyShip1)].m_fire_interval = sf::Time::Zero;
+    data[static_cast<int>(ShipType::kEnemyShip1)].m_texture = TextureID::kEnemyShip1;
+    //data[static_cast<int>(ShipType::kEnemyShip1)].m_texture_rect = sf::IntRect(144, 0, 84, 64);
+    data[static_cast<int>(ShipType::kEnemyShip1)].m_has_roll_animation = true;
 
-    //AI for Raptor
-    data[static_cast<int>(ShipType::kRaptor)].m_directions.emplace_back(Direction(+45.f, 80.f));
-    data[static_cast<int>(ShipType::kRaptor)].m_directions.emplace_back(Direction(-45.f, 160.f));
-    data[static_cast<int>(ShipType::kRaptor)].m_directions.emplace_back(Direction(+45.f, 80.f));
+   
+    data[static_cast<int>(ShipType::kEnemyShip1)].m_directions.emplace_back(Direction(+45.f, 80.f));
+    data[static_cast<int>(ShipType::kEnemyShip1)].m_directions.emplace_back(Direction(-45.f, 160.f));
+    data[static_cast<int>(ShipType::kEnemyShip1)].m_directions.emplace_back(Direction(+45.f, 80.f));
 
 
-    data[static_cast<int>(ShipType::kAvenger)].m_hitpoints = 40;
-    data[static_cast<int>(ShipType::kAvenger)].m_speed = 50.f;
-    data[static_cast<int>(ShipType::kAvenger)].m_fire_interval = sf::seconds(2);
-    data[static_cast<int>(ShipType::kAvenger)].m_texture = TextureID::kAvenger;
-    //data[static_cast<int>(ShipType::kAvenger)].m_texture_rect = sf::IntRect(228, 0, 60, 59);
-    data[static_cast<int>(ShipType::kAvenger)].m_has_roll_animation = false;
+    //Enemy Red Ship
+    data[static_cast<int>(ShipType::kEnemyShip2)].m_hitpoints = 40;
+    data[static_cast<int>(ShipType::kEnemyShip2)].m_speed = 50.f;
+    data[static_cast<int>(ShipType::kEnemyShip2)].m_fire_interval = sf::seconds(2);
+    data[static_cast<int>(ShipType::kEnemyShip2)].m_texture = TextureID::kEnemyShip2;
+    //data[static_cast<int>(ShipType::kEnemyShip2)].m_texture_rect = sf::IntRect(228, 0, 60, 59);
+    data[static_cast<int>(ShipType::kEnemyShip2)].m_has_roll_animation = false;
 
-    //AI for Raptor
-    data[static_cast<int>(ShipType::kAvenger)].m_directions.emplace_back(Direction(+45.f, 50.f));
-    data[static_cast<int>(ShipType::kAvenger)].m_directions.emplace_back(Direction(0.f, 50.f));
-    data[static_cast<int>(ShipType::kAvenger)].m_directions.emplace_back(Direction(-45.f, 100.f));
-    data[static_cast<int>(ShipType::kAvenger)].m_directions.emplace_back(Direction(0.f, 50.f));
-    data[static_cast<int>(ShipType::kAvenger)].m_directions.emplace_back(Direction(45.f, 50.f));
+
+    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(+45.f, 50.f));
+    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(0.f, 50.f));
+    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(-45.f, 100.f));
+    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(0.f, 50.f));
+    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(45.f, 50.f));
 
     return data;
 }
@@ -51,15 +52,18 @@ std::vector<ShipData> InitializeShipData()
 std::vector<ProjectileData> InitializeProjectileData()
 {
     std::vector<ProjectileData> data(static_cast<int>(ProjectileType::kProjectileCount));
-    data[static_cast<int>(ProjectileType::kAlliedBullet)].m_damage = 10;
-    data[static_cast<int>(ProjectileType::kAlliedBullet)].m_speed = 300;
-    data[static_cast<int>(ProjectileType::kAlliedBullet)].m_texture = TextureID::kEntities;
-    data[static_cast<int>(ProjectileType::kAlliedBullet)].m_texture_rect = sf::IntRect(175, 64, 3, 14);
 
-    data[static_cast<int>(ProjectileType::kEnemyBullet)].m_damage = 10;
-    data[static_cast<int>(ProjectileType::kEnemyBullet)].m_speed = 300;
-    data[static_cast<int>(ProjectileType::kEnemyBullet)].m_texture = TextureID::kEntities;
-    data[static_cast<int>(ProjectileType::kEnemyBullet)].m_texture_rect = sf::IntRect(175, 64, 3, 14);
+    ////No need for this (previously: bullets hitting enemies)
+    //data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_damage = 10;
+    //data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_speed = 300;
+    //data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_texture = TextureID::kEntities;
+    //data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_texture_rect = sf::IntRect(175, 64, 3, 14);
+
+    //cannon balls from enemy hitting to the player
+    data[static_cast<int>(ProjectileType::kEnemyCannonBall)].m_damage = 10;
+    data[static_cast<int>(ProjectileType::kEnemyCannonBall)].m_speed = 300;
+    data[static_cast<int>(ProjectileType::kEnemyCannonBall)].m_texture = TextureID::kEnemyCannonBall;
+    //data[static_cast<int>(ProjectileType::kEnemyCannonBall)].m_texture_rect = sf::IntRect(175, 64, 3, 14);
 
     //Cannon Ball
     data[static_cast<int>(ProjectileType::kMissile)].m_damage = 200;

@@ -26,6 +26,9 @@ SettingsState::SettingsState(StateStack& stack, Context context)
 		AddButtonLabel(static_cast<int>(Action::kMoveDown), x, 3, "Move Down", context);
 		AddButtonLabel(static_cast<int>(Action::kBulletFire), x, 4, "Fire", context);
 		AddButtonLabel(static_cast<int>(Action::kMissileFire), x, 5, "Missile", context);
+		AddButtonLabel(static_cast<int>(Action::kRotateLeft), x, 6, "Rotate Left", context);
+		AddButtonLabel(static_cast<int>(Action::kRotateRight), x, 7, "Rotate Right", context);
+		AddButtonLabel(static_cast<int>(Action::kAim), x, 8, "Aim", context);
 	}
 	UpdateLabels();
 

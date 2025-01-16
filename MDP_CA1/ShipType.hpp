@@ -2,7 +2,7 @@
 enum class ShipType
 {
 	kPirateShip,
-	kRaptor,
-	kAvenger,
+	kEnemyShip1,
+	kEnemyShip2,
 	kAircraftCount
 };
