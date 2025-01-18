@@ -30,9 +30,11 @@ public:
 	sf::FloatRect GetBoundingRect() const override;
 	bool IsMarkedForRemoval() const override;
 	void PlayLocalSound(CommandQueue& commands, SoundEffect effect);
-	void RotateShip();
+	//void RotateShip();
 	void Aim() const;
 	void SetRenderTargets(sf::RenderTarget& target);
+	float GetRotation() const;
+	void MoveShip(sf::Time dt, float speed);
 
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;

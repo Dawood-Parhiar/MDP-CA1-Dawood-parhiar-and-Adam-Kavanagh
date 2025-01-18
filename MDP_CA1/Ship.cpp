@@ -46,7 +46,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_is_firing(false)
 	, m_is_launching_missile(false)
 	, m_fire_countdown(sf::Time::Zero)
-	, m_missile_ammo(2)
+	, m_missile_ammo(20)
 	, m_is_marked_for_removal(false)
 	, m_show_explosion(true)
 	, m_spawned_pickup(false)
@@ -234,10 +234,14 @@ void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
 	sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().width, y_offset * m_sprite.getGlobalBounds().height);
 	//fire the projectile from the center of the ship
-	sf::Vector2f velocity(projectile->GetMaxSpeed(), 0);// fire the projectile horizontally
+	sf::Vector2f velocity(180, 45);// fire the projectile horizontally
 
 	float sign = IsAllied() ? -1.f : 1.f;
+
+
 	projectile->setPosition(GetWorldPosition() + offset * sign);
+
+
 	projectile->SetVelocity(velocity* sign);
 	node.AttachChild(std::move(projectile));
 }
@@ -284,6 +288,7 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 	Entity::UpdateCurrent(dt, commands);
 	UpdateTexts();
+
 	UpdateMovementPattern(dt);
 
 	UpdateRollAnimation(dt);
@@ -405,24 +410,39 @@ void Ship::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
 	commands.Push(command);
 }
 
-void Ship::RotateShip()
-{
-	// if player presses the left arrow key, the ship will rotate left
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-	{
-		//rotate the ship to the left
-		rotate(-1);
-	}
-	// if player presses the right arrow key, the ship will rotate right
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-	{
-		//rotate the ship to the right
-		rotate(1);
-	}
-}
+//void Ship::RotateShip()
+//{
+//	// if player presses the left arrow key, the ship will rotate left
+//	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+//	{
+//		//rotate the ship to the left
+//		rotate(-0.4f);
+//	}
+//	// if player presses the right arrow key, the ship will rotate right
+//	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+//	{
+//		//rotate the ship to the right
+//		rotate(0.4f);
+//	}
+//}
+
 void Ship::SetRenderTargets(sf::RenderTarget& target)
 {
 	m_render_target = &target;
+}
+
+float Ship::GetRotation() const
+{
+	return m_sprite.getRotation();
+}
+
+void Ship::MoveShip(sf::Time dt, float speed)
+{
+
+	float rotation = GetRotation();
+	float angle = Utility::ToRadians(rotation);
+
+	move(std::cos(angle) * speed * dt.asSeconds(), std::sin(angle) * speed * dt.asSeconds());
 }
 
 void Ship::Aim() const

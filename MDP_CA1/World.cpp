@@ -14,7 +14,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_scene_layers()
 	,m_world_bounds(0.f,0.f, m_camera.getSize().x, 3000.f)
 	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.height - m_camera.getSize().y/2.f)
-	,m_scrollspeed(-30.f)
+	,m_scrollspeed(-20.f)
 	,m_player_aircraft(nullptr)
 {
 	m_scene_texture.create(m_target.getSize().x, m_target.getSize().y);
@@ -241,7 +241,7 @@ void World::SpawnEnemies()
 		SpawnPoint spawn = m_enemy_spawn_points.back();
 		std::unique_ptr<Ship> enemy(new Ship(spawn.m_type, m_textures, m_fonts));
 		enemy->setPosition(spawn.m_x, spawn.m_y);
-		enemy->setRotation(0);
+		enemy->setRotation(180);
 		m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(enemy));
 		m_enemy_spawn_points.pop_back();
 	}
@@ -319,7 +319,7 @@ void World::GuideMissiles()
 			//assign a trajectory if it doesnt have a target
 			if(!missile.GetCategory())
 			{
-				float radius = 200.f;
+				float radius = 10.f;
 				float angle = std::rand() % 360;
 				float angleRad = Utility::ToRadians(angle);
 

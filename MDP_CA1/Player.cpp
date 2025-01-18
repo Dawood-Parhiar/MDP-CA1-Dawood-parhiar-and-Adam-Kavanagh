@@ -2,17 +2,20 @@
 #include "ReceiverCategories.hpp"
 #include "Ship.hpp"
 
-struct ShipMover
-{
-    ShipMover(float vx, float vy) :velocity(vx, vy)
-    {}
-    void operator()(Ship& ship, sf::Time) const
-    {
-        ship.Accelerate(velocity);
-    }
-
-    sf::Vector2f velocity;
-};
+//struct ShipMover
+//{
+//    float speed;
+//    ShipMover(float shipSpeed) :speed(shipSpeed)
+//    {}
+//    void operator()(Ship& ship, sf::Time dt) const
+//    {
+//        float rotation = ship.GetRotation();
+//        float rotationRads = Utility::ToRadians(rotation);
+//
+//        sf::Vector2f facingDirection(std::cos(rotationRads), std::sin(rotationRads));
+//        ship.Accelerate(facingDirection * speed * dt.asSeconds());
+//    }
+//};
 
 Player::Player()
 : m_current_mission_status(MissionStatus::kMissionRunning)
@@ -20,13 +23,11 @@ Player::Player()
 {
     
     //Set initial key bindings
-    m_key_binding[sf::Keyboard::A] = Action::kMoveLeft;
-    m_key_binding[sf::Keyboard::D] = Action::kMoveRight;
     m_key_binding[sf::Keyboard::W] = Action::kMoveUp;
     m_key_binding[sf::Keyboard::S] = Action::kMoveDown;
     m_key_binding[sf::Keyboard::M] = Action::kMissileFire;
-    m_key_binding[sf::Keyboard::Left] = Action::kRotateLeft;
-    m_key_binding[sf::Keyboard::Right] = Action::kRotateRight;
+    m_key_binding[sf::Keyboard::A] = Action::kRotateLeft;
+    m_key_binding[sf::Keyboard::D] = Action::kRotateRight;
     m_key_binding[sf::Keyboard::RShift] = Action::kAim;
     //m_key_binding[sf::Keyboard::Space] = Action::kBulletFire;
 
@@ -105,11 +106,35 @@ MissionStatus Player::GetMissionStatus() const
 
 void Player::InitialiseActions()
 {
-    const float kPlayerSpeed = 200.f;
-    m_action_binding[Action::kMoveLeft].action = DerivedAction<Ship>(ShipMover(-kPlayerSpeed, 0.f));
-    m_action_binding[Action::kMoveRight].action = DerivedAction<Ship>(ShipMover(kPlayerSpeed, 0.f));
-    m_action_binding[Action::kMoveUp].action = DerivedAction<Ship>(ShipMover(0.f, -kPlayerSpeed));
-    m_action_binding[Action::kMoveDown].action = DerivedAction<Ship>(ShipMover(0.f, kPlayerSpeed));
+    
+    m_action_binding[Action::kMoveUp].action = DerivedAction<Ship>([](Ship& s, sf::Time dt){
+        //Move the ship up
+    	const float kPlayerSpeed = 30.f;
+        s.MoveShip(dt,-kPlayerSpeed);
+    });
+    m_action_binding[Action::kMoveDown].action = DerivedAction<Ship>([](Ship& s, sf::Time dt) {
+
+        //Move the ship down
+        const float kPlayerSpeed = 30.f;
+
+        s.MoveShip(dt, kPlayerSpeed);
+        });
+    m_action_binding[Action::kRotateLeft].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
+	    {
+        //rotate the ship left
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+                a.rotate(-0.4f);
+            }
+	    });
+
+    m_action_binding[Action::kRotateRight].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
+	    {
+	    //rotate the ship right
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+                a.rotate(0.4f);
+            }
+	    });
+
     // m_action_binding[Action::kBulletFire].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
     //     {
     //         a.Fire();
@@ -119,16 +144,6 @@ void Player::InitialiseActions()
     m_action_binding[Action::kMissileFire].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
         {
             a.LaunchMissile();
-        }
-    );
-    m_action_binding[Action::kRotateLeft].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
-        {
-            a.RotateShip();
-        }
-    );
-    m_action_binding[Action::kRotateRight].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
-        {
-            a.RotateShip();
         }
     );
     m_action_binding[Action::kAim].action = DerivedAction<Ship>([this](Ship& a, sf::Time dt)
@@ -144,14 +159,12 @@ bool Player::IsRealTimeAction(Action action)
 {
     switch (action)
     {
-    case Action::kMoveLeft:
-    case Action::kMoveRight:
     case Action::kMoveDown:
     case Action::kMoveUp:
     case Action::kRotateLeft:
     case Action::kRotateRight:
     case Action::kAim:
-    //case Action::kBulletFire:
+    //case Action::kMissileFire:
         return true;
     default:
         return false;

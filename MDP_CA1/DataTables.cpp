@@ -67,7 +67,7 @@ std::vector<ProjectileData> InitializeProjectileData()
 
     //Cannon Ball
     data[static_cast<int>(ProjectileType::kMissile)].m_damage = 200;
-    data[static_cast<int>(ProjectileType::kMissile)].m_speed = 150;
+    data[static_cast<int>(ProjectileType::kMissile)].m_speed = 100;
     data[static_cast<int>(ProjectileType::kMissile)].m_texture = TextureID::kMissile;
     //data[static_cast<int>(ProjectileType::kMissile)].m_texture_rect = sf::IntRect(160, 64, 15, 32);
 
