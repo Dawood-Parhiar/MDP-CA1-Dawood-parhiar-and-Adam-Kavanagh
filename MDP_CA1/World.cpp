@@ -13,14 +13,15 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_scenegraph(ReceiverCategories::kNone)
 	,m_scene_layers()
 	,m_world_bounds(0.f,0.f, m_camera.getSize().x, 3000.f)
-	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.height - m_camera.getSize().y/2.f)
-	,m_scrollspeed(-20.f)
+	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.height - m_camera.getSize().y/2.f)//
+	,m_scrollspeed(-50.f)
 	,m_player_aircraft(nullptr)
 {
 	m_scene_texture.create(m_target.getSize().x, m_target.getSize().y);
 	LoadTextures();
 	BuildScene();
 	m_camera.setCenter(m_spawn_position);
+	
 }
 
 void World::Update(sf::Time dt)
@@ -174,7 +175,7 @@ void World::BuildScene()
 	std::unique_ptr<Ship> leader(new Ship(ShipType::kPirateShip, m_textures, m_fonts));
 	m_player_aircraft = leader.get();
 	m_player_aircraft->setPosition(m_spawn_position);
-	m_player_aircraft->SetVelocity(20.f, m_scrollspeed);
+	m_player_aircraft->SetVelocity(50.f, m_scrollspeed);
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(leader));
 
 	//Add the particle nodes to the scene

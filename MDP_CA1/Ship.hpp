@@ -33,7 +33,6 @@ public:
 	//void RotateShip();
 	void Aim() const;
 	void SetRenderTargets(sf::RenderTarget& target);
-	float GetRotation() const;
 	void MoveShip(sf::Time dt, float speed);
 
 private:

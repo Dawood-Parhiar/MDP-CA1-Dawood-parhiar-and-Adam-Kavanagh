@@ -431,18 +431,16 @@ void Ship::SetRenderTargets(sf::RenderTarget& target)
 	m_render_target = &target;
 }
 
-float Ship::GetRotation() const
-{
-	return m_sprite.getRotation();
-}
 
 void Ship::MoveShip(sf::Time dt, float speed)
 {
 
-	float rotation = GetRotation();
+	float rotation = getRotation() +90;
 	float angle = Utility::ToRadians(rotation);
+	float vx = speed * std::cos(angle);
+	float vy = speed * std::sin(angle);
+	Accelerate(vx, vy);
 
-	move(std::cos(angle) * speed * dt.asSeconds(), std::sin(angle) * speed * dt.asSeconds());
 }
 
 void Ship::Aim() const

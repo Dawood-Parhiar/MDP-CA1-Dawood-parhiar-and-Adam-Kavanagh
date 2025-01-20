@@ -2,20 +2,16 @@
 #include "ReceiverCategories.hpp"
 #include "Ship.hpp"
 
-//struct ShipMover
-//{
-//    float speed;
-//    ShipMover(float shipSpeed) :speed(shipSpeed)
-//    {}
-//    void operator()(Ship& ship, sf::Time dt) const
-//    {
-//        float rotation = ship.GetRotation();
-//        float rotationRads = Utility::ToRadians(rotation);
-//
-//        sf::Vector2f facingDirection(std::cos(rotationRads), std::sin(rotationRads));
-//        ship.Accelerate(facingDirection * speed * dt.asSeconds());
-//    }
-//};
+struct ShipMover
+{
+    ShipMover(float vx, float vy) :velocity(vx,vy)
+    {}
+    void operator()(Ship& ship, sf::Time dt) const
+    {
+        ship.Accelerate(velocity);
+    }
+    sf::Vector2f velocity;
+};
 
 Player::Player()
 : m_current_mission_status(MissionStatus::kMissionRunning)
@@ -106,17 +102,15 @@ MissionStatus Player::GetMissionStatus() const
 
 void Player::InitialiseActions()
 {
-    
-    m_action_binding[Action::kMoveUp].action = DerivedAction<Ship>([](Ship& s, sf::Time dt){
+    const float kPlayerSpeed = 200.f;
+
+    m_action_binding[Action::kMoveUp].action = DerivedAction<Ship>([kPlayerSpeed](Ship& s, sf::Time dt){
         //Move the ship up
-    	const float kPlayerSpeed = 30.f;
-        s.MoveShip(dt,-kPlayerSpeed);
+        s.MoveShip(dt, -kPlayerSpeed);
     });
-    m_action_binding[Action::kMoveDown].action = DerivedAction<Ship>([](Ship& s, sf::Time dt) {
+    m_action_binding[Action::kMoveDown].action = DerivedAction<Ship>([kPlayerSpeed](Ship& s, sf::Time dt) {
 
         //Move the ship down
-        const float kPlayerSpeed = 30.f;
-
         s.MoveShip(dt, kPlayerSpeed);
         });
     m_action_binding[Action::kRotateLeft].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
