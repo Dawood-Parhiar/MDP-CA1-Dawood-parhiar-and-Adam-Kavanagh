@@ -7,14 +7,25 @@
 
 std::vector<ShipData> InitializeShipData()
 {
-    std::vector<ShipData> data(static_cast<int>(ShipType::kAircraftCount));
+    std::vector<ShipData> data(static_cast<int>(ShipType::kShipCount));
 
-    data[static_cast<int>(ShipType::kPirateShip)].m_hitpoints = 100;
+    data[static_cast<int>(ShipType::kPirateShip)].m_hitpoints = 200;
     data[static_cast<int>(ShipType::kPirateShip)].m_speed = 200.f;
     data[static_cast<int>(ShipType::kPirateShip)].m_fire_interval = sf::seconds(1);
     data[static_cast<int>(ShipType::kPirateShip)].m_texture = TextureID::kPirateShip;
     //data[static_cast<int>(ShipType::kPirateShip)].m_texture_rect = sf::IntRect(0, 0, 48, 64);
     data[static_cast<int>(ShipType::kPirateShip)].m_has_roll_animation = true;
+
+
+
+    //player 2 ship
+
+    data[static_cast<int>(ShipType::kPlayer2Ship)].m_hitpoints = 200;
+    data[static_cast<int>(ShipType::kPlayer2Ship)].m_speed = 200.f;
+    data[static_cast<int>(ShipType::kPlayer2Ship)].m_fire_interval = sf::seconds(1);
+    data[static_cast<int>(ShipType::kPirateShip)].m_texture = TextureID::kPlayer2Ship;
+    //data[static_cast<int>(ShipType::kPirateShip)].m_texture_rect = sf::IntRect(0, 0, 48, 64);
+    data[static_cast<int>(ShipType::kPlayer2Ship)].m_has_roll_animation = true;
 
     //Enemy Skeleton Ship
     
@@ -26,10 +37,10 @@ std::vector<ShipData> InitializeShipData()
     data[static_cast<int>(ShipType::kEnemyShip1)].m_has_roll_animation = true;
 
    
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_directions.emplace_back(Direction(+45.f, 80.f));
+    /*data[static_cast<int>(ShipType::kEnemyShip1)].m_directions.emplace_back(Direction(+45.f, 80.f));
     data[static_cast<int>(ShipType::kEnemyShip1)].m_directions.emplace_back(Direction(-45.f, 160.f));
     data[static_cast<int>(ShipType::kEnemyShip1)].m_directions.emplace_back(Direction(+45.f, 80.f));
-
+*/
 
     //Enemy Red Ship
     data[static_cast<int>(ShipType::kEnemyShip2)].m_hitpoints = 40;
@@ -53,11 +64,11 @@ std::vector<ProjectileData> InitializeProjectileData()
 {
     std::vector<ProjectileData> data(static_cast<int>(ProjectileType::kProjectileCount));
 
-    ////No need for this (previously: bullets hitting enemies)
-    //data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_damage = 10;
-    //data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_speed = 300;
-    //data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_texture = TextureID::kEntities;
-    //data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_texture_rect = sf::IntRect(175, 64, 3, 14);
+    //No need for this (previously: bullets hitting enemies)
+    data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_damage = 10;
+    data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_speed = 300;
+    data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_texture = TextureID::kEntities;
+    data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_texture_rect = sf::IntRect(175, 64, 3, 14);
 
     //cannon balls from enemy hitting to the player
     data[static_cast<int>(ProjectileType::kEnemyCannonBall)].m_damage = 10;

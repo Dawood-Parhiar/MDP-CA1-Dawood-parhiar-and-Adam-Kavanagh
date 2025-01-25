@@ -13,19 +13,21 @@ struct ShipMover
     sf::Vector2f velocity;
 };
 
-Player::Player()
+Player::Player(KeyBinding* key_binding)
 : m_current_mission_status(MissionStatus::kMissionRunning)
-
+,m_key_binding(key_binding)
 {
     
     //Set initial key bindings
-    m_key_binding[sf::Keyboard::W] = Action::kMoveUp;
+    /*m_key_binding[sf::Keyboard::W] = Action::kMoveUp;
     m_key_binding[sf::Keyboard::S] = Action::kMoveDown;
-    m_key_binding[sf::Keyboard::M] = Action::kMissileFire;
+    m_key_binding[sf::Keyboard::Space] = Action::kMissileFire;
     m_key_binding[sf::Keyboard::A] = Action::kRotateLeft;
     m_key_binding[sf::Keyboard::D] = Action::kRotateRight;
-    m_key_binding[sf::Keyboard::RShift] = Action::kAim;
-    //m_key_binding[sf::Keyboard::Space] = Action::kBulletFire;
+    m_key_binding[sf::Keyboard::RShift] = Action::kAim;*/
+
+
+    
 
     //Set initial action bindings
     InitialiseActions();
@@ -33,7 +35,7 @@ Player::Player()
     //Assign all categories to a player's aircraft
     for (auto& pair : m_action_binding)
     {
-        pair.second.category = static_cast<unsigned int>(ReceiverCategories::kPlayerAircraft);
+        pair.second.category = static_cast<unsigned int>(ReceiverCategories::kPlayerShip);
     }
 }
 
@@ -41,10 +43,15 @@ void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
 {
     if (event.type == sf::Event::KeyPressed)
     {
-        auto found = m_key_binding.find(event.key.code);
+        /*auto found = m_key_binding.find(event.key.code);
         if (found != m_key_binding.end() && !IsRealTimeAction(found->second))
         {
             command_queue.Push(m_action_binding[found->second]);
+        }*/
+        Action action;
+        if (m_key_binding->CheckAction(event.key.code, action) && !IsRealTimeAction(action))
+        {
+            command_queue.Push(m_action_binding[action]);
         }
     }
 }
@@ -52,43 +59,51 @@ void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
 void Player::HandleRealTimeInput(CommandQueue& command_queue)
 {
     //Check if any of the key bindings are pressed
-    for (auto pair : m_key_binding)
+   /* for (auto pair : m_key_binding)
     {
         if (sf::Keyboard::isKeyPressed(pair.first) && IsRealTimeAction(pair.second))
         {
             command_queue.Push(m_action_binding[pair.second]);
         }
+    }*/
+
+    for (Action action: m_key_binding->GetRealtimeActions())
+    {
+	    if (IsRealTimeAction(action))
+	    {
+            command_queue.Push(m_action_binding[action]);
+	    }
     }
 }
 
-void Player::AssignKey(Action action, sf::Keyboard::Key key)
-{
-    //Remove keys that are currently bound to the action
-    for (auto itr = m_key_binding.begin(); itr != m_key_binding.end();)
-    {
-        if (itr->second == action)
-        {
-            m_key_binding.erase(itr++);
-        }
-        else
-        {
-            ++itr;
-        }
-    }
-    m_key_binding[key] = action;
-}
-
-sf::Keyboard::Key Player::GetAssignedKey(Action action) const
-{
-    for (auto pair : m_key_binding)
-    {
-        if (pair.second == action)
-        {
-            return pair.first;
-        }
-    }
-    return sf::Keyboard::Unknown;
-}
+//void Player::AssignKey(Action action, sf::Keyboard::Key key)
+//{
+//    //Remove keys that are currently bound to the action
+//    for (auto itr = m_key_binding.begin(); itr != m_key_binding.end();)
+//    {
+//        if (itr->second == action)
+//        {
+//            m_key_binding.erase(itr++);
+//        }
+//        else
+//        {
+//            ++itr;
+//        }
+//    }
+//    m_key_binding[key] = action;
+//}
+//
+//sf::Keyboard::Key Player::GetAssignedKey(Action action) const
+//{
+//    for (auto pair : m_key_binding)
+//    {
+//        if (pair.second == action)
+//        {
+//            return pair.first;
+//        }
+//    }
+//    return sf::Keyboard::Unknown;
+//}
 
 void Player::SetMissionStatus(MissionStatus status)
 {
@@ -116,17 +131,15 @@ void Player::InitialiseActions()
     m_action_binding[Action::kRotateLeft].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
 	    {
         //rotate the ship left
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-                a.rotate(-0.4f);
-            }
+    	a.rotate(-0.4f);
+            
 	    });
 
     m_action_binding[Action::kRotateRight].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
 	    {
 	    //rotate the ship right
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-                a.rotate(0.4f);
-            }
+    	a.rotate(0.4f);
+            
 	    });
 
     // m_action_binding[Action::kBulletFire].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)

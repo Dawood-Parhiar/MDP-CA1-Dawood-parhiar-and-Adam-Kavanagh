@@ -1,6 +1,8 @@
 #pragma once
 #include <SFML/System/NonCopyable.hpp>
 
+#include "SceneLayers.hpp"
+
 namespace sf
 {
 	class RenderTarget;

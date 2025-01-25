@@ -20,13 +20,13 @@ SettingsState::SettingsState(StateStack& stack, Context context)
 
 	for (std::size_t x = 0; x < 2; ++x)
 	{
-		AddButtonLabel(static_cast<int>(Action::kMoveUp), x, 2, "Move Up", context);
-		AddButtonLabel(static_cast<int>(Action::kMoveDown), x, 3, "Move Down", context);
-		AddButtonLabel(static_cast<int>(Action::kBulletFire), x, 4, "Fire", context);
-		AddButtonLabel(static_cast<int>(Action::kMissileFire), x, 5, "Missile", context);
-		AddButtonLabel(static_cast<int>(Action::kRotateLeft), x, 6, "Rotate Left", context);
-		AddButtonLabel(static_cast<int>(Action::kRotateRight), x, 7, "Rotate Right", context);
-		AddButtonLabel(static_cast<int>(Action::kAim), x, 8, "Aim", context);
+		AddButtonLabel(static_cast<int>(Action::kMoveUp), x, 0, "Move Up", context);
+		AddButtonLabel(static_cast<int>(Action::kMoveDown), x, 1, "Move Down", context);
+		//AddButtonLabel(static_cast<int>(Action::kBulletFire), x, 4, "Fire", context);
+		AddButtonLabel(static_cast<int>(Action::kMissileFire), x, 2, "Missile", context);
+		AddButtonLabel(static_cast<int>(Action::kRotateLeft), x, 3, "Rotate Left", context);
+		AddButtonLabel(static_cast<int>(Action::kRotateRight), x, 4, "Rotate Right", context);
+		AddButtonLabel(static_cast<int>(Action::kAim), x, 5, "Aim", context);
 	}
 	UpdateLabels();
 

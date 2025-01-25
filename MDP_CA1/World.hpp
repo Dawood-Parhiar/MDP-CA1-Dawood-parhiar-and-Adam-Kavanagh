@@ -13,6 +13,7 @@
 
 #include <array>
 
+#include "Player.hpp"
 #include "WaterEffects.h"
 
 class World : private sf::NonCopyable
@@ -46,6 +47,8 @@ private:
 	void HandleCollisions();
 	void UpdateSounds();
 
+	void InitializePlayers();
+
 
 private:
 	struct SpawnPoint
@@ -70,8 +73,11 @@ private:
 	std::array<SceneNode*, static_cast<int>(SceneLayers::kLayerCount)> m_scene_layers;
 	sf::FloatRect m_world_bounds;
 	sf::Vector2f m_spawn_position;
+
 	float m_scrollspeed;
-	Ship* m_player_aircraft;
+
+	std::vector<Ship*> m_player_ships;
+	std::vector<std::unique_ptr<Player>> m_players;
 
 	CommandQueue m_command_queue;
 

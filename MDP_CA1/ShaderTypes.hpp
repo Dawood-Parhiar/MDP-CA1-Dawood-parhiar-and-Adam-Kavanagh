@@ -5,6 +5,5 @@ enum class ShaderTypes
 	kDownSamplePass,
 	kGaussianBlurPass,
 	kAddPass,
-
 	kWaterShader
 };

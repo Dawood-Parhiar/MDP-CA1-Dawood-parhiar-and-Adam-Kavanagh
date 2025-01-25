@@ -23,5 +23,7 @@ enum class TextureID
 	kParticle,
 	kWater,
 	kCannonBall,
-	kEnemyCannonBall
+	kEnemyCannonBall,
+	kEnemyShip3,
+	kPlayer2Ship
 };

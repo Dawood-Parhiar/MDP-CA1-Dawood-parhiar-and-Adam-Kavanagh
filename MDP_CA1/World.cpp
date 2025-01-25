@@ -14,8 +14,9 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_scene_layers()
 	,m_world_bounds(0.f,0.f, m_camera.getSize().x, 3000.f)
 	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.height - m_camera.getSize().y/2.f)//
-	,m_scrollspeed(-50.f)
-	,m_player_aircraft(nullptr)
+	,m_scrollspeed(-5.f)
+	,m_player_ships()
+	,m_players()
 {
 	m_scene_texture.create(m_target.getSize().x, m_target.getSize().y);
 	LoadTextures();
@@ -28,8 +29,17 @@ void World::Update(sf::Time dt)
 {
 	//Scroll the world
 	m_camera.move(0, m_scrollspeed * dt.asSeconds());
-	
-	m_player_aircraft->SetVelocity(0.f, 0.f);
+
+	for (size_t i=0; i<m_players.size(); ++i)
+	{
+		m_players[i]->HandleRealTimeInput(m_command_queue);
+	}
+
+
+	for (Ship* player: m_player_ships)
+	{
+		player->SetVelocity(0.f, 0.f);
+	}
 
 	DestroyEntitiesOutsideView();
 	GuideMissiles();
@@ -39,16 +49,14 @@ void World::Update(sf::Time dt)
 	{
 		m_scenegraph.OnCommand(m_command_queue.Pop(), dt);
 	}
+
 	AdaptPlayerVelocity();
-
 	HandleCollisions();
-
 	m_scenegraph.RemoveWrecks();
-
-	SpawnEnemies();
-
+	//SpawnEnemies();
 	m_scenegraph.Update(dt, m_command_queue);
 	AdaptPlayerPosition();
+	UpdateSounds();
 }
 
 void World::Draw()
@@ -57,36 +65,38 @@ void World::Draw()
 	
 	if (PostEffect::IsSupported())
 	{
-		// Clear the render texture
+
 		m_scene_texture.clear();
 		m_scene_texture.setView(m_camera);
-		//m_scene_texture.draw(m_scenegraph);
-
-		// Draw the background layer into the render texture
-		//if (m_scene_layers[static_cast<int>(SceneLayers::kBackground)] != nullptr)
-		
-		m_scene_texture.draw(*m_scene_layers[static_cast<int>(SceneLayers::kBackground)]);
-		
-
-		// Apply the water effect shader
+		m_scene_texture.draw(m_scenegraph);
 		m_scene_texture.display(); // Finalize the render texture
-		
-		// Pass background size and offset to the shader
-		
-		
+		//m_bloom_effect.Apply(m_scene_texture, m_target);
+		m_water_effect.Apply(m_scene_texture, m_target);
 
-		
-		m_water_effect.Apply(m_scene_texture, m_target); // Apply shader to m_scene_texture and render to m_target
 
-		//Draw the lowerAir and upperAir layers to the render target
-		m_target.setView(m_camera);
-		for (int i = static_cast<int>(SceneLayers::kLowerAir); i < static_cast<int>(SceneLayers::kLayerCount); ++i)
-		{
-			if (m_scene_layers[i] != nullptr)
-			{
-				m_target.draw(*m_scene_layers[i]);
-			}
-		}
+		////Draw the lowerAir and upperAir layers to the render target
+		////m_target.setView(m_camera);
+		//for (int i = static_cast<int>(SceneLayers::kBackground); i < static_cast<int>(SceneLayers::kLayerCount); ++i)
+		//{
+		//	if (m_scene_layers[i] != nullptr)
+		//	{
+		//		if (i == static_cast<int>(SceneLayers::kBackground))
+		//		{
+		//			m_scene_texture.clear();
+		//			m_target.setView(m_camera);
+		//			m_scene_texture.draw(*m_scene_layers[i]);
+		//			m_scene_texture.display();
+
+		//			m_water_effect.Apply(m_scene_texture, m_target);
+		//		}
+		//		else
+		//		{
+		//			m_target.draw(*m_scene_layers[i]);
+		//			m_water_effect.Apply(m_scene_texture, m_target);
+		//		}
+		//	}
+		//}
+		
 		
 	}
 	else
@@ -104,12 +114,18 @@ CommandQueue& World::GetCommandQueue()
 
 bool World::HasAlivePlayer() const
 {
-	return !m_player_aircraft->IsMarkedForRemoval();
+	for (const Ship* player : m_player_ships)
+	{
+		if (!player->IsMarkedForRemoval())
+			return true;
+	}
+	return false;
 }
 
 bool World::HasPlayerReachedEnd() const
 {
-	return !m_world_bounds.contains(m_player_aircraft->getPosition());
+	//return !m_world_bounds.contains(m_player_1_ship->getPosition());
+	return false;
 }
 
 
@@ -117,13 +133,14 @@ void World::LoadTextures()
 {
 	m_textures.Load(TextureID::kPirateShip, "Media/Textures/ship.png");
 	m_textures.Load(TextureID::kEnemyShip1, "Media/EnemyShips/EnemyShip1.png");
-	
+	m_textures.Load(TextureID::kMissile, "Media/Textures/cannon_ball.png");
 	m_textures.Load(TextureID::kEnemyShip2, "Media/EnemyShips/EnemyShip2.png");
-	m_textures.Load(TextureID::kLandscape, "Media/Textures/Desert.png");
-	m_textures.Load(TextureID::kBullet, "Media/Textures/Bullet.png");
+	m_textures.Load(TextureID::kEnemyShip3, "Media/EnemyShips/EnemyShip3.png");
+	/*m_textures.Load(TextureID::kLandscape, "Media/Textures/Desert.png");
+	m_textures.Load(TextureID::kBullet, "Media/Textures/Bullet.png");*/
 
 	//changed the texture
-	m_textures.Load(TextureID::kMissile, "Media/Textures/cannon_ball.png");
+	
 
 	m_textures.Load(TextureID::kHealthRefill, "Media/Textures/HealthRefill.png");
 	m_textures.Load(TextureID::kMissileRefill, "Media/Textures/MissileRefill.png");
@@ -132,13 +149,14 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kFinishLine, "Media/Textures/FinishLine.png");
 
 	m_textures.Load(TextureID::kEntities, "Media/Textures/Entities.png");
-	m_textures.Load(TextureID::kJungle, "Media/Textures/Jungle.png");
+	//m_textures.Load(TextureID::kJungle, "Media/Textures/Jungle.png");
 	m_textures.Load(TextureID::kExplosion, "Media/Textures/Explosion.png");
 	m_textures.Load(TextureID::kParticle, "Media/Textures/Particle.png");
 
 	//Textures for the Ship Battle game
 	m_textures.Load(TextureID::kWater, "Media/Textures/Water3.jpg");
 	m_textures.Load(TextureID::kEnemyCannonBall, "Media/Textures/EnemyBall.png");
+	m_textures.Load(TextureID::kPlayer2Ship, "Media/EnemyShips/ship13.png");
 	//m_textures.Load(TextureID::kCannonBall, "Media/Textures/cannonball.png"); using missile with different texture
 
 
@@ -171,12 +189,8 @@ void World::BuildScene()
 	finish_sprite->setPosition(0.f, -76.f);
 	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(finish_sprite));
 
-	//Add the player's aircraft
-	std::unique_ptr<Ship> leader(new Ship(ShipType::kPirateShip, m_textures, m_fonts));
-	m_player_aircraft = leader.get();
-	m_player_aircraft->setPosition(m_spawn_position);
-	m_player_aircraft->SetVelocity(50.f, m_scrollspeed);
-	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(leader));
+	//Add Players here
+
 
 	//Add the particle nodes to the scene
 	std::unique_ptr<ParticleNode> smokeNode(new ParticleNode(ParticleType::kSmoke, m_textures));
@@ -196,42 +210,48 @@ void World::BuildScene()
 	std::unique_ptr<SoundNode> soundNode(new SoundNode(m_sounds));
 	m_scenegraph.AttachChild(std::move(soundNode));
 
-	AddEnemies();
+	//AddEnemies();
 
 	/*std::unique_ptr<Ship> left_escort(new Ship(ShipType::kEnemyShip1, m_textures, m_fonts));
 	left_escort->setPosition(-80.f, 50.f);
-	m_player_aircraft->AttachChild(std::move(left_escort));
+	m_player_1_ship->AttachChild(std::move(left_escort));
 
 	std::unique_ptr<Ship> right_escort(new Ship(ShipType::kEnemyShip1, m_textures, m_fonts));
 	right_escort->setPosition(80.f, 50.f);
-	m_player_aircraft->AttachChild(std::move(right_escort));*/
+	m_player_1_ship->AttachChild(std::move(right_escort));*/
 }
 
 void World::AdaptPlayerPosition()
 {
-	//keep the player on the screen
+	//keep each player on the screen
 	sf::FloatRect view_bounds(m_camera.getCenter() - m_camera.getSize() / 2.f, m_camera.getSize());
 	const float border_distance = 40.f;
 
-	sf::Vector2f position = m_player_aircraft->getPosition();
-	position.x = std::max(position.x, view_bounds.left + border_distance);
-	position.x = std::min(position.x, view_bounds.left + view_bounds.width - border_distance);
-	position.y = std::max(position.y, view_bounds.top + border_distance);
-	position.y = std::min(position.y, view_bounds.top + view_bounds.height -border_distance);
-	m_player_aircraft->setPosition(position);
+	for (Ship* player : m_player_ships)
+	{
+		sf::Vector2f position = player->getPosition();
+		position.x = std::max(position.x, view_bounds.left + border_distance);
+		position.x = std::min(position.x, view_bounds.left + view_bounds.width - border_distance);
+		position.y = std::max(position.y, view_bounds.top + border_distance);
+		position.y = std::min(position.y, view_bounds.top + view_bounds.height - border_distance);
+		player->setPosition(position);
+	}
 }
 
 void World::AdaptPlayerVelocity()
 {
-	sf::Vector2f velocity = m_player_aircraft->GetVelocity();
-
-	//If they are moving diagonally divide by sqrt 2
-	if (velocity.x != 0.f && velocity.y != 0.f)
+	for (Ship* player : m_player_ships)
 	{
-		m_player_aircraft->SetVelocity(velocity / std::sqrt(2.f));
+		sf::Vector2f velocity = player->GetVelocity();
+
+		//If they are moving diagonally divide by sqrt 2
+		if (velocity.x != 0.f && velocity.y != 0.f)
+		{
+			player->SetVelocity(velocity / std::sqrt(2.f));
+		}
+		//Add scrolling velocity
+		player->Accelerate(0.f, m_scrollspeed);
 	}
-	//Add scrolling velocity
-	m_player_aircraft->Accelerate(0.f, m_scrollspeed);
 }
 
 void World::SpawnEnemies()
@@ -269,8 +289,7 @@ void World::AddEnemies()
 void World::AddEnemy(ShipType type, float relx, float rely)
 {
 	SpawnPoint spawn(type, m_spawn_position.x + relx, m_spawn_position.y - rely);
-	//add second spawn point for the enemy, spawn them at the right side of the screen and the enemies should move to the left
-
+	
 
 	m_enemy_spawn_points.emplace_back(spawn);
 }
@@ -294,7 +313,7 @@ sf::FloatRect World::GetBattleFieldBounds() const
 void World::DestroyEntitiesOutsideView()
 {
 	Command command;
-	command.category = static_cast<int>(ReceiverCategories::kEnemyAircraft) | static_cast<int>(ReceiverCategories::kProjectile);
+	command.category = static_cast<int>(ReceiverCategories::kEnemyShip) | static_cast<int>(ReceiverCategories::kProjectile);
 	command.action = DerivedAction<Entity>([this](Entity& e, sf::Time dt)
 		{
 			//Does the object intersect with the battlefield
@@ -308,62 +327,66 @@ void World::DestroyEntitiesOutsideView()
 
 void World::GuideMissiles()
 {
-	//Target the trajectory of the missiles in a radius around the player
+
+
+	//Target the closest enemy in the radius
+	Command enemyCollector;
+	enemyCollector.category = static_cast<int>(ReceiverCategories::kEnemyShip);
+	enemyCollector.action = DerivedAction<Ship>([this](Ship& enemy, sf::Time)
+		{
+			if (!enemy.IsDestroyed())
+			{
+				m_active_enemies.emplace_back(&enemy);
+			}
+		});
+
 	Command missileGuider;
 	missileGuider.category = static_cast<int>(ReceiverCategories::kAlliedProjectile);
-	missileGuider.action = DerivedAction<Projectile>([this](Projectile& missile, sf::Time)
+	missileGuider.action = DerivedAction<Projectile>([this](Projectile& missile, sf::Time dt)
 		{
 			if (!missile.IsGuided())
 			{
 				return;
 			}
-			//assign a trajectory if it doesnt have a target
-			if(!missile.GetCategory())
-			{
-				float radius = 10.f;
-				float angle = std::rand() % 360;
-				float angleRad = Utility::ToRadians(angle);
 
-				sf::Vector2f target = missile.GetWorldPosition() + sf::Vector2f(radius * std::cos(angleRad), radius * std::sin(angleRad));
-				missile.GuideTowards(target);
+			float min_distance = std::numeric_limits<float>::max();
+			Ship* closest_enemy = nullptr;
+
+			//get missile launch position and current position
+			sf::Vector2f missile_position = missile.GetWorldPosition();
+			sf::Vector2f launch_position = missile.GetLaunchPosition();
+
+			//check if missile has exceeded its range
+			float dist_from_launch = std::hypot(
+				missile_position.x - launch_position.x,
+				missile_position.y - launch_position.y
+			);
+			if (dist_from_launch > missile.GetMaxRadius())
+			{
+				//missile.IsDestroyed();
+				missile.Destroy();
+				return;
 			}
-			//guide with a curve instead of a straight line
-			
+
+			for (Ship* enemy : m_active_enemies)
+			{
+				float enemy_distance = Distance(missile, *enemy);
+				if (enemy_distance < min_distance && enemy_distance <= missile.GetMaxRadius())
+				{
+					closest_enemy = enemy;
+					min_distance = enemy_distance;
+				}
+			}
+
+			if (closest_enemy)
+			{
+				missile.GuideTowards(closest_enemy->GetWorldPosition());
+			}
 		});
 
-		
-	// Command missileGuider;
-	// missileGuider.category = static_cast<int>(ReceiverCategories::kAlliedProjectile);
-	// missileGuider.action = DerivedAction<Projectile>([this](Projectile& missile, sf::Time dt)
-	// 	{
-	// 		if (!missile.IsGuided())
-	// 		{
-	// 			return;
-	// 		}
-	//
-	// 		float min_distance = std::numeric_limits<float>::max();
-	// 		Ship* closest_enemy = nullptr;
-	//
-	// 		for (Ship* enemy : m_active_enemies)
-	// 		{
-	// 			float enemy_distance = Distance(missile, *enemy);
-	// 			if (enemy_distance < min_distance)
-	// 			{
-	// 				closest_enemy = enemy;
-	// 				min_distance = enemy_distance;
-	// 			}
-	// 		}
-	//
-	// 		if (closest_enemy)
-	// 		{
-	// 			missile.GuideTowards(closest_enemy->GetWorldPosition());
-	// 		}
-	// 	});
-
-	//m_command_queue.Push(enemyCollector);
-	//m_active_enemies.clear();
-
+	m_command_queue.Push(enemyCollector);
 	m_command_queue.Push(missileGuider);
+	m_active_enemies.clear();
 }
 
 bool MatchesCategories(SceneNode::Pair& colliders, ReceiverCategories type1, ReceiverCategories type2)
@@ -392,7 +415,7 @@ void World::HandleCollisions()
 	m_scenegraph.CheckSceneCollision(m_scenegraph, collision_pairs);
 	for (SceneNode::Pair pair : collision_pairs)
 	{
-		if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kEnemyAircraft))
+		if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyShip))
 		{
 			auto& player = static_cast<Ship&>(*pair.first);
 			auto& enemy = static_cast<Ship&>(*pair.second);
@@ -401,7 +424,7 @@ void World::HandleCollisions()
 			enemy.Destroy();
 		}
 
-		else if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kPickup))
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kPickup))
 		{
 			auto& player = static_cast<Ship&>(*pair.first);
 			auto& pickup = static_cast<Pickup&>(*pair.second);
@@ -410,7 +433,7 @@ void World::HandleCollisions()
 			pickup.Destroy();
 			player.PlayLocalSound(m_command_queue, SoundEffect::kCollectPickup);
 		}
-		else if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kEnemyProjectile) || MatchesCategories(pair, ReceiverCategories::kEnemyAircraft, ReceiverCategories::kAlliedProjectile))
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyProjectile) || MatchesCategories(pair, ReceiverCategories::kEnemyShip, ReceiverCategories::kAlliedProjectile))
 		{
 			auto& aircraft = static_cast<Ship&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
@@ -423,9 +446,73 @@ void World::HandleCollisions()
 
 void World::UpdateSounds()
 {
-	// Set listener's position to player position
-	m_sounds.SetListenerPosition(m_player_aircraft->GetWorldPosition());
+	if (!m_player_ships.empty())
+	{
+		// Set listener's position to player position
+		//m_sounds.SetListenerPosition(m_player_ships[0]->GetWorldPosition());
+
+		 //calculate the average position of all players
+		
+		sf::Vector2f average_position(0.f, 0.f);
+		for (const Ship* player : m_player_ships)
+		{
+			average_position += player->GetWorldPosition();
+		}
+		average_position /= static_cast<float>(m_player_ships.size());
+		m_sounds.SetListenerPosition(average_position);
+		
+	}
 
 	// Remove unused sounds
 	m_sounds.RemoveStoppedSounds();
 }
+
+void World::InitializePlayers()
+{
+	/*Add the player 1's ship
+	std::unique_ptr<Ship> ship1(new Ship(ShipType::kPirateShip, m_textures, m_fonts));
+	ship1->setPosition(m_spawn_position);
+	ship1->SetVelocity(50.f, m_scrollspeed);
+	m_player_ships.emplace_back(ship1.get());
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship1));
+
+
+	////Add the player 2's ship
+	std::unique_ptr<Ship> ship2(new Ship(ShipType::kPlayer2Ship, m_textures, m_fonts));
+	ship2->setPosition(300.f, 300.f);
+	ship2->SetVelocity(50.f, 40.f);
+	m_player_ships.push_back(ship2.get()); // Store pointer in the vector
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship2));
+
+	*/
+	auto ship1 = std::make_unique<Ship>(ShipType::kPirateShip, m_textures, m_fonts);
+	ship1->setPosition(m_spawn_position);
+	ship1->SetVelocity(50.f, m_scrollspeed);
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship1));
+
+	// Add player 2's ship
+	auto ship2 = std::make_unique<Ship>(ShipType::kPlayer2Ship, m_textures, m_fonts);
+	ship2->setPosition(300.f, 300.f);
+	ship2->SetVelocity(50.f, 40.f);
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship2));
+	//create ships for players
+	
+
+	//key bindings pre-configurations for players
+	KeyBinding player1Keys(1);
+	KeyBinding player2Keys(2);
+
+	//players
+	auto player1 = std::make_unique<Player>(&player1Keys);
+	auto player2 = std::make_unique<Player>(&player2Keys);
+
+	m_player_ships.emplace_back(ship1.get());
+	m_player_ships.emplace_back(ship2.get());
+
+	m_players.push_back(std::move(player1));
+	m_players.push_back(std::move(player2));
+
+
+}
+
+

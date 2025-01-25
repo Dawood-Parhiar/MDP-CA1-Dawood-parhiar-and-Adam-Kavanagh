@@ -88,7 +88,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	m_health_display = health_display.get();
 	AttachChild(std::move(health_display));
 
-	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayerAircraft))
+	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayerShip))
 	{
 		std::string* missile_ammo = new std::string("");
 		std::unique_ptr<TextNode> missile_display(new TextNode(fonts, *missile_ammo));
@@ -113,9 +113,9 @@ unsigned int Ship::GetCategory() const
 {
 	if (IsAllied())
 	{
-		return static_cast<unsigned int>(ReceiverCategories::kPlayerAircraft);
+		return static_cast<unsigned int>(ReceiverCategories::kPlayerShip);
 	}
-	return static_cast<unsigned int>(ReceiverCategories::kEnemyAircraft);
+	return static_cast<unsigned int>(ReceiverCategories::kEnemyShip);
 
 }
 
@@ -205,6 +205,7 @@ void Ship::LaunchMissile()
 	{
 		m_is_launching_missile = true;
 		--m_missile_ammo;
+
 	}
 }
 
@@ -240,9 +241,14 @@ void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset
 
 
 	projectile->setPosition(GetWorldPosition() + offset * sign);
-
-
 	projectile->SetVelocity(velocity* sign);
+
+	if (type == ProjectileType::kMissile)
+	{
+		projectile->SetLaunchPosition(projectile->GetWorldPosition());
+		projectile->SetMaxRadius(300.f);
+	}
+
 	node.AttachChild(std::move(projectile));
 }
 

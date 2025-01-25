@@ -84,6 +84,26 @@ float Projectile::GetDamage() const
     return Table[static_cast<int>(m_type)].m_damage;
 }
 
+void Projectile::SetLaunchPosition(sf::Vector2f position)
+{
+    m_launch_position = position;
+}
+
+sf::Vector2f Projectile::GetLaunchPosition() const
+{
+    return m_launch_position;
+}
+
+ void Projectile::SetMaxRadius(float radius)
+{
+     m_max_radius = radius;
+}
+
+ float Projectile::GetMaxRadius() const
+{
+     return m_max_radius;
+}
+
 void Projectile::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 {
     if (IsGuided())
