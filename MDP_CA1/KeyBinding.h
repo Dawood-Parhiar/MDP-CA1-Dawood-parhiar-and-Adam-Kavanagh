@@ -16,7 +16,7 @@ public:
     std::vector<Action>	GetRealtimeActions() const;
 
 private:
-    std::map<sf::Keyboard::Key, Action>	m_key_map;
+    std::map<sf::Keyboard::Key, Action>	m_key_map = {};
 };
 
 bool IsRealtimeAction(Action action);

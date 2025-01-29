@@ -21,7 +21,7 @@ TextureID ToTextureID(ProjectileType type)
             return TextureID::kBullet;
             break; 
         case ProjectileType::kEnemyCannonBall:
-            return TextureID::kBullet;
+            return TextureID::kEnemyCannonBall;
             break;
     }
     return TextureID::kMissile;

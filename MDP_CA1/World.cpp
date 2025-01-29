@@ -14,27 +14,29 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_scene_layers()
 	,m_world_bounds(0.f,0.f, m_camera.getSize().x, 3000.f)
 	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.height - m_camera.getSize().y/2.f)//
-	,m_scrollspeed(-5.f)
+	,m_scrollspeed(-50.f)
 	,m_player_ships()
 	,m_players()
 {
 	m_scene_texture.create(m_target.getSize().x, m_target.getSize().y);
 	LoadTextures();
+	//InitializePlayers();
 	BuildScene();
 	m_camera.setCenter(m_spawn_position);
-	
+
+
 }
 
 void World::Update(sf::Time dt)
 {
-	//Scroll the world
+	
+	//Scroll the world   m_scenegraph.Update(dt, m_command_queue);
 	m_camera.move(0, m_scrollspeed * dt.asSeconds());
 
-	for (size_t i=0; i<m_players.size(); ++i)
+	for (size_t i = 0; i < m_players.size(); ++i)
 	{
-		m_players[i]->HandleRealTimeInput(m_command_queue);
+		m_players[i].HandleRealTimeInput(m_command_queue);
 	}
-
 
 	for (Ship* player: m_player_ships)
 	{
@@ -190,8 +192,7 @@ void World::BuildScene()
 	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(finish_sprite));
 
 	//Add Players here
-
-
+	InitializePlayers();
 	//Add the particle nodes to the scene
 	std::unique_ptr<ParticleNode> smokeNode(new ParticleNode(ParticleType::kSmoke, m_textures));
 	m_scene_layers[static_cast<int>(SceneLayers::kLowerAir)]->AttachChild(std::move(smokeNode));
@@ -262,7 +263,7 @@ void World::SpawnEnemies()
 		SpawnPoint spawn = m_enemy_spawn_points.back();
 		std::unique_ptr<Ship> enemy(new Ship(spawn.m_type, m_textures, m_fonts));
 		enemy->setPosition(spawn.m_x, spawn.m_y);
-		enemy->setRotation(180);
+		enemy->setRotation(0);
 		m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(enemy));
 		m_enemy_spawn_points.pop_back();
 	}
@@ -313,7 +314,7 @@ sf::FloatRect World::GetBattleFieldBounds() const
 void World::DestroyEntitiesOutsideView()
 {
 	Command command;
-	command.category = static_cast<int>(ReceiverCategories::kEnemyShip) | static_cast<int>(ReceiverCategories::kProjectile);
+	command.category = static_cast<int>(ReceiverCategories::kPlayer2Ship) | static_cast<int>(ReceiverCategories::kProjectile);
 	command.action = DerivedAction<Entity>([this](Entity& e, sf::Time dt)
 		{
 			//Does the object intersect with the battlefield
@@ -331,7 +332,7 @@ void World::GuideMissiles()
 
 	//Target the closest enemy in the radius
 	Command enemyCollector;
-	enemyCollector.category = static_cast<int>(ReceiverCategories::kEnemyShip);
+	enemyCollector.category = static_cast<int>(ReceiverCategories::kPlayer2Ship);
 	enemyCollector.action = DerivedAction<Ship>([this](Ship& enemy, sf::Time)
 		{
 			if (!enemy.IsDestroyed())
@@ -415,13 +416,13 @@ void World::HandleCollisions()
 	m_scenegraph.CheckSceneCollision(m_scenegraph, collision_pairs);
 	for (SceneNode::Pair pair : collision_pairs)
 	{
-		if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyShip))
+		if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kPlayer2Ship))
 		{
 			auto& player = static_cast<Ship&>(*pair.first);
 			auto& enemy = static_cast<Ship&>(*pair.second);
 			//Collision response
 			player.Damage(enemy.GetHitPoints());
-			enemy.Destroy();
+			enemy.Damage(10);
 		}
 
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kPickup))
@@ -433,7 +434,7 @@ void World::HandleCollisions()
 			pickup.Destroy();
 			player.PlayLocalSound(m_command_queue, SoundEffect::kCollectPickup);
 		}
-		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyProjectile) || MatchesCategories(pair, ReceiverCategories::kEnemyShip, ReceiverCategories::kAlliedProjectile))
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyProjectile) || MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kAlliedProjectile))
 		{
 			auto& aircraft = static_cast<Ship&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
@@ -449,17 +450,17 @@ void World::UpdateSounds()
 	if (!m_player_ships.empty())
 	{
 		// Set listener's position to player position
-		//m_sounds.SetListenerPosition(m_player_ships[0]->GetWorldPosition());
+		m_sounds.SetListenerPosition(m_player_ships[0]->GetWorldPosition());
 
 		 //calculate the average position of all players
 		
-		sf::Vector2f average_position(0.f, 0.f);
+		/*sf::Vector2f average_position(0.f, 0.f);
 		for (const Ship* player : m_player_ships)
 		{
 			average_position += player->GetWorldPosition();
 		}
 		average_position /= static_cast<float>(m_player_ships.size());
-		m_sounds.SetListenerPosition(average_position);
+		m_sounds.SetListenerPosition(average_position);*/
 		
 	}
 
@@ -469,49 +470,27 @@ void World::UpdateSounds()
 
 void World::InitializePlayers()
 {
-	/*Add the player 1's ship
+
+	//player 1's ship
 	std::unique_ptr<Ship> ship1(new Ship(ShipType::kPirateShip, m_textures, m_fonts));
 	ship1->setPosition(m_spawn_position);
 	ship1->SetVelocity(50.f, m_scrollspeed);
-	m_player_ships.emplace_back(ship1.get());
+	m_player_ships.push_back(ship1.get());
+
+	Player player1(1);
+	m_players.emplace_back(player1);
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship1));
 
-
-	////Add the player 2's ship
-	std::unique_ptr<Ship> ship2(new Ship(ShipType::kPlayer2Ship, m_textures, m_fonts));
-	ship2->setPosition(300.f, 300.f);
-	ship2->SetVelocity(50.f, 40.f);
-	m_player_ships.push_back(ship2.get()); // Store pointer in the vector
-	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship2));
-
-	*/
-	auto ship1 = std::make_unique<Ship>(ShipType::kPirateShip, m_textures, m_fonts);
-	ship1->setPosition(m_spawn_position);
-	ship1->SetVelocity(50.f, m_scrollspeed);
-	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship1));
 
 	// Add player 2's ship
-	auto ship2 = std::make_unique<Ship>(ShipType::kPlayer2Ship, m_textures, m_fonts);
-	ship2->setPosition(300.f, 300.f);
+	std::unique_ptr<Ship> ship2(new Ship(ShipType::kPlayer2Ship, m_textures, m_fonts));
+	ship2->setPosition(130.f, 130.f);
 	ship2->SetVelocity(50.f, 40.f);
-	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship2));
-	//create ships for players
-	
-
-	//key bindings pre-configurations for players
-	KeyBinding player1Keys(1);
-	KeyBinding player2Keys(2);
-
-	//players
-	auto player1 = std::make_unique<Player>(&player1Keys);
-	auto player2 = std::make_unique<Player>(&player2Keys);
-
-	m_player_ships.emplace_back(ship1.get());
 	m_player_ships.emplace_back(ship2.get());
 
-	m_players.push_back(std::move(player1));
-	m_players.push_back(std::move(player2));
-
+	Player player2(2);
+	m_players.emplace_back(player2);
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship2));
 
 }
 

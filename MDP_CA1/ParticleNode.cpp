@@ -14,7 +14,7 @@ ParticleNode::ParticleNode(ParticleType type, const TextureHolder& textures)
     : SceneNode()
     , m_texture(textures.Get(TextureID::kParticle))
     , m_type(type)
-    , m_vertex_array(sf::TriangleStrip)
+    , m_vertex_array(sf::Quads)// Gracie Chaudhary
     , m_needs_vertex_update(true)
 {
 }

@@ -77,7 +77,7 @@ private:
 	float m_scrollspeed;
 
 	std::vector<Ship*> m_player_ships;
-	std::vector<std::unique_ptr<Player>> m_players;
+	std::vector<Player> m_players;
 
 	CommandQueue m_command_queue;
 

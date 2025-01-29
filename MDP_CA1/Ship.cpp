@@ -21,6 +21,9 @@ TextureID ToTextureID(ShipType type)
 	case ShipType::kPirateShip:
 		return TextureID::kPirateShip;
 		break;
+	case ShipType::kPlayer2Ship:
+		return TextureID::kPlayer2Ship;
+		break;
 	case ShipType::kEnemyShip1:
 		return TextureID::kEnemyShip1;
 		break;
