@@ -16,6 +16,7 @@ struct ShipMover
 Player::Player(int player_number)
 : m_current_mission_status(MissionStatus::kMissionRunning)
 ,m_key_binding()
+//,m_key_binding_player2()
 {
     
     //Set initial key bindings
@@ -38,10 +39,10 @@ Player::Player(int player_number)
         m_key_binding[sf::Keyboard::D] = Action::kRotateRight;
         m_key_binding[sf::Keyboard::RShift] = Action::kAim;
     }
-    else if (player_number == 2)
+    if (player_number == 2)
     {
         m_key_binding[sf::Keyboard::Up] = Action::kMoveUp;
-    	m_key_binding[sf::Keyboard::Down] = Action::kMoveDown;
+        m_key_binding[sf::Keyboard::Down] = Action::kMoveDown;
         m_key_binding[sf::Keyboard::M] = Action::kMissileFire;
         m_key_binding[sf::Keyboard::Left] = Action::kRotateLeft;
         m_key_binding[sf::Keyboard::Right] = Action::kRotateRight;
@@ -55,8 +56,17 @@ Player::Player(int player_number)
     //Assign all categories to a player's aircraft
     for (auto& pair : m_action_binding)
     {
-        pair.second.category = static_cast<unsigned int>(ReceiverCategories::kShip);
+        if (player_number == 1)
+        {
+            pair.second.category = static_cast<unsigned int>(ReceiverCategories::kPlayerShip);
+        }
+        if (player_number == 2)
+        {
+            pair.second.category = static_cast<unsigned int>(ReceiverCategories::kPlayer2Ship);
+        }
     }
+
+    
 }
 
 void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)

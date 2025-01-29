@@ -64,20 +64,20 @@ std::vector<ProjectileData> InitializeProjectileData()
 {
     std::vector<ProjectileData> data(static_cast<int>(ProjectileType::kProjectileCount));
 
-    //No need for this (previously: bullets hitting enemies)
-    data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_damage = 10;
-    data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_speed = 300;
-    data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_texture = TextureID::kEntities;
-    data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_texture_rect = sf::IntRect(175, 64, 3, 14);
+    ////No need for this (previously: bullets hitting enemies)
+    //data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_damage = 10;
+    //data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_speed = 300;
+    //data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_texture = TextureID::kEntities;
+    //data[static_cast<int>(ProjectileType::kAlliedCannonBall)].m_texture_rect = sf::IntRect(175, 64, 3, 14);
 
     //cannon balls from enemy hitting to the player
-    data[static_cast<int>(ProjectileType::kEnemyCannonBall)].m_damage = 10;
-    data[static_cast<int>(ProjectileType::kEnemyCannonBall)].m_speed = 300;
-    data[static_cast<int>(ProjectileType::kEnemyCannonBall)].m_texture = TextureID::kEnemyCannonBall;
+    data[static_cast<int>(ProjectileType::kMissile)].m_damage = 50;
+    data[static_cast<int>(ProjectileType::kMissile)].m_speed = 300;
+    data[static_cast<int>(ProjectileType::kMissile)].m_texture = TextureID::kEnemyCannonBall;
     //data[static_cast<int>(ProjectileType::kEnemyCannonBall)].m_texture_rect = sf::IntRect(175, 64, 3, 14);
 
-    //Cannon Ball
-    data[static_cast<int>(ProjectileType::kMissile)].m_damage = 200;
+    //Cannon Ball from player's ship
+    data[static_cast<int>(ProjectileType::kMissile)].m_damage = 50;
     data[static_cast<int>(ProjectileType::kMissile)].m_speed = 100;
     data[static_cast<int>(ProjectileType::kMissile)].m_texture = TextureID::kMissile;
     //data[static_cast<int>(ProjectileType::kMissile)].m_texture_rect = sf::IntRect(160, 64, 15, 32);

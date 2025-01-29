@@ -158,6 +158,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="KeyBinding.cpp" />
+    <ClCompile Include="Obstacle.cpp" />
     <ClCompile Include="Ship.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Application.cpp" />
@@ -200,6 +201,7 @@
   <ItemGroup>
     <ClInclude Include="Action.hpp" />
     <ClInclude Include="KeyBinding.h" />
+    <ClInclude Include="Obstacle.hpp" />
     <ClInclude Include="Ship.hpp" />
     <ClInclude Include="ShipType.hpp" />
     <ClInclude Include="Animation.hpp" />

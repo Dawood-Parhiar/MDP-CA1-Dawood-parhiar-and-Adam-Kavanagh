@@ -1,4 +1,6 @@
 #include "World.hpp"
+
+#include "Obstacle.hpp"
 #include "Pickup.hpp"
 #include "Projectile.hpp"
 #include "ParticleNode.hpp"
@@ -58,7 +60,7 @@ void World::Update(sf::Time dt)
 	//SpawnEnemies();
 	m_scenegraph.Update(dt, m_command_queue);
 	AdaptPlayerPosition();
-	UpdateSounds();
+	//UpdateSounds();
 }
 
 void World::Draw()
@@ -72,8 +74,8 @@ void World::Draw()
 		m_scene_texture.setView(m_camera);
 		m_scene_texture.draw(m_scenegraph);
 		m_scene_texture.display(); // Finalize the render texture
-		//m_bloom_effect.Apply(m_scene_texture, m_target);
-		m_water_effect.Apply(m_scene_texture, m_target);
+		m_bloom_effect.Apply(m_scene_texture, m_target);
+		//m_water_effect.Apply(m_scene_texture, m_target);
 
 
 		////Draw the lowerAir and upperAir layers to the render target
@@ -126,8 +128,7 @@ bool World::HasAlivePlayer() const
 
 bool World::HasPlayerReachedEnd() const
 {
-	//return !m_world_bounds.contains(m_player_1_ship->getPosition());
-	return false;
+	return !m_world_bounds.contains(m_player_ships.at(1)->getPosition());
 }
 
 
@@ -159,9 +160,21 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kWater, "Media/Textures/Water3.jpg");
 	m_textures.Load(TextureID::kEnemyCannonBall, "Media/Textures/EnemyBall.png");
 	m_textures.Load(TextureID::kPlayer2Ship, "Media/EnemyShips/ship13.png");
-	//m_textures.Load(TextureID::kCannonBall, "Media/Textures/cannonball.png"); using missile with different texture
+	m_textures.Load(TextureID::kMountains, "Media/Textures/mountain_area.png");
 
 
+}
+
+void World::BuildMountains()
+{
+
+	for (int i = 0; i < 10; i++)
+	{	//Add The mountains in the scene
+		sf::Texture& mountain_texture = m_textures.Get(TextureID::kMountains);
+		std::unique_ptr<Obstacle> mountain = std::make_unique<Obstacle>(mountain_texture);
+		mountain->setPosition(Utility::RandomInt(500),Utility::RandomInt(2500));
+		m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(mountain));
+	}
 }
 
 void World::BuildScene()
@@ -190,6 +203,8 @@ void World::BuildScene()
 	std::unique_ptr<SpriteNode> finish_sprite(new SpriteNode(finish_texture));
 	finish_sprite->setPosition(0.f, -76.f);
 	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(finish_sprite));
+
+	BuildMountains();
 
 	//Add Players here
 	InitializePlayers();
@@ -442,6 +457,14 @@ void World::HandleCollisions()
 			aircraft.Damage(projectile.GetDamage());
 			projectile.Destroy();
 		}
+		//if hits the mountain
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kObstacle) || MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kObstacle))
+		{
+			auto& aircraft = static_cast<Ship&>(*pair.first);
+			auto& mountain = static_cast<Obstacle&>(*pair.second);
+			//Collision response
+			aircraft.Destroy();
+		}
 	}
 }
 
@@ -484,6 +507,7 @@ void World::InitializePlayers()
 
 	// Add player 2's ship
 	std::unique_ptr<Ship> ship2(new Ship(ShipType::kPlayer2Ship, m_textures, m_fonts));
+	ship2->setRotation(180);
 	ship2->setPosition(130.f, 130.f);
 	ship2->SetVelocity(50.f, 40.f);
 	m_player_ships.emplace_back(ship2.get());

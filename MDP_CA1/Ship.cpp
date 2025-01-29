@@ -38,7 +38,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	: Entity(Table[static_cast<int>(type)].m_hitpoints)
 	, m_type(type)
 	//, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
-	, m_sprite(textures.Get(ToTextureID(type)))
+	, m_sprite(textures.Get(ToTextureID(type)))//using .png instead of a rect from a sprite
 	, m_explosion(textures.Get(TextureID::kExplosion))
 	, m_health_display(nullptr)
 	, m_missile_display(nullptr)
@@ -68,11 +68,12 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	Utility::CentreOrigin(m_sprite);
 	Utility::CentreOrigin(m_explosion);
 
-	m_fire_command.category = static_cast<int>(ReceiverCategories::kScene);
+	/* No Bullets in the game
+	 *m_fire_command.category = static_cast<int>(ReceiverCategories::kScene);
 	m_fire_command.action = [this, &textures](SceneNode& node, sf::Time dt)
 		{
 			CreateBullet(node, textures);
-		};
+		};*/
 
 	m_missile_command.category = static_cast<int>(ReceiverCategories::kScene);
 	m_missile_command.action = [this, &textures](SceneNode& node, sf::Time dt)

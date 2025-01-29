@@ -31,6 +31,7 @@ public:
 
 private:
 	void LoadTextures();
+	void BuildMountains();
 	void BuildScene();
 	void AdaptPlayerPosition();
 	void AdaptPlayerVelocity();
