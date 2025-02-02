@@ -19,6 +19,22 @@ ParticleNode::ParticleNode(ParticleType type, const TextureHolder& textures)
 {
 }
 
+void ParticleNode::AddSplashParticle(sf::Vector2f position, float angle)
+{
+    Particle particle;
+    particle.m_position = position;
+    particle.m_color = Table[static_cast<int>(m_type)].m_color;
+    particle.m_lifetime = Table[static_cast<int>(m_type)].m_lifetime;
+
+    // Adjust the particle position based on the offset angle (fixed)
+    float offsetX = 20.f * std::cos(angle);  // Adjust the distance (50.f) here if necessary
+    float offsetY = 0.f * std::sin(angle);  // Adjust the distance (50.f) here if necessary
+
+    particle.m_position += sf::Vector2f(offsetX, offsetY);  // Apply the offset to the particle's position
+
+    m_particles.emplace_back(particle);
+}
+
 
 void ParticleNode::AddParticle(sf::Vector2f position)
 {
@@ -32,13 +48,16 @@ void ParticleNode::AddParticle(sf::Vector2f position)
     if (m_type == ParticleType::kWaterSplashes)
     {
         //  for splash effect
+        const float angle7OClock = 225.f;
+        const float angle5OClock = 315.f;
 
-        particle.m_position = sf::Vector2f();
+        AddSplashParticle(position, angle7OClock); 
+        AddSplashParticle(position, angle5OClock);
     }
     else if (m_type == ParticleType::kPropellant)
     {
         // Straight trail particles
-        particle.m_position = sf::Vector2f(0.f, -50.f); // Example velocity
+        particle.m_position = sf::Vector2f(0.f, -50.f); 
     }
     
     m_particles.emplace_back(particle);

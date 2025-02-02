@@ -9,6 +9,7 @@ class ParticleNode : public SceneNode
 public:
 	ParticleNode(ParticleType type, const TextureHolder& textures);
 
+	void AddSplashParticle(sf::Vector2f pos, float angle);
 	void AddParticle(sf::Vector2f position);
 	ParticleType GetParticleType() const;
 	virtual unsigned int GetCategory() const;

@@ -80,7 +80,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	m_missile_command.category = static_cast<int>(ReceiverCategories::kScene);
 	m_missile_command.action = [this, &textures](SceneNode& node, sf::Time dt)
 		{
-			CreateProjectile(node, ProjectileType::kMissile, 0.f, 0.5f, textures);
+			CreateProjectile(node, ProjectileType::kMissile, original_x, 0.f, textures);
 		};
 
 	m_drop_pickup_command.category = static_cast<int>(ReceiverCategories::kScene);
@@ -94,26 +94,21 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	m_health_display = health_display.get();
 	AttachChild(std::move(health_display));
 
-	std::string* coins = new std::string("");
-	std::unique_ptr<TextNode> coins_display(new TextNode(fonts, *coins));
-	m_coins_display = coins_display.get();
-	AttachChild(std::move(coins_display));
+	
 
-	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayerShip))
+	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayerShip) || Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayer2Ship))
 	{
 		std::string* missile_ammo = new std::string("");
 		std::unique_ptr<TextNode> missile_display(new TextNode(fonts, *missile_ammo));
 		m_missile_display = missile_display.get();
 		AttachChild(std::move(missile_display));
+
+		std::string* coins = new std::string("");
+		std::unique_ptr<TextNode> coins_display(new TextNode(fonts, *coins));
+		m_coins_display = coins_display.get();
+		AttachChild(std::move(coins_display));
 	}
 
-	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayer2Ship))
-	{
-		std::string* missile_ammo = new std::string("");
-		std::unique_ptr<TextNode> missile_display(new TextNode(fonts, *missile_ammo));
-		m_missile_display = missile_display.get();
-		AttachChild(std::move(missile_display));
-	}
 
 	UpdateTexts();
 
@@ -122,9 +117,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	splashes->setPosition(0.f, GetBoundingRect().height/2.f);
 	AttachChild(std::move(splashes));
 
-	std::unique_ptr<EmitterNode> mist(new EmitterNode(ParticleType::kWaterMist));
-	mist->setPosition(0.f, GetBoundingRect().height/2.f);
-	AttachChild(std::move(mist));
+	
 
 }
 
@@ -134,7 +127,7 @@ unsigned int Ship::GetCategory() const
 	{
 		return static_cast<unsigned int>(ReceiverCategories::kPlayerShip);
 	}
-	return static_cast<unsigned int>(ReceiverCategories::kEnemyShip);
+	return static_cast<unsigned int>(ReceiverCategories::kPlayer2Ship);
 
 }
 
@@ -170,21 +163,16 @@ void Ship::UpdateTexts()
 	m_health_display->setPosition(0.f, 50.f);
 	m_health_display->setRotation(-getRotation());
 
-	m_coins_display->SetString("Coins: " + std::to_string(m_coins));
-	m_coins_display->setPosition(0.f, 70.f);
-	m_coins_display->setRotation(-getRotation());
+	
 
 	if (m_missile_display)
 	{
 		m_missile_display->setPosition(0.f, 90.f);
-		if (m_missile_ammo == 0)
-		{
-			m_missile_display->SetString("");
-		}
-		else
-		{
-			m_missile_display->SetString("M: " + std::to_string(m_missile_ammo));
-		}
+		m_missile_display->SetString("M: " + std::to_string(m_missile_ammo));
+		//display coins if missile display is present to a ship
+		m_coins_display->SetString("Coins: " + std::to_string(m_coins));
+		m_coins_display->setPosition(0.f, 70.f);
+		m_coins_display->setRotation(-getRotation());
 	}
 }
 

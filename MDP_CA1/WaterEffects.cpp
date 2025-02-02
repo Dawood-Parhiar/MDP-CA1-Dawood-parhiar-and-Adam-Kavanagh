@@ -6,6 +6,7 @@
 
 WaterEffects::WaterEffects()
 {
+    //shader frpm Chatgpt to simulate water waves on the screen
     m_shaders.Load(ShaderTypes::kWaterShader, "Media/Shaders/Fullpass.vert", "Media/Shaders/Water.frag");
 }
 
@@ -42,11 +43,5 @@ void WaterEffects::PrepareTexture(sf::Vector2u size)
     }
 }
 
-void WaterEffects::WaterWaves(const sf::RenderTexture& input, sf::RenderTexture& output)
-{
-    
-    output.display();
-
-}
 
 

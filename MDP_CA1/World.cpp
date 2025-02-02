@@ -58,8 +58,12 @@ void World::Update(sf::Time dt)
 		m_scenegraph.OnCommand(m_command_queue.Pop(), dt);
 	}
 
+	
 	AdaptPlayerVelocity();
 	HandleCollisions();
+
+	SpawnEnemies();
+
 	m_scenegraph.RemoveWrecks();
 	AdaptPlayerPosition();
 	UpdateSounds();
@@ -120,7 +124,7 @@ CommandQueue& World::GetCommandQueue()
 
 bool World::HasAlivePlayer() const
 {
-	if (!m_player_ships.at(1)->IsMarkedForRemoval())
+	if (!m_player_ships.at(0)->IsMarkedForRemoval())
 	{
 			return true;
 	}
@@ -249,13 +253,13 @@ void World::BuildScene()
 	m_scene_layers[static_cast<int>(SceneLayers::kLowerAir)]->AttachChild(std::move(smokeNode));
 
 	std::unique_ptr<ParticleNode> propellantNode(new ParticleNode(ParticleType::kPropellant, m_textures));
-	m_scene_layers[static_cast<int>(SceneLayers::kLowerAir)]->AttachChild(std::move(propellantNode));
+	//m_scene_layers[static_cast<int>(SceneLayers::kLowerAir)]->AttachChild(std::move(propellantNode));
 
 	std::unique_ptr<ParticleNode> splashesNode(new ParticleNode(ParticleType::kWaterSplashes, m_textures));
 	m_scene_layers[static_cast<int>(SceneLayers::kLowerAir)]->AttachChild(std::move(splashesNode));
 
 	std::unique_ptr<ParticleNode> mistNode(new ParticleNode(ParticleType::kWaterMist, m_textures));
-	m_scene_layers[static_cast<int>(SceneLayers::kLowerAir)]->AttachChild(std::move(mistNode));
+	//m_scene_layers[static_cast<int>(SceneLayers::kLowerAir)]->AttachChild(std::move(mistNode));
 
 
 	// Add sound effect node
@@ -314,7 +318,7 @@ void World::SpawnEnemies()
 		SpawnPoint spawn = m_enemy_spawn_points.back();
 		std::unique_ptr<Ship> enemy(new Ship(spawn.m_type, m_textures, m_fonts));
 		enemy->setPosition(spawn.m_x, spawn.m_y);
-		enemy->setRotation(0);
+		enemy->setRotation(180);
 		m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(enemy));
 		m_enemy_spawn_points.pop_back();
 	}
@@ -341,8 +345,6 @@ void World::AddEnemies()
 void World::AddEnemy(ShipType type, float relx, float rely)
 {
 	SpawnPoint spawn(type, m_spawn_position.x + relx, m_spawn_position.y - rely);
-	
-
 	m_enemy_spawn_points.emplace_back(spawn);
 }
 
@@ -483,6 +485,14 @@ void World::HandleCollisions()
 			player.Damage(missile.GetHitPoints());
 			missile.Destroy();
 		}
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyShip))
+		{
+			auto& player = static_cast<Ship&>(*pair.first);
+			auto& enemy = static_cast<Ship&>(*pair.second);
+			//Collision response
+			player.Damage(enemy.GetHitPoints());
+			enemy.Destroy();
+		}
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kPlayer2Ship))
 		{
 			auto& player = static_cast<Ship&>(*pair.first);
@@ -503,12 +513,22 @@ void World::HandleCollisions()
 		}
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyProjectile) || MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kEnemyProjectile))
 		{
-			auto& aircraft = static_cast<Ship&>(*pair.first);
+			auto& ship = static_cast<Ship&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
 			//Collision response
-			aircraft.Damage(projectile.GetDamage());
+			ship.Damage(projectile.GetDamage());
 			projectile.Destroy();
 		}
+
+		else if (MatchesCategories(pair, ReceiverCategories::kEnemyShip, ReceiverCategories::kAlliedProjectile) || MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kAlliedProjectile))
+		{
+			auto& ship = static_cast<Ship&>(*pair.first);
+			auto& projectile = static_cast<Projectile&>(*pair.second);
+			//Collision response
+			ship.Damage(projectile.GetDamage());
+			projectile.Destroy();
+		}
+
 		//if hits the mountain
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kObstacle) || MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kObstacle))
 		{

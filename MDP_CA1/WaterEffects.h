@@ -16,8 +16,7 @@ public:
     WaterEffects();
     virtual void Apply(const sf::RenderTexture& input, sf::RenderTarget& output) override;
     void PrepareTexture(sf::Vector2u size);
-    void WaterWaves(const sf::RenderTexture& input, sf::RenderTexture& output);
-
+   
 
 private:
     typedef std::array<sf::RenderTexture, 2> RenderTextureArray;

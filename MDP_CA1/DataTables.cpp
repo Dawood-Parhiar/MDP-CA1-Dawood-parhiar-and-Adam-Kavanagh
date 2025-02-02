@@ -129,7 +129,7 @@ std::vector<ParticleData> InitializeParticleData()
     data[static_cast<int>(ParticleType::kWaterMist)].m_color = sf::Color(200, 200, 255, 150);
     data[static_cast<int>(ParticleType::kWaterMist)].m_lifetime = sf::seconds(1.5f);
 
-    data[static_cast<int>(ParticleType::kWaterSplashes)].m_color = sf::Color(100, 150, 255); // Light blue color
+    data[static_cast<int>(ParticleType::kWaterSplashes)].m_color = sf::Color(235, 235, 235, 50);
     data[static_cast<int>(ParticleType::kWaterSplashes)].m_lifetime = sf::seconds(1.5f);    // Short lifespan for quick splashes
 
 
