@@ -532,7 +532,15 @@ void World::HandleCollisions()
 			ship.Damage(10);
 		}
 		//coins collision
-		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kCoin) || MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kCoin))
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kCoin))
+		{
+			auto& ship = static_cast<Ship&>(*pair.first);
+			auto& coin = static_cast<Pickup&>(*pair.second);
+			//Collision response
+			coin.Apply(ship);
+			coin.Destroy();
+		}
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kCoin))
 		{
 			auto& ship = static_cast<Ship&>(*pair.first);
 			auto& coin = static_cast<Pickup&>(*pair.second);

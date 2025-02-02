@@ -123,7 +123,7 @@ void ParticleNode::ComputeVertices() const
 
     for (const Particle& particle : m_particles)
     {
-a        sf::Vector2f pos = particle.m_position;
+    	sf::Vector2f pos = particle.m_position;
         sf::Color color = particle.m_color;
 
         float ratio = particle.m_lifetime.asSeconds() / Table[static_cast<int>(m_type)].m_lifetime.asSeconds();

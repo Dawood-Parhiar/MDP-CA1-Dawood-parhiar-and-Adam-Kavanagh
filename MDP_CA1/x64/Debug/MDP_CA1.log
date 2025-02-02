@@ -1,10 +1,1 @@
-﻿  Ship.cpp
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(196,78): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(197,12): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(198,12): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(458,35): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(458,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(487,43): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(487,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(495,53): warning C4244: 'argument': conversion from 'const float' to 'sf::Uint8', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(497,57): warning C4244: 'argument': conversion from 'const float' to 'sf::Uint8', possible loss of data
+﻿  MDP_CA1.vcxproj -> C:\Users\umar_\RiderProjects\MDP_CA1\x64\Debug\MDP_CA1.exe
