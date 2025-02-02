@@ -24,11 +24,11 @@ TextureID ToTextureID(ShipType type)
 	case ShipType::kPlayer2Ship:
 		return TextureID::kPlayer2Ship;
 		break;
-	/*case ShipType::kEnemyShip1:
+	case ShipType::kEnemyShip1:
 		return TextureID::kEnemyShip1;
 		break;
 	case ShipType::kEnemyShip2:
-		return TextureID::kEnemyShip2;*/
+		return TextureID::kEnemyShip2;
 		break;
 	}
 	return TextureID::kPirateShip;
@@ -42,8 +42,10 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_explosion(textures.Get(TextureID::kExplosion))
 	, m_health_display(nullptr)
 	, m_missile_display(nullptr)
+	, m_coins_display(nullptr)
 	, m_distance_travelled(0.f)
 	, m_directions_index(0)
+	, m_coins(0)
 	, m_fire_rate(1)
 	, m_spread_level(1)
 	, m_is_firing(false)
@@ -92,7 +94,20 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	m_health_display = health_display.get();
 	AttachChild(std::move(health_display));
 
-	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kShip))
+	std::string* coins = new std::string("");
+	std::unique_ptr<TextNode> coins_display(new TextNode(fonts, *coins));
+	m_coins_display = coins_display.get();
+	AttachChild(std::move(coins_display));
+
+	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayerShip))
+	{
+		std::string* missile_ammo = new std::string("");
+		std::unique_ptr<TextNode> missile_display(new TextNode(fonts, *missile_ammo));
+		m_missile_display = missile_display.get();
+		AttachChild(std::move(missile_display));
+	}
+
+	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayer2Ship))
 	{
 		std::string* missile_ammo = new std::string("");
 		std::unique_ptr<TextNode> missile_display(new TextNode(fonts, *missile_ammo));
@@ -131,6 +146,11 @@ void Ship::IncreaseFireRate()
 	}
 }
 
+void Ship::IncreaseCoins()
+{
+	++m_coins;
+}
+
 void Ship::IncreaseFireSpread()
 {
 	if (m_spread_level < 3)
@@ -150,9 +170,13 @@ void Ship::UpdateTexts()
 	m_health_display->setPosition(0.f, 50.f);
 	m_health_display->setRotation(-getRotation());
 
+	m_coins_display->SetString("Coins: " + std::to_string(m_coins));
+	m_coins_display->setPosition(0.f, 70.f);
+	m_coins_display->setRotation(-getRotation());
+
 	if (m_missile_display)
 	{
-		m_missile_display->setPosition(0.f, 70.f);
+		m_missile_display->setPosition(0.f, 90.f);
 		if (m_missile_ammo == 0)
 		{
 			m_missile_display->SetString("");
@@ -355,7 +379,7 @@ void Ship::CreatePickup(SceneNode& node, const TextureHolder& textures) const
 void Ship::CheckPickupDrop(CommandQueue& commands)
 {
 	//TODO Get rid of the magic number 3 here 
-	if (!IsAllied() && Utility::RandomInt(3) == 0 && !m_spawned_pickup)
+	if (!IsAllied() && Utility::RandomInt(static_cast<int>(PickupType::kPickupCount)) == 0 && !m_spawned_pickup)
 	{
 		commands.Push(m_drop_pickup_command);
 	}
@@ -381,8 +405,11 @@ void Ship::UpdateRollAnimation(sf::Time dt)
 	//
 	// }
 
-	
-	// Check if the ship type has roll animation enabled
+
+
+	//animation code from chatgpt 
+
+	// Check if the ship type has roll animation enabled 
 	if (Table[static_cast<int>(m_type)].m_has_roll_animation)
 	{
 		// Time-based animation using sine waves from Chatgpt
@@ -430,13 +457,11 @@ void Ship::SetRenderTargets(sf::RenderTarget& target)
 
 void Ship::MoveShip(sf::Time dt, float speed)
 {
-
 	float rotation = getRotation() +90;
 	float angle = Utility::ToRadians(rotation);
 	float vx = speed * std::cos(angle);
 	float vy = speed * std::sin(angle);
 	Accelerate(vx, vy);
-
 }
 
 void Ship::Aim() const
@@ -451,7 +476,7 @@ void Ship::Aim() const
 
 	// Base position and rotation of the ship
 	sf::Vector2f shipPosition = GetWorldPosition();
-	float shipRotation = m_sprite.getRotation(); // Assuming GetRotation() gives the ship's current angle in degrees
+	float shipRotation = getRotation(); // Assuming GetRotation() gives the ship's current angle in degrees
 
 	// Create the aiming arc
 	sf::VertexArray aimingArc(sf::TriangleStrip, (numSegments + 1) * 2);

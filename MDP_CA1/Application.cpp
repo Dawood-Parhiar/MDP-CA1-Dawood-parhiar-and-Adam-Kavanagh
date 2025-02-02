@@ -87,6 +87,5 @@ void Application::RegisterStates()
 	m_stack.RegisterState<PauseState>(StateID::kPause);
 	m_stack.RegisterState<SettingsState>(StateID::kSettings);
 	m_stack.RegisterState<GameOverState>(StateID::kGameOver,"Game Over!");
-
 	m_stack.RegisterState<GameWinState>(StateID::kGameWon, "!Congratulations!*You*Won!");
 }

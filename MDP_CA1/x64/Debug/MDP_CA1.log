@@ -1,6 +1,28 @@
-﻿  Application.cpp
+﻿  GameWinState.cpp
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\GameWinState.cpp(25,59): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  Obstacle.cpp
+  Ship.cpp
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(207,78): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(208,12): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(209,12): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(461,35): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(461,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(488,43): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(488,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(496,53): warning C4244: 'argument': conversion from 'const float' to 'sf::Uint8', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(498,57): warning C4244: 'argument': conversion from 'const float' to 'sf::Uint8', possible loss of data
+  Application.cpp
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
+  Command.cpp
+  CommandQueue.cpp
+  DataTables.cpp
+  EmitterNode.cpp
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\EmitterNode.cpp(35,61): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\EmitterNode.cpp(35,27): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
+  Entity.cpp
   GameOverState.cpp
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
@@ -8,24 +30,42 @@ C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\GameOverState.cpp(21,60): warning C
   GameState.cpp
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
-  GameWinState.cpp
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\GameWinState.cpp(25,59): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   Main.cpp
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
+  ParticleNode.cpp
+  Pickup.cpp
   Player.cpp
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
+  Projectile.cpp
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Projectile.cpp(84,43): warning C4244: 'return': conversion from 'const int' to 'float', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Projectile.cpp(115,47): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  SceneNode.cpp
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\SceneNode.cpp(167,27): warning C4244: 'return': conversion from 'int' to 'float', possible loss of data
   SettingsState.cpp
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
+  SoundNode.cpp
+  SpriteNode.cpp
+  Generating Code...
+  Compiling...
+  TextNode.cpp
   World.cpp
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(174,67): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(174,43): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(465,40): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(177,67): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(177,43): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(212,69): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(212,44): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(509,40): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
   Generating Code...
   MDP_CA1.vcxproj -> C:\Users\umar_\RiderProjects\MDP_CA1\x64\Debug\MDP_CA1.exe

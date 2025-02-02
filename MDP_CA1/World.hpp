@@ -32,6 +32,9 @@ public:
 private:
 	void LoadTextures();
 	void BuildMountains();
+	void DropCoins();
+	void DropCoins(sf::Vector2f position);
+	void SpawnInitialCoins();
 	void BuildScene();
 	void AdaptPlayerPosition();
 	void AdaptPlayerVelocity();

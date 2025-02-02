@@ -15,6 +15,7 @@ public:
 	unsigned int GetCategory() const override;
 
 	void IncreaseFireRate();
+	void IncreaseCoins();
 	void IncreaseFireSpread();
 	void CollectMissile(unsigned int count);
 
@@ -51,6 +52,7 @@ private:
 
 	TextNode* m_health_display;
 	TextNode* m_missile_display;
+	TextNode* m_coins_display;
 	float m_distance_travelled;
 	int m_directions_index;
 
@@ -61,6 +63,7 @@ private:
 	unsigned int m_fire_rate;
 	unsigned int m_spread_level;
 	unsigned int m_missile_ammo;
+	unsigned int m_coins;
 
 	bool m_is_firing;
 	bool m_is_launching_missile;

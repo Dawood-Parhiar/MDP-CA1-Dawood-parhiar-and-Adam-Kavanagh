@@ -2,16 +2,16 @@
 #include "ReceiverCategories.hpp"
 #include "Ship.hpp"
 
-struct ShipMover
-{
-    ShipMover(float vx, float vy) :velocity(vx,vy)
-    {}
-    void operator()(Ship& ship, sf::Time dt) const
-    {
-        ship.Accelerate(velocity);
-    }
-    sf::Vector2f velocity;
-};
+//struct ShipMover
+//{
+//    ShipMover(float vx, float vy) :velocity(vx,vy)
+//    {}
+//    void operator()(Ship& ship, sf::Time dt) const
+//    {
+//        ship.Accelerate(velocity);
+//    }
+//    sf::Vector2f velocity;
+//};
 
 Player::Player(int player_number)
 : m_current_mission_status(MissionStatus::kMissionRunning)
@@ -24,7 +24,16 @@ Player::Player(int player_number)
         m_key_binding[sf::Keyboard::Space] = Action::kMissileFire;
         m_key_binding[sf::Keyboard::A] = Action::kRotateLeft;
         m_key_binding[sf::Keyboard::D] = Action::kRotateRight;
-        m_key_binding[sf::Keyboard::RShift] = Action::kAim;
+        m_key_binding[sf::Keyboard::LShift] = Action::kAim;
+
+        InitialiseActions();
+
+        //Assign all categories to a player's aircraft
+        for (auto& pair : m_action_binding)
+        {
+            pair.second.category = static_cast<unsigned int>(ReceiverCategories::kPlayerShip);
+            //: static_cast<unsigned int>(ReceiverCategories::kPlayer2Ship);
+        }
     }
     else if (player_number == 2)
     {
@@ -33,25 +42,22 @@ Player::Player(int player_number)
         m_key_binding_player2[sf::Keyboard::M] = Action::kMissileFire;
         m_key_binding_player2[sf::Keyboard::Left] = Action::kRotateLeft;
         m_key_binding_player2[sf::Keyboard::Right] = Action::kRotateRight;
-        m_key_binding_player2[sf::Keyboard::LShift] = Action::kAim;
+        m_key_binding_player2[sf::Keyboard::RShift] = Action::kAim;
+
+        InitialiseActions();
+
+        for (auto& pair : m_action_binding_player2)
+        {
+            pair.second.category = static_cast<unsigned int>(ReceiverCategories::kPlayer2Ship);
+            //: static_cast<unsigned int>(ReceiverCategories::kPlayer2Ship);
+        }
     }
    
     
 
     //Set initial action bindings
-    InitialiseActions();
-
-    //Assign all categories to a player's aircraft
-    for (auto& pair : m_action_binding)
-    {
-        pair.second.category = static_cast<unsigned int>(ReceiverCategories::kPlayerShip);
-    	//: static_cast<unsigned int>(ReceiverCategories::kPlayer2Ship);
-    }
-    for (auto& pair : m_action_binding_player2)
-    {
-        pair.second.category = static_cast<unsigned int>(ReceiverCategories::kPlayer2Ship);
-        //: static_cast<unsigned int>(ReceiverCategories::kPlayer2Ship);
-    }
+    
+   
 
     	//Assign the player's aircraft to the player's aircraft
 
@@ -86,7 +92,7 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue)
             command_queue.Push(m_action_binding[pair.second]);
         }
     }
-    for (auto pair: m_key_binding)
+    for (auto pair: m_key_binding_player2)
     {
 	    if (sf::Keyboard::isKeyPressed(pair.first) && IsRealTimeAction(pair.second))
 	    {
