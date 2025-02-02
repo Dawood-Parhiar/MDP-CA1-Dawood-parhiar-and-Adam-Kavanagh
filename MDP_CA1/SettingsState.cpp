@@ -63,10 +63,10 @@ bool SettingsState::HandleEvent(const sf::Event& event)
 			{
 				// Player 1
 				if (action < static_cast<int>(Action::kActionCount))
-					GetContext().keys1->AssignKey(static_cast<Action>(action), event.key.code);
+					GetContext().player->AssignKey(static_cast<Action>(action), event.key.code);
 				// Player 2
 				else
-					GetContext().keys2->AssignKey(static_cast<Action>(action - static_cast<int>(Action::kActionCount)), event.key.code);
+					GetContext().player2->AssignKey(static_cast<Action>(action - static_cast<int>(Action::kActionCount)), event.key.code);
 				m_binding_buttons[action]->Deactivate();
 			}
 			break;
@@ -92,8 +92,8 @@ void SettingsState::UpdateLabels()
 	{
 		auto action = static_cast<Action>(i);
 		// Get keys of both players
-		sf::Keyboard::Key key1 = GetContext().keys1->GetAssignedKey(action);
-		sf::Keyboard::Key key2 = GetContext().keys2->GetAssignedKey(action);
+		sf::Keyboard::Key key1 = GetContext().player->GetAssignedKey(action);
+		sf::Keyboard::Key key2 = GetContext().player2->GetAssignedKey(action);
 		// Assign both key strings to labels
 		m_binding_labels[i]->SetText(Utility::toString(key1));
 		m_binding_labels[i + static_cast<int>(Action::kActionCount)]->SetText(Utility::toString(key2));

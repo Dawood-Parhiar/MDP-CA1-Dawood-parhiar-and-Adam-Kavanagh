@@ -17,7 +17,9 @@ public:
 	Player(int player_number);
 
 	// Default constructor
-	Player(): m_key_binding(), m_current_mission_status(MissionStatus::kMissionRunning) {}
+
+
+	//Player(): m_key_binding(), m_current_mission_status(MissionStatus::kMissionRunning) {}
 
 	void HandleEvent(const sf::Event& event, CommandQueue& command_queue);
 	void HandleRealTimeInput(CommandQueue& command_queue);
@@ -33,9 +35,14 @@ private:
 
 private:
 	std::map<sf::Keyboard::Key, Action> m_key_binding;
+	std::map<sf::Keyboard::Key, Action> m_key_binding_player2;
+
 //	std::map<sf::Keyboard::Key, Action> m_key_binding_player2;
 	//KeyBinding* m_key_binding;
 	std::map<Action, Command> m_action_binding;
+	std::map<Action, Command> m_action_binding_player2;
+
+
 	MissionStatus m_current_mission_status;
 
 };

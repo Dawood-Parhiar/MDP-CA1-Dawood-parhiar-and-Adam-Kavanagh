@@ -24,11 +24,11 @@ TextureID ToTextureID(ShipType type)
 	case ShipType::kPlayer2Ship:
 		return TextureID::kPlayer2Ship;
 		break;
-	case ShipType::kEnemyShip1:
+	/*case ShipType::kEnemyShip1:
 		return TextureID::kEnemyShip1;
 		break;
 	case ShipType::kEnemyShip2:
-		return TextureID::kEnemyShip2;
+		return TextureID::kEnemyShip2;*/
 		break;
 	}
 	return TextureID::kPirateShip;
@@ -92,7 +92,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	m_health_display = health_display.get();
 	AttachChild(std::move(health_display));
 
-	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayerShip))
+	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kShip))
 	{
 		std::string* missile_ammo = new std::string("");
 		std::unique_ptr<TextNode> missile_display(new TextNode(fonts, *missile_ammo));
@@ -213,26 +213,26 @@ void Ship::LaunchMissile()
 	}
 }
 
-void Ship::CreateBullet(SceneNode& node, const TextureHolder& textures) const
-{
-	ProjectileType type = IsAllied() ? ProjectileType::kAlliedCannonBall : ProjectileType::kEnemyCannonBall;
-	switch (m_spread_level)
-	{
-	case 1:
-		CreateProjectile(node, type, 0.0f, 0.5f, textures);
-		break;
-	case 2:
-		CreateProjectile(node, type, -0.5f, 0.5f, textures);
-		CreateProjectile(node, type, 0.5f, 0.5f, textures);
-		break;
-	case 3:
-		CreateProjectile(node, type, 0.0f, 0.5f, textures);
-		CreateProjectile(node, type, -0.5f, 0.5f, textures);
-		CreateProjectile(node, type, 0.5f, 0.5f, textures);
-		break;
-	}
-	
-}
+//void Ship::CreateBullet(SceneNode& node, const TextureHolder& textures) const
+//{
+//	ProjectileType type = IsAllied() ? ProjectileType::kAlliedCannonBall : ProjectileType::kEnemyCannonBall;
+//	switch (m_spread_level)
+//	{
+//	case 1:
+//		CreateProjectile(node, type, 0.0f, 0.5f, textures);
+//		break;
+//	case 2:
+//		CreateProjectile(node, type, -0.5f, 0.5f, textures);
+//		CreateProjectile(node, type, 0.5f, 0.5f, textures);
+//		break;
+//	case 3:
+//		CreateProjectile(node, type, 0.0f, 0.5f, textures);
+//		CreateProjectile(node, type, -0.5f, 0.5f, textures);
+//		CreateProjectile(node, type, 0.5f, 0.5f, textures);
+//		break;
+//	}
+//	
+//}
 
 void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
 {
@@ -309,10 +309,11 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 void Ship::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 {
-	if (!IsAllied())
-	{
-		Fire();
-	}
+	//no auto fires bcz No NPCs
+	//if (!IsAllied())
+	//{
+		//Fire();
+	//}
 
 	if (m_is_firing && m_fire_countdown <= sf::Time::Zero)
 	{
@@ -384,7 +385,8 @@ void Ship::UpdateRollAnimation(sf::Time dt)
 	// Check if the ship type has roll animation enabled
 	if (Table[static_cast<int>(m_type)].m_has_roll_animation)
 	{
-		// Time-based animation using sine waves
+		// Time-based animation using sine waves from Chatgpt
+
 		static float timeAccumulator = 0.0f; // Accumulate elapsed time for smooth animation
 		timeAccumulator += dt.asSeconds();
 	
@@ -419,22 +421,6 @@ void Ship::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
 
 	commands.Push(command);
 }
-
-//void Ship::RotateShip()
-//{
-//	// if player presses the left arrow key, the ship will rotate left
-//	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-//	{
-//		//rotate the ship to the left
-//		rotate(-0.4f);
-//	}
-//	// if player presses the right arrow key, the ship will rotate right
-//	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-//	{
-//		//rotate the ship to the right
-//		rotate(0.4f);
-//	}
-//}
 
 void Ship::SetRenderTargets(sf::RenderTarget& target)
 {

@@ -19,13 +19,6 @@ ParticleNode::ParticleNode(ParticleType type, const TextureHolder& textures)
 {
 }
 
-float RandomRange(float min, float max)
-{
-    static std::random_device rd;  // Seed
-    static std::mt19937 gen(rd()); // Random number generator
-    std::uniform_real_distribution<float> dis(min, max);
-    return dis(gen);
-}
 
 void ParticleNode::AddParticle(sf::Vector2f position)
 {
@@ -38,11 +31,9 @@ void ParticleNode::AddParticle(sf::Vector2f position)
     // Add type-specific customizations
     if (m_type == ParticleType::kWaterSplashes)
     {
-        // Randomize velocity for splash effect
-        float angle = RandomRange(-45.f, 45.f); // Splash spread
-        float speed = RandomRange(50.f, 100.f);
-        double angleRad = Utility::ToRadians(angle);
-        particle.m_position = sf::Vector2f(speed * std::cos(angleRad), speed * std::sin(angleRad));
+        //  for splash effect
+
+        particle.m_position = sf::Vector2f();
     }
     else if (m_type == ParticleType::kPropellant)
     {

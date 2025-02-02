@@ -25,5 +25,7 @@ enum class TextureID
 	kCannonBall,
 	kEnemyCannonBall,
 	kEnemyShip3,
-	kPlayer2Ship, kMountains
+	kPlayer2Ship,
+	kMountains,
+	kGameWonSprite
 };

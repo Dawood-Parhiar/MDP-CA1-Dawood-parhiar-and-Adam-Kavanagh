@@ -1,1 +1,31 @@
-﻿  MDP_CA1.vcxproj -> C:\Users\umar_\RiderProjects\MDP_CA1\x64\Debug\MDP_CA1.exe
+﻿  Application.cpp
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
+  GameOverState.cpp
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\GameOverState.cpp(21,60): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  GameState.cpp
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
+  GameWinState.cpp
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\GameWinState.cpp(25,59): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  Main.cpp
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
+  Player.cpp
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
+  SettingsState.cpp
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
+  World.cpp
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(174,67): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(174,43): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(465,40): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+  Generating Code...
+  MDP_CA1.vcxproj -> C:\Users\umar_\RiderProjects\MDP_CA1\x64\Debug\MDP_CA1.exe

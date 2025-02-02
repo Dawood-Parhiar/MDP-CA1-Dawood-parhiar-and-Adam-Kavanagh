@@ -40,7 +40,7 @@ sf::Transform SceneNode::GetWorldTransform() const
     sf::Transform transform = sf::Transform::Identity;
     for (const SceneNode* node = this; node != nullptr; node = node->m_parent)
     {
-        transform = node->getTransform() * transform;
+         transform = node->getTransform() * transform;
     }
     return transform;
 }

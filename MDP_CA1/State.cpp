@@ -2,14 +2,14 @@
 #include "StateID.hpp"
 #include "StateStack.hpp"
 
-State::Context::Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, MusicPlayer& music, SoundPlayer& sounds, KeyBinding& keys1, KeyBinding& keys2)
+State::Context::Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, MusicPlayer& music, SoundPlayer& sounds, Player& p1, Player& p2)
     : window(&window)
       , textures(&textures)
       , fonts(&fonts)
       , music(&music)
       , sounds(&sounds)
-      , keys1(&keys1)
-      , keys2(&keys2)
+      , player(&p1)
+      , player2(&p2)
       
 {
 }

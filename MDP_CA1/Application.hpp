@@ -32,7 +32,7 @@ private:
 	MusicPlayer m_music;
 	SoundPlayer m_sound;
 	
-	KeyBinding m_key_binding_1;
-	KeyBinding m_key_binding_2;
+	Player m_player_1;
+	Player m_player_2;
 };
 

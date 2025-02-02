@@ -20,21 +20,20 @@ std::vector<ShipData> InitializeShipData()
 
     //player 2 ship
 
-    data[static_cast<int>(ShipType::kPlayer2Ship)].m_hitpoints = 100;
-    data[static_cast<int>(ShipType::kPlayer2Ship)].m_speed = 50.f;
+    data[static_cast<int>(ShipType::kPlayer2Ship)].m_hitpoints = 200;
+    data[static_cast<int>(ShipType::kPlayer2Ship)].m_speed = 200.f;
     data[static_cast<int>(ShipType::kPlayer2Ship)].m_fire_interval = sf::seconds(1);
-    data[static_cast<int>(ShipType::kPirateShip)].m_texture = TextureID::kPlayer2Ship;
-    //data[static_cast<int>(ShipType::kPirateShip)].m_texture_rect = sf::IntRect(0, 0, 48, 64);
+    data[static_cast<int>(ShipType::kPlayer2Ship)].m_texture = TextureID::kPlayer2Ship;
     data[static_cast<int>(ShipType::kPlayer2Ship)].m_has_roll_animation = true;
 
     //Enemy Skeleton Ship
     
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_hitpoints = 20;
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_speed = 80.f;
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_fire_interval = sf::Time::Zero;
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_texture = TextureID::kEnemyShip1;
-    //data[static_cast<int>(ShipType::kEnemyShip1)].m_texture_rect = sf::IntRect(144, 0, 84, 64);
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_has_roll_animation = true;
+    //data[static_cast<int>(ShipType::kEnemyShip1)].m_hitpoints = 20;
+    //data[static_cast<int>(ShipType::kEnemyShip1)].m_speed = 80.f;
+    //data[static_cast<int>(ShipType::kEnemyShip1)].m_fire_interval = sf::Time::Zero;
+    //data[static_cast<int>(ShipType::kEnemyShip1)].m_texture = TextureID::kEnemyShip1;
+    ////data[static_cast<int>(ShipType::kEnemyShip1)].m_texture_rect = sf::IntRect(144, 0, 84, 64);
+    //data[static_cast<int>(ShipType::kEnemyShip1)].m_has_roll_animation = true;
 
    
     /*data[static_cast<int>(ShipType::kEnemyShip1)].m_directions.emplace_back(Direction(+45.f, 80.f));
@@ -42,20 +41,20 @@ std::vector<ShipData> InitializeShipData()
     data[static_cast<int>(ShipType::kEnemyShip1)].m_directions.emplace_back(Direction(+45.f, 80.f));
 */
 
-    //Enemy Red Ship
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_hitpoints = 40;
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_speed = 50.f;
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_fire_interval = sf::seconds(2);
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_texture = TextureID::kEnemyShip2;
-    //data[static_cast<int>(ShipType::kEnemyShip2)].m_texture_rect = sf::IntRect(228, 0, 60, 59);
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_has_roll_animation = false;
+    ////Enemy Red Ship
+    //data[static_cast<int>(ShipType::kEnemyShip2)].m_hitpoints = 40;
+    //data[static_cast<int>(ShipType::kEnemyShip2)].m_speed = 50.f;
+    //data[static_cast<int>(ShipType::kEnemyShip2)].m_fire_interval = sf::seconds(2);
+    //data[static_cast<int>(ShipType::kEnemyShip2)].m_texture = TextureID::kEnemyShip2;
+    ////data[static_cast<int>(ShipType::kEnemyShip2)].m_texture_rect = sf::IntRect(228, 0, 60, 59);
+    //data[static_cast<int>(ShipType::kEnemyShip2)].m_has_roll_animation = false;
 
 
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(+45.f, 50.f));
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(0.f, 50.f));
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(-45.f, 100.f));
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(0.f, 50.f));
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(45.f, 50.f));
+    //data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(+45.f, 50.f));
+    //data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(0.f, 50.f));
+    //data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(-45.f, 100.f));
+    //data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(0.f, 50.f));
+    //data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(45.f, 50.f));
 
     return data;
 }
@@ -122,10 +121,10 @@ std::vector<ParticleData> InitializeParticleData()
     data[static_cast<int>(ParticleType::kSmoke)].m_lifetime = sf::seconds(2.5f);
 
     data[static_cast<int>(ParticleType::kWaterMist)].m_color = sf::Color(200, 200, 255, 150);
-    data[static_cast<int>(ParticleType::kWaterMist)].m_lifetime = sf::seconds(2.5f);
+    data[static_cast<int>(ParticleType::kWaterMist)].m_lifetime = sf::seconds(1.5f);
 
     data[static_cast<int>(ParticleType::kWaterSplashes)].m_color = sf::Color(100, 150, 255); // Light blue color
-    data[static_cast<int>(ParticleType::kWaterSplashes)].m_lifetime = sf::seconds(0.5f);    // Short lifespan for quick splashes
+    data[static_cast<int>(ParticleType::kWaterSplashes)].m_lifetime = sf::seconds(1.5f);    // Short lifespan for quick splashes
 
 
     return data;

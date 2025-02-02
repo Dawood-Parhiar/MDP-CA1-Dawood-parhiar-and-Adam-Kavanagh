@@ -78,7 +78,10 @@ private:
 	float m_scrollspeed;
 
 	std::vector<Ship*> m_player_ships;
-	std::vector<Player> m_players;
+	Player* m_player;
+	Player* m_player2;
+
+	//std::vector<Player*> m_players;
 
 	CommandQueue m_command_queue;
 

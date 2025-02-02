@@ -4,6 +4,8 @@
 
 GameState::GameState(StateStack& stack, Context context) : State(stack, context)
 , m_world(*context.window, *context.fonts, *context.sounds)
+, m_player(*context.player)
+, m_player2(*context.player2)
 {
 	//Play the music
 	context.music->Play(MusicThemes::kMissionTheme);
@@ -26,10 +28,11 @@ bool GameState::Update(sf::Time dt)
 	else if(m_world.HasPlayerReachedEnd())
 	{ 
 		m_player.SetMissionStatus(MissionStatus::kMissionSuccess);
-		RequestStackPush(StateID::kGameOver);
+		RequestStackPush(StateID::kGameWon);
 	}
 	CommandQueue& commands = m_world.GetCommandQueue();
 	m_player.HandleRealTimeInput(commands);
+	m_player2.HandleRealTimeInput(commands);
 	return true;
 }
 
@@ -37,6 +40,7 @@ bool GameState::HandleEvent(const sf::Event& event)
 {
 	CommandQueue& commands = m_world.GetCommandQueue();
 	m_player.HandleEvent(event, commands);
+	m_player2.HandleEvent(event, commands);
 
 	//Escape should bring up the pause menu
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)

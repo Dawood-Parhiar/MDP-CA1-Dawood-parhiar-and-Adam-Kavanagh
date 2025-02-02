@@ -18,11 +18,11 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.height - m_camera.getSize().y/2.f)//
 	,m_scrollspeed(-50.f)
 	,m_player_ships()
-	,m_players()
+	,m_player(new Player(1))
+	,m_player2(new Player(2))
 {
 	m_scene_texture.create(m_target.getSize().x, m_target.getSize().y);
 	LoadTextures();
-	//InitializePlayers();
 	BuildScene();
 	m_camera.setCenter(m_spawn_position);
 
@@ -32,13 +32,15 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 void World::Update(sf::Time dt)
 {
 	
-	//Scroll the world   m_scenegraph.Update(dt, m_command_queue);
+	//Scroll the world  
 	m_camera.move(0, m_scrollspeed * dt.asSeconds());
 
-	for (size_t i = 0; i < m_players.size(); ++i)
-	{
-		m_players[i].HandleRealTimeInput(m_command_queue);
-	}
+
+	m_scenegraph.Update(dt, m_command_queue);
+
+
+	m_player->HandleRealTimeInput(m_command_queue);
+	m_player2->HandleRealTimeInput(m_command_queue);
 
 	for (Ship* player: m_player_ships)
 	{
@@ -57,10 +59,8 @@ void World::Update(sf::Time dt)
 	AdaptPlayerVelocity();
 	HandleCollisions();
 	m_scenegraph.RemoveWrecks();
-	//SpawnEnemies();
-	m_scenegraph.Update(dt, m_command_queue);
 	AdaptPlayerPosition();
-	//UpdateSounds();
+	UpdateSounds();
 }
 
 void World::Draw()
@@ -118,9 +118,8 @@ CommandQueue& World::GetCommandQueue()
 
 bool World::HasAlivePlayer() const
 {
-	for (const Ship* player : m_player_ships)
+	if (!m_player_ships.at(1)->IsMarkedForRemoval())
 	{
-		if (!player->IsMarkedForRemoval())
 			return true;
 	}
 	return false;
@@ -128,7 +127,7 @@ bool World::HasAlivePlayer() const
 
 bool World::HasPlayerReachedEnd() const
 {
-	return !m_world_bounds.contains(m_player_ships.at(1)->getPosition());
+	return !m_world_bounds.contains(m_player_ships.at(0)->getPosition());
 }
 
 
@@ -417,6 +416,7 @@ bool MatchesCategories(SceneNode::Pair& colliders, ReceiverCategories type1, Rec
 	else if (static_cast<int>(type1) & category2 && static_cast<int>(type2) & category1)
 	{ 
 		std::swap(colliders.first, colliders.second);
+		return true;
 	}
 	else
 	{
@@ -431,13 +431,21 @@ void World::HandleCollisions()
 	m_scenegraph.CheckSceneCollision(m_scenegraph, collision_pairs);
 	for (SceneNode::Pair pair : collision_pairs)
 	{
-		if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kPlayer2Ship))
+		if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyProjectile))
 		{
 			auto& player = static_cast<Ship&>(*pair.first);
-			auto& enemy = static_cast<Ship&>(*pair.second);
+			auto& player2 = static_cast<Ship&>(*pair.second);
 			//Collision response
-			player.Damage(enemy.GetHitPoints());
-			enemy.Damage(10);
+			player.Damage(player2.GetHitPoints());
+			player2.Damage(10);
+		}
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kPlayer2Ship))
+		{
+			auto& player = static_cast<Ship&>(*pair.first);
+			auto& player2 = static_cast<Ship&>(*pair.second);
+			//Collision response
+			player.Damage(player2.GetHitPoints());
+			player2.Damage(10);
 		}
 
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kPickup))
@@ -449,7 +457,7 @@ void World::HandleCollisions()
 			pickup.Destroy();
 			player.PlayLocalSound(m_command_queue, SoundEffect::kCollectPickup);
 		}
-		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyProjectile) || MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kAlliedProjectile))
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyProjectile) || MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kEnemyProjectile))
 		{
 			auto& aircraft = static_cast<Ship&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
@@ -460,10 +468,10 @@ void World::HandleCollisions()
 		//if hits the mountain
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kObstacle) || MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kObstacle))
 		{
-			auto& aircraft = static_cast<Ship&>(*pair.first);
+			auto& ship = static_cast<Ship&>(*pair.first);
 			auto& mountain = static_cast<Obstacle&>(*pair.second);
 			//Collision response
-			aircraft.Destroy();
+			ship.Damage(10);
 		}
 	}
 }
@@ -473,7 +481,7 @@ void World::UpdateSounds()
 	if (!m_player_ships.empty())
 	{
 		// Set listener's position to player position
-		m_sounds.SetListenerPosition(m_player_ships[0]->GetWorldPosition());
+		m_sounds.SetListenerPosition(m_spawn_position);
 
 		 //calculate the average position of all players
 		
@@ -500,22 +508,32 @@ void World::InitializePlayers()
 	ship1->SetVelocity(50.f, m_scrollspeed);
 	m_player_ships.push_back(ship1.get());
 
-	Player player1(1);
-	m_players.emplace_back(player1);
+	//std::unique_ptr<Player> p1(new Player(1));
+	//m_players.emplace_back(p1.get());
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship1));
 
 
 	// Add player 2's ship
+	//std::unique_ptr<Ship> ship2(new Ship(ShipType::kPlayer2Ship, m_textures, m_fonts));
+	//ship2->setRotation(180);
+	//ship2->setPosition(300.f, m_spawn_position.y);
+	//ship2->SetVelocity(50.f, 40.f);
+	//m_player_ships.emplace_back(ship2.get());
+
+	////std::unique_ptr<Player> p2(new Player(2));
+	////m_players.empla_back(p2.get());
+	//m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship2));
+
 	std::unique_ptr<Ship> ship2(new Ship(ShipType::kPlayer2Ship, m_textures, m_fonts));
-	ship2->setRotation(180);
-	ship2->setPosition(130.f, 130.f);
-	ship2->SetVelocity(50.f, 40.f);
-	m_player_ships.emplace_back(ship2.get());
+	ship2->setPosition(300.f , m_spawn_position.y);
+	ship2->SetVelocity(50.f, m_scrollspeed);
+	//ship2->setRotation();
+	
+	m_player_ships.push_back(ship2.get());
 
-	Player player2(2);
-	m_players.emplace_back(player2);
+	//std::unique_ptr<Player> p1(new Player(1));
+	//m_players.emplace_back(p1.get());
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship2));
-
 }
 
 
