@@ -1,17 +1,3 @@
-﻿  World.cpp
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(181,67): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(181,43): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(216,69): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(216,44): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(513,36): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(522,36): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+﻿  SceneNode.cpp
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\SceneNode.cpp(167,27): warning C4244: 'return': conversion from 'int' to 'float', possible loss of data
+  MDP_CA1.vcxproj -> C:\Users\umar_\RiderProjects\MDP_CA1\x64\Debug\MDP_CA1.exe
