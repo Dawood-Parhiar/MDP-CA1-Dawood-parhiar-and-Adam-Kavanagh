@@ -7,7 +7,7 @@ Phase 1: Basic Networking Setup
 
 Phase 2: Synchronizing the Game World
 ✔️ Implement a MultiplayerState to handle networked gameplay.
-✔️ Synchronize player movement and firing cannons over the network.
+✔️ Synchronize player movement and firing cannons over the network (firing cannons are events and movements are real time input). Packets of messages and commands will be sent to server to notify all the players in the game so everybody can have a live view of the game with their own perspective.
 
 Phase 3: Expanding Game Features
 ✔️ Increase map size and remove NPCs to make it PvP-focused.
