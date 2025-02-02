@@ -333,7 +333,7 @@ void Ship::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 	
 	if (!IsAllied())
 	{
-		Fire();
+		//Fire();
 	}
 
 	if (m_is_firing && m_fire_countdown <= sf::Time::Zero)
