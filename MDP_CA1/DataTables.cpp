@@ -29,7 +29,7 @@ std::vector<ShipData> InitializeShipData()
     //Enemy Skeleton Ship
     
     data[static_cast<int>(ShipType::kEnemyShip1)].m_hitpoints = 20;
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_speed = 80.f;
+    data[static_cast<int>(ShipType::kEnemyShip1)].m_speed = 20.f;
     data[static_cast<int>(ShipType::kEnemyShip1)].m_fire_interval = sf::Time::Zero;
     data[static_cast<int>(ShipType::kEnemyShip1)].m_texture = TextureID::kEnemyShip1;
     //data[static_cast<int>(ShipType::kEnemyShip1)].m_texture_rect = sf::IntRect(144, 0, 84, 64);
@@ -43,8 +43,8 @@ std::vector<ShipData> InitializeShipData()
 
     //Enemy Red Ship
     data[static_cast<int>(ShipType::kEnemyShip2)].m_hitpoints = 40;
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_speed = 50.f;
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_fire_interval = sf::seconds(2);
+    data[static_cast<int>(ShipType::kEnemyShip2)].m_speed = 30.f;
+    data[static_cast<int>(ShipType::kEnemyShip2)].m_fire_interval = sf::seconds(5);
     data[static_cast<int>(ShipType::kEnemyShip2)].m_texture = TextureID::kEnemyShip2;
     //data[static_cast<int>(ShipType::kEnemyShip2)].m_texture_rect = sf::IntRect(228, 0, 60, 59);
     data[static_cast<int>(ShipType::kEnemyShip2)].m_has_roll_animation = false;

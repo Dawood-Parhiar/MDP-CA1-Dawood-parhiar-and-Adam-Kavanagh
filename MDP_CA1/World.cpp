@@ -16,7 +16,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_scene_layers()
 	,m_world_bounds(0.f,0.f, m_camera.getSize().x, 3000.f)
 	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.height - m_camera.getSize().y/2.f)//
-	,m_scrollspeed(-50.f)
+	,m_scrollspeed(-20.f)
 	,m_player_ships()
 	
 {
@@ -124,7 +124,7 @@ CommandQueue& World::GetCommandQueue()
 
 bool World::HasAlivePlayer() const
 {
-	if (!m_player_ships.at(0)->IsMarkedForRemoval())
+	if (!m_player_ships.at(0)->IsMarkedForRemoval() || !m_player_ships.at(1)->IsMarkedForRemoval())
 	{
 			return true;
 	}
@@ -326,10 +326,10 @@ void World::SpawnEnemies()
 
 void World::AddEnemies()
 {
-	AddEnemy(ShipType::kEnemyShip1, 0.f, 500.f);
-	AddEnemy(ShipType::kEnemyShip1, 0.f, 1000.f);
-	AddEnemy(ShipType::kEnemyShip1, 100.f, 1100.f);
-	AddEnemy(ShipType::kEnemyShip1, -100.f, 1100.f);
+	AddEnemy(ShipType::kEnemyShip2, 0.f, 500.f);
+	AddEnemy(ShipType::kEnemyShip2, 0.f, 1000.f);
+	AddEnemy(ShipType::kEnemyShip2, 100.f, 1100.f);
+	AddEnemy(ShipType::kEnemyShip2, -100.f, 1100.f);
 	AddEnemy(ShipType::kEnemyShip2, -70.f, 1400.f);
 	AddEnemy(ShipType::kEnemyShip2, 70.f, 1400.f);
 	AddEnemy(ShipType::kEnemyShip2, 70.f, 1600.f);
@@ -385,7 +385,7 @@ void World::GuideMissiles()
 
 	//Target the closest enemy in the radius
 	Command enemyCollector;
-	enemyCollector.category = static_cast<int>(ReceiverCategories::kPlayer2Ship);
+	enemyCollector.category = static_cast<int>(ReceiverCategories::kPlayer2Ship) & static_cast<int>(ReceiverCategories::kEnemyShip);
 	enemyCollector.action = DerivedAction<Ship>([this](Ship& enemy, sf::Time)
 		{
 			if (!enemy.IsDestroyed())
@@ -411,7 +411,8 @@ void World::GuideMissiles()
 			sf::Vector2f launch_position = missile.GetLaunchPosition();
 
 			//check if missile has exceeded its range
-			float dist_from_launch = std::hypot(
+			float dist_from_launch = std::hypot
+			(
 				missile_position.x - launch_position.x,
 				missile_position.y - launch_position.y
 			);
@@ -477,14 +478,7 @@ void World::HandleCollisions()
 			//Collision response
 			missile.Destroy();
 		}
-		else if (MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kAlliedProjectile))
-		{
-			auto& player = static_cast<Ship&>(*pair.first);
-			auto& missile = static_cast<Projectile&>(*pair.second);
-			//Collision response
-			player.Damage(missile.GetHitPoints());
-			missile.Destroy();
-		}
+		
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyShip))
 		{
 			auto& player = static_cast<Ship&>(*pair.first);
@@ -498,8 +492,8 @@ void World::HandleCollisions()
 			auto& player = static_cast<Ship&>(*pair.first);
 			auto& player2 = static_cast<Ship&>(*pair.second);
 			//Collision response
-			player.Destroy();
-			player2.Destroy();
+			player.Damage(player2.GetHitPoints());
+			player2.Damage(player.GetHitPoints());
 		}
 
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kPickup))

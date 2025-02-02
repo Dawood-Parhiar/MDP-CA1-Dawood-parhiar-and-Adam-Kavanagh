@@ -26,42 +26,26 @@ Player::Player(int player_number)
         m_key_binding[sf::Keyboard::D] = Action::kRotateRight;
         m_key_binding[sf::Keyboard::LShift] = Action::kAim;
 
-        InitialiseActions();
-
-        //Assign all categories to a player's aircraft
-        for (auto& pair : m_action_binding)
-        {
-            pair.second.category = static_cast<unsigned int>(ReceiverCategories::kPlayerShip);
-            //: static_cast<unsigned int>(ReceiverCategories::kPlayer2Ship);
-        }
+       
     }
     else if (player_number == 2)
     {
-        m_key_binding_player2[sf::Keyboard::Up] = Action::kMoveUp;
-        m_key_binding_player2[sf::Keyboard::Down] = Action::kMoveDown;
-        m_key_binding_player2[sf::Keyboard::M] = Action::kMissileFire;
-        m_key_binding_player2[sf::Keyboard::Left] = Action::kRotateLeft;
-        m_key_binding_player2[sf::Keyboard::Right] = Action::kRotateRight;
-        m_key_binding_player2[sf::Keyboard::RShift] = Action::kAim;
-
-        InitialiseActions();
-
-        for (auto& pair : m_action_binding_player2)
-        {
-            pair.second.category = static_cast<unsigned int>(ReceiverCategories::kPlayer2Ship);
-            //: static_cast<unsigned int>(ReceiverCategories::kPlayer2Ship);
-        }
+        m_key_binding[sf::Keyboard::Up] = Action::kMoveUp;
+        m_key_binding[sf::Keyboard::Down] = Action::kMoveDown;
+        m_key_binding[sf::Keyboard::M] = Action::kMissileFire;
+        m_key_binding[sf::Keyboard::Left] = Action::kRotateLeft;
+        m_key_binding[sf::Keyboard::Right] = Action::kRotateRight;
+        m_key_binding[sf::Keyboard::RShift] = Action::kAim;
     }
    
-    
+    InitialiseActions();
 
-    //Set initial action bindings
-    
-   
-
-    	//Assign the player's aircraft to the player's aircraft
-
-    
+    //Assign all categories to a player's aircraft
+    for (auto& pair : m_action_binding)
+    {
+        pair.second.category = (player_number == 1) ? static_cast<unsigned int>(ReceiverCategories::kPlayerShip)
+            : static_cast<unsigned int>(ReceiverCategories::kPlayer2Ship);
+    }
 }
 
 void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
@@ -74,11 +58,6 @@ void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
             command_queue.Push(m_action_binding[found->second]);
         }
 
-        auto found2 = m_key_binding_player2.find(event.key.code);
-        if (found2 != m_key_binding_player2.end() && !IsRealTimeAction(found2->second))
-        {
-        	command_queue.Push(m_action_binding_player2[found2->second]);
-        }
     }
 }
 
@@ -92,25 +71,7 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue)
             command_queue.Push(m_action_binding[pair.second]);
         }
     }
-    for (auto pair: m_key_binding_player2)
-    {
-	    if (sf::Keyboard::isKeyPressed(pair.first) && IsRealTimeAction(pair.second))
-	    {
-	    	command_queue.Push(m_action_binding_player2[pair.second]);
-	    }
-    }
 
-    /*if (!m_key_binding) {
-        throw std::runtime_error("m_key_binding is null!");
-    }
-    
-    for (Action action: m_key_binding->GetRealtimeActions())
-    {
-	    if (IsRealTimeAction(action))
-	    {
-            command_queue.Push(m_action_binding[action]);
-	    }
-    }*/
 }
 
 void Player::AssignKey(Action action, sf::Keyboard::Key key)
@@ -129,19 +90,6 @@ void Player::AssignKey(Action action, sf::Keyboard::Key key)
     }
     m_key_binding[key] = action;
 
-    for (auto itr = m_key_binding_player2.begin(); itr != m_key_binding_player2.end();)
-    {
-        if (itr->second == action)
-        {
-            m_key_binding_player2.erase(itr++);
-        }
-        else
-        {
-            ++itr;
-        }
-    }
-    m_key_binding_player2[key] = action;
-
 }
 
 sf::Keyboard::Key Player::GetAssignedKey(Action action) const
@@ -153,13 +101,7 @@ sf::Keyboard::Key Player::GetAssignedKey(Action action) const
             return pair.first;
         }
     }
-    for (auto pair : m_key_binding_player2)
-    {
-        if (pair.second == action)
-        {
-            return pair.first;
-        }
-    }
+  
     return sf::Keyboard::Unknown;
 }
 
@@ -217,50 +159,6 @@ void Player::InitialiseActions()
         a.Aim();
         
     });
-
-    //Player 2
-    
-
-    m_action_binding_player2[Action::kMoveUp].action = DerivedAction<Ship>([kPlayerSpeed](Ship& s, sf::Time dt) {
-        //Move the ship up
-        s.MoveShip(dt, -kPlayerSpeed);
-        });
-    m_action_binding_player2[Action::kMoveDown].action = DerivedAction<Ship>([kPlayerSpeed](Ship& s, sf::Time dt) {
-
-        //Move the ship down
-        s.MoveShip(dt, kPlayerSpeed);
-        });
-    m_action_binding_player2[Action::kRotateLeft].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
-        {
-            //rotate the ship left
-            a.rotate(-0.5f);
-
-        });
-
-    m_action_binding_player2[Action::kRotateRight].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
-        {
-            //rotate the ship right
-            a.rotate(0.5f);
-
-        });
-
-    // m_action_binding[Action::kBulletFire].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
-    //     {
-    //         a.Fire();
-    //     }
-    // );
-
-    m_action_binding_player2[Action::kMissileFire].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
-        {
-            a.LaunchMissile();
-        }
-    );
-    m_action_binding_player2[Action::kAim].action = DerivedAction<Ship>([this](Ship& a, sf::Time dt)
-        {
-
-            a.Aim();
-
-        });
 
 }
 

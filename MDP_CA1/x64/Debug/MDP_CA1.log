@@ -1,14 +1,4 @@
-﻿  Ship.cpp
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(195,78): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(196,12): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(197,12): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(449,35): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(449,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(476,43): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(476,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(484,53): warning C4244: 'argument': conversion from 'const float' to 'sf::Uint8', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Ship.cpp(486,57): warning C4244: 'argument': conversion from 'const float' to 'sf::Uint8', possible loss of data
-  World.cpp
+﻿  World.cpp
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Player.hpp(11,14): warning C4099: 'Command': type name first seen using 'struct' now seen using 'class'
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\Command.hpp(10,8): message : see declaration of 'Command'
 C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(181,67): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
@@ -23,7 +13,5 @@ C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(216,44): warning C4244: '
           [
               T=float
           ]
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(519,36): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(528,36): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-  Generating Code...
-  MDP_CA1.vcxproj -> C:\Users\umar_\RiderProjects\MDP_CA1\x64\Debug\MDP_CA1.exe
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(513,36): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\umar_\RiderProjects\MDP_CA1\MDP_CA1\World.cpp(522,36): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data

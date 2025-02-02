@@ -98,6 +98,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 
 	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayerShip) || Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayer2Ship))
 	{
+		m_missile_ammo = 20;
 		std::string* missile_ammo = new std::string("");
 		std::unique_ptr<TextNode> missile_display(new TextNode(fonts, *missile_ammo));
 		m_missile_display = missile_display.get();
@@ -225,26 +226,26 @@ void Ship::LaunchMissile()
 	}
 }
 
-//void Ship::CreateBullet(SceneNode& node, const TextureHolder& textures) const
-//{
-//	ProjectileType type = IsAllied() ? ProjectileType::kAlliedCannonBall : ProjectileType::kEnemyCannonBall;
-//	switch (m_spread_level)
-//	{
-//	case 1:
-//		CreateProjectile(node, type, 0.0f, 0.5f, textures);
-//		break;
-//	case 2:
-//		CreateProjectile(node, type, -0.5f, 0.5f, textures);
-//		CreateProjectile(node, type, 0.5f, 0.5f, textures);
-//		break;
-//	case 3:
-//		CreateProjectile(node, type, 0.0f, 0.5f, textures);
-//		CreateProjectile(node, type, -0.5f, 0.5f, textures);
-//		CreateProjectile(node, type, 0.5f, 0.5f, textures);
-//		break;
-//	}
-//	
-//}
+void Ship::CreateBullet(SceneNode& node, const TextureHolder& textures) const
+{
+	ProjectileType type = IsAllied() ? ProjectileType::kAlliedCannonBall : ProjectileType::kEnemyCannonBall;
+	switch (m_spread_level)
+	{
+	case 1:
+		CreateProjectile(node, type, 0.0f, 0.5f, textures);
+		break;
+	case 2:
+		CreateProjectile(node, type, -0.5f, 0.5f, textures);
+		CreateProjectile(node, type, 0.5f, 0.5f, textures);
+		break;
+	case 3:
+		CreateProjectile(node, type, 0.0f, 0.5f, textures);
+		CreateProjectile(node, type, -0.5f, 0.5f, textures);
+		CreateProjectile(node, type, 0.5f, 0.5f, textures);
+		break;
+	}
+	
+}
 
 void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
 {
@@ -300,8 +301,16 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 		// Play explosion sound only once
 		if (!m_played_explosion_sound)
 		{
-			SoundEffect soundEffect = (Utility::RandomInt(2) == 0) ? SoundEffect::kExplosion1 : SoundEffect::kExplosion2;
-			PlayLocalSound(commands, soundEffect);
+			if (m_type == ShipType::kPirateShip)
+			{
+				SoundEffect soundEffect = SoundEffect::kExplosion3;
+				PlayLocalSound(commands, soundEffect);
+			}
+			else
+			{
+				SoundEffect soundEffect = (Utility::RandomInt(2) == 0) ? SoundEffect::kExplosion1 : SoundEffect::kExplosion2;
+				PlayLocalSound(commands, soundEffect);
+			}
 
 			m_played_explosion_sound = true;
 		}
@@ -321,11 +330,11 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 void Ship::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 {
-	//no auto fires bcz No NPCs
-	//if (!IsAllied())
-	//{
-		//Fire();
-	//}
+	
+	if (!IsAllied())
+	{
+		Fire();
+	}
 
 	if (m_is_firing && m_fire_countdown <= sf::Time::Zero)
 	{
@@ -454,6 +463,8 @@ void Ship::MoveShip(sf::Time dt, float speed)
 
 void Ship::Aim() const
 {
+	////draw an aim as a Vertex of lines from the ship so it simulates the ship is aiming towrads its target.
+	
 	if (!m_render_target) return;
 	
 	// Draw an aiming arc on the target
