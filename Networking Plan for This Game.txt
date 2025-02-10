@@ -14,3 +14,9 @@ Phase 3: Expanding Game Features
 ✔️ Implement team-based and objective-based game modes.
 ✔️ Add latency compensation techniques for smoother gameplay.
 
+
+
+
+if(n % 5 ==1) give a color to player's aircrafts.
+
+Re stage the codebase for the .gitignore to work properly
