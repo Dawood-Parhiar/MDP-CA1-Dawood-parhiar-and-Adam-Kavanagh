@@ -21,9 +21,9 @@ TextureID ToTextureID(ShipType type)
 	case ShipType::kPirateShip:
 		return TextureID::kPirateShip;
 		break;
-	case ShipType::kPlayer2Ship:
+	/*case ShipType::kPlayer2Ship:
 		return TextureID::kPlayer2Ship;
-		break;
+		break;*/
 	case ShipType::kEnemyShip1:
 		return TextureID::kEnemyShip1;
 		break;
@@ -80,7 +80,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	m_missile_command.category = static_cast<int>(ReceiverCategories::kScene);
 	m_missile_command.action = [this, &textures](SceneNode& node, sf::Time dt)
 		{
-			CreateProjectile(node, ProjectileType::kMissile, original_x, 0.f, textures);
+			CreateProjectile(node, ProjectileType::kMissile, original_x , 0.f, textures);
 		};
 
 	m_drop_pickup_command.category = static_cast<int>(ReceiverCategories::kScene);
@@ -250,14 +250,15 @@ void Ship::CreateBullet(SceneNode& node, const TextureHolder& textures) const
 void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
 {
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
-	sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().width, y_offset * m_sprite.getGlobalBounds().height);
+
+	sf::Vector2f offset(x_offset * Utility::ToRadians(getRotation()), y_offset * Utility::ToRadians(getRotation()));
 	//fire the projectile from the center of the ship
-	sf::Vector2f velocity(180, 45);// fire the projectile horizontally
+	sf::Vector2f velocity(std::cos(getRotation() * 3.14159f / 180.f) * 300.f,  // Speed in x-direction
+		std::sin(getRotation() * 3.14159f / 180.f) * 300.f);// fire the projectile horizontally
 
 	float sign = IsAllied() ? -1.f : 1.f;
 
-
-	projectile->setPosition(GetWorldPosition() + offset * sign);
+	projectile->setPosition(GetWorldPosition() + offset);
 	projectile->SetVelocity(velocity* sign);
 
 	if (type == ProjectileType::kMissile)
@@ -326,6 +327,8 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 	//Check if bullets or misiles are fired
 	CheckProjectileLaunch(dt, commands);
+
+	
 }
 
 void Ship::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
@@ -385,26 +388,6 @@ void Ship::CheckPickupDrop(CommandQueue& commands)
 
 void Ship::UpdateRollAnimation(sf::Time dt)
 {
-	// if (Table[static_cast<int>(m_type)].m_has_roll_animation)
-	// {
-	// 	sf::IntRect textureRect = Table[static_cast<int>(m_type)].m_texture_rect;
-	//
-	// 	//Roll left: Texture rect is offset once
-	// 	if (GetVelocity().x < 0.f)
-	// 	{
-	// 		textureRect.left += textureRect.width;
-	// 	}
-	// 	else if (GetVelocity().x > 0.f)
-	// 	{
-	// 		textureRect.left += 2 * textureRect.width;
-	// 	}
-	// 	m_sprite.setTextureRect(textureRect);
-	//
-	// }
-
-
-
-	//animation code from chatgpt 
 
 	// Check if the ship type has roll animation enabled 
 	if (Table[static_cast<int>(m_type)].m_has_roll_animation)

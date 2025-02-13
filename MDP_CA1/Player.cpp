@@ -17,24 +17,24 @@ Player::Player(int player_number)
 : m_current_mission_status(MissionStatus::kMissionRunning)
 ,m_key_binding()
 {
-    if (player_number == 1)
+    if (player_number == 1) //movement controller
     {
         m_key_binding[sf::Keyboard::W] = Action::kMoveUp;
         m_key_binding[sf::Keyboard::S] = Action::kMoveDown;
         m_key_binding[sf::Keyboard::Space] = Action::kMissileFire;
         m_key_binding[sf::Keyboard::A] = Action::kRotateLeft;
         m_key_binding[sf::Keyboard::D] = Action::kRotateRight;
-        m_key_binding[sf::Keyboard::LShift] = Action::kAim;
+        //m_key_binding[sf::Keyboard::LShift] = Action::kAim;
 
        
     }
-    else if (player_number == 2)
+    else if (player_number == 2) //weapon controller
     {
-        m_key_binding[sf::Keyboard::Up] = Action::kMoveUp;
-        m_key_binding[sf::Keyboard::Down] = Action::kMoveDown;
+        //m_key_binding[sf::Keyboard::Up] = Action::kMoveUp;
+        //m_key_binding[sf::Keyboard::Down] = Action::kMoveDown;
         m_key_binding[sf::Keyboard::M] = Action::kMissileFire;
-        m_key_binding[sf::Keyboard::Left] = Action::kRotateLeft;
-        m_key_binding[sf::Keyboard::Right] = Action::kRotateRight;
+       // m_key_binding[sf::Keyboard::Left] = Action::kRotateLeft;
+       // m_key_binding[sf::Keyboard::Right] = Action::kRotateRight;
         m_key_binding[sf::Keyboard::RShift] = Action::kAim;
     }
    

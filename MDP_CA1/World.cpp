@@ -69,23 +69,16 @@ void World::Draw()
 {
 	if (PostEffect::IsSupported())
 	{
-		// --- Step 1: Apply Water Effect to Background ---
-		sf::RenderTexture backgroundTexture;
-		backgroundTexture.create(m_target.getSize().x, m_target.getSize().y);
-		backgroundTexture.setView(m_camera);
-		backgroundTexture.clear();
+		//Apply Water Effect to Background ---
+		m_scene_texture.clear();
+		m_scene_texture.setView(m_camera);
+		m_scene_texture.draw(m_scenegraph);
+		m_scene_texture.display();
+		//m_water_effect.Apply(m_scene_texture, m_target);  // Apply water effect to background
 
-		if (m_scene_layers[static_cast<int>(SceneLayers::kBackground)] != nullptr)
-		{
-			backgroundTexture.draw(*m_scene_layers[static_cast<int>(SceneLayers::kBackground)]);
-		}
-		backgroundTexture.display();
-
-		m_water_effect.Apply(backgroundTexture, m_target);  // Apply water effect to background
-
-		// --- Step 2: Draw Other Layers Normally ---
+		// Draw  Layers Normally ---
 		m_target.setView(m_camera);
-		for (int i = static_cast<int>(SceneLayers::kLowerAir); i < static_cast<int>(SceneLayers::kLayerCount); ++i)
+		for (int i = static_cast<int>(SceneLayers::kBackground); i < static_cast<int>(SceneLayers::kLayerCount); ++i)
 		{
 			if (m_scene_layers[i] != nullptr)
 			{
@@ -111,7 +104,6 @@ bool World::HasAlivePlayer() const
 {
 	if (!m_player_ships.empty())
 	{
-
 			return true;
 	}
 	return false;

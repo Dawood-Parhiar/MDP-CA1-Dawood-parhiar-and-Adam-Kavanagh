@@ -112,7 +112,7 @@ void Projectile::UpdateCurrent(sf::Time dt, CommandQueue& commands)
         sf::Vector2f new_velocity = Utility::UnitVector(approach_rate * dt.asSeconds() * m_target_direction + GetVelocity());
         new_velocity *= GetMaxSpeed();
         float angle = std::atan2(new_velocity.y, new_velocity.x);
-        setRotation(Utility::ToDegrees(angle) + 90.f);
+        setRotation(Utility::ToDegrees(angle) + 90);
         SetVelocity(new_velocity);
     }
     Entity::UpdateCurrent(dt, commands);

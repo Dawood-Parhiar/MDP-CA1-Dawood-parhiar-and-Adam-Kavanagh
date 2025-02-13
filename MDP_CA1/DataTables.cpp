@@ -20,11 +20,11 @@ std::vector<ShipData> InitializeShipData()
 
     //player 2 ship
 
-    data[static_cast<int>(ShipType::kPlayer2Ship)].m_hitpoints = 200;
+   /* data[static_cast<int>(ShipType::kPlayer2Ship)].m_hitpoints = 200;
     data[static_cast<int>(ShipType::kPlayer2Ship)].m_speed = 100.f;
     data[static_cast<int>(ShipType::kPlayer2Ship)].m_fire_interval = sf::seconds(1);
     data[static_cast<int>(ShipType::kPlayer2Ship)].m_texture = TextureID::kPlayer2Ship;
-    data[static_cast<int>(ShipType::kPlayer2Ship)].m_has_roll_animation = true;
+    data[static_cast<int>(ShipType::kPlayer2Ship)].m_has_roll_animation = true;*/
 
     //Enemy Skeleton Ship
     
