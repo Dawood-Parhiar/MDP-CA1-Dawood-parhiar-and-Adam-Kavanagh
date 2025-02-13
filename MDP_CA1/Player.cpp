@@ -56,6 +56,7 @@ void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
         if (found != m_key_binding.end() && !IsRealTimeAction(found->second))
         {
             command_queue.Push(m_action_binding[found->second]);
+            
         }
 
     }
