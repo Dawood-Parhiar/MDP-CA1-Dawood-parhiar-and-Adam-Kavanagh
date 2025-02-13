@@ -16,7 +16,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_scene_layers()
 	,m_world_bounds(0.f,0.f, m_camera.getSize().x, 3000.f)
 	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.height - m_camera.getSize().y/2.f)//
-	,m_scrollspeed(-20.f)
+	,m_scrollspeed(-50.f)
 	,m_player_ships()
 	
 {
@@ -25,9 +25,6 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	BuildScene();
 	m_camera.setCenter(m_spawn_position);
 	
-	m_player_ships.at(0)->UpdateTexts();
-	m_player_ships.at(1)->UpdateTexts();
-
 
 }
 
@@ -39,10 +36,6 @@ void World::Update(sf::Time dt)
 
 
 	m_scenegraph.Update(dt, m_command_queue);
-
-
-	//m_player->HandleRealTimeInput(m_command_queue);
-	//m_player2->HandleRealTimeInput(m_command_queue);
 
 	for (Ship* player: m_player_ships)
 	{
@@ -67,47 +60,38 @@ void World::Update(sf::Time dt)
 	m_scenegraph.RemoveWrecks();
 	AdaptPlayerPosition();
 	UpdateSounds();
+
+	
+
 }
 
 void World::Draw()
 {
-	//m_textures.Load(TextureID::kWater, "Media/Textures/water.png");
-	
 	if (PostEffect::IsSupported())
 	{
+		// --- Step 1: Apply Water Effect to Background ---
+		sf::RenderTexture backgroundTexture;
+		backgroundTexture.create(m_target.getSize().x, m_target.getSize().y);
+		backgroundTexture.setView(m_camera);
+		backgroundTexture.clear();
 
-		m_scene_texture.clear();
-		m_scene_texture.setView(m_camera);
-		m_scene_texture.draw(m_scenegraph);
-		m_scene_texture.display(); // Finalize the render texture
-		m_bloom_effect.Apply(m_scene_texture, m_target);
-		//m_water_effect.Apply(m_scene_texture, m_target);
+		if (m_scene_layers[static_cast<int>(SceneLayers::kBackground)] != nullptr)
+		{
+			backgroundTexture.draw(*m_scene_layers[static_cast<int>(SceneLayers::kBackground)]);
+		}
+		backgroundTexture.display();
 
+		m_water_effect.Apply(backgroundTexture, m_target);  // Apply water effect to background
 
-		////Draw the lowerAir and upperAir layers to the render target
-		////m_target.setView(m_camera);
-		//for (int i = static_cast<int>(SceneLayers::kBackground); i < static_cast<int>(SceneLayers::kLayerCount); ++i)
-		//{
-		//	if (m_scene_layers[i] != nullptr)
-		//	{
-		//		if (i == static_cast<int>(SceneLayers::kBackground))
-		//		{
-		//			m_scene_texture.clear();
-		//			m_target.setView(m_camera);
-		//			m_scene_texture.draw(*m_scene_layers[i]);
-		//			m_scene_texture.display();
-
-		//			m_water_effect.Apply(m_scene_texture, m_target);
-		//		}
-		//		else
-		//		{
-		//			m_target.draw(*m_scene_layers[i]);
-		//			m_water_effect.Apply(m_scene_texture, m_target);
-		//		}
-		//	}
-		//}
-		
-		
+		// --- Step 2: Draw Other Layers Normally ---
+		m_target.setView(m_camera);
+		for (int i = static_cast<int>(SceneLayers::kLowerAir); i < static_cast<int>(SceneLayers::kLayerCount); ++i)
+		{
+			if (m_scene_layers[i] != nullptr)
+			{
+				m_target.draw(*m_scene_layers[i]);
+			}
+		}
 	}
 	else
 	{
@@ -117,6 +101,7 @@ void World::Draw()
 	}
 }
 
+
 CommandQueue& World::GetCommandQueue()
 {
 	return m_command_queue;
@@ -124,8 +109,9 @@ CommandQueue& World::GetCommandQueue()
 
 bool World::HasAlivePlayer() const
 {
-	if (!m_player_ships.at(0)->IsMarkedForRemoval() || !m_player_ships.at(1)->IsMarkedForRemoval())
+	if (!m_player_ships.empty())
 	{
+
 			return true;
 	}
 	return false;
@@ -577,14 +563,14 @@ void World::InitializePlayers()
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship1));
 
 
-		//player 2's ship
-	std::unique_ptr<Ship> ship2(new Ship(ShipType::kPlayer2Ship, m_textures, m_fonts));
+	//player 2's ship
+	/*std::unique_ptr<Ship> ship2(new Ship(ShipType::kPlayer2Ship, m_textures, m_fonts));
 	m_player_ships.push_back(ship2.get());
 	m_player_ships.at(1) = ship2.get();
 	m_player_ships.at(1)->setPosition(300.f , m_spawn_position.y);
 	m_player_ships.at(1)->SetVelocity(50.f, m_scrollspeed);
 
-	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship2));
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship2));*/
 }
 
 
