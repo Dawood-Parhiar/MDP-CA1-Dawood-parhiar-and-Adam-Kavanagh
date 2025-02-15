@@ -15,23 +15,21 @@ KeyBinding::KeyBinding(int control_preconfiguration)
 	{
 		m_key_map[sf::Keyboard::W] = Action::kMoveUp;
 		m_key_map[sf::Keyboard::S] = Action::kMoveDown;
-		//m_key_map[sf::Keyboard::Space] = Action::kBulletFire;
-		m_key_map[sf::Keyboard::Space] = Action::kMissileFire;
+		//m_key_map[sf::Keyboard::Space] = Action::kMissileFire;
 		m_key_map[sf::Keyboard::A] = Action::kRotateLeft;
 		m_key_map[sf::Keyboard::D] = Action::kRotateRight;
-		m_key_map[sf::Keyboard::LControl] = Action::kAim;
+		//m_key_map[sf::Keyboard::LControl] = Action::kAim;
 	}
 	else if (control_preconfiguration == 2)
 	{
 		// Player 2
 		
-		m_key_map[sf::Keyboard::Up] = Action::kMoveUp;
-		m_key_map[sf::Keyboard::Down] = Action::kMoveDown;
-		//m_key_map[sf::Keyboard::F] = Action::kBulletFire;
-		m_key_map[sf::Keyboard::M] = Action::kMissileFire;
-		m_key_map[sf::Keyboard::Left] = Action::kRotateLeft;
-		m_key_map[sf::Keyboard::Right] = Action::kRotateRight;
-		m_key_map[sf::Keyboard::RControl] = Action::kAim;
+		//m_key_map[sf::Keyboard::Up] = Action::kMoveUp;
+		//m_key_map[sf::Keyboard::Down] = Action::kMoveDown;
+		m_key_map[sf::Keyboard::Return] = Action::kMissileFire;
+		//m_key_map[sf::Keyboard::Left] = Action::kRotateLeft;
+		//m_key_map[sf::Keyboard::Right] = Action::kRotateRight;
+		m_key_map[sf::Keyboard::RShift] = Action::kAim;
 	}
 }
 
