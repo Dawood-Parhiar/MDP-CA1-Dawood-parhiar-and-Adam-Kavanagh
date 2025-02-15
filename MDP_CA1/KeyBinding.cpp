@@ -33,10 +33,6 @@ KeyBinding::KeyBinding(int control_preconfiguration)
 		m_key_map[sf::Keyboard::Right] = Action::kRotateRight;
 		m_key_map[sf::Keyboard::RControl] = Action::kAim;
 	}
-
-	
-    // Debug log
-    std::cerr << "KeyBinding initialized with " << m_key_map.size() << " keys." << std::endl;
 }
 
 void KeyBinding::AssignKey(Action action, sf::Keyboard::Key key)
@@ -84,20 +80,12 @@ std::vector<Action> KeyBinding::GetRealtimeActions() const
 	// Return all realtime actions that are currently active.
 	std::vector<Action> actions;
 
-	//debug check
-	if (m_key_map.empty()) {
-		std::cerr << "Warning: m_key_map is empty in KeyBinding::GetRealtimeActions()." << std::endl;
-		return actions;
-	}
-
-	for (const auto& pair : m_key_map)
+	
+	for (auto pair : m_key_map)
 	{
 		// If key is pressed and an action is a realtime action, store it
 		if (sf::Keyboard::isKeyPressed(pair.first) && IsRealtimeAction(pair.second))
 			actions.push_back(pair.second);
-	}
-	if (actions.empty()) {
-		std::cerr << "No real-time actions detected in KeyBinding::GetRealtimeActions()." << std::endl;
 	}
 	return actions;
 }

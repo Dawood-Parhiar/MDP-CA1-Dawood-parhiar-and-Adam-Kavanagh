@@ -25,6 +25,11 @@ public:
 
 	CommandQueue& GetCommandQueue();
 
+	Ship* AddShip(int id);
+	void RemoveShip(int id);
+
+	Ship* GetShip(int id) const;
+
 	bool HasAlivePlayer() const;
 	bool HasPlayerReachedEnd() const;
 
@@ -81,11 +86,6 @@ private:
 	float m_scrollspeed;
 
 	std::vector<Ship*> m_player_ships;
-	Player* m_player;
-	Player* m_player2;
-
-	//std::vector<Player*> m_players;
-
 	CommandQueue m_command_queue;
 
 	std::vector<SpawnPoint> m_enemy_spawn_points;

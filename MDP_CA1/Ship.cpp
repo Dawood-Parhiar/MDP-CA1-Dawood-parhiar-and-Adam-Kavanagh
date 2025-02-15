@@ -58,6 +58,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_played_explosion_sound(false)
 	, original_x(0.f)
 	, original_y(0.f)
+	,m_id(0)
 
 {
 	//positions for animation of the ship
@@ -442,6 +443,16 @@ void Ship::MoveShip(sf::Time dt, float speed)
 	float vx = speed * std::cos(angle);
 	float vy = speed * std::sin(angle);
 	Accelerate(vx, vy);
+}
+
+void Ship::SetId(int id)
+{
+	m_id = id;
+}
+
+int Ship::GetId()
+{
+	return m_id;
 }
 
 void Ship::Aim() const

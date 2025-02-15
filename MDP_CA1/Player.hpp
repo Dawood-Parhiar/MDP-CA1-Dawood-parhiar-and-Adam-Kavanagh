@@ -14,7 +14,7 @@ class Command;
 class Player
 {
 public:
-	Player(int player_number);
+	Player(sf::Int32 id, const KeyBinding* binding);
 
 	// Default constructor
 
@@ -24,8 +24,8 @@ public:
 	void HandleEvent(const sf::Event& event, CommandQueue& command_queue);
 	void HandleRealTimeInput(CommandQueue& command_queue);
 
-	void AssignKey(Action action, sf::Keyboard::Key key);
-	sf::Keyboard::Key GetAssignedKey(Action action) const;
+	/*void AssignKey(Action action, sf::Keyboard::Key key);
+	sf::Keyboard::Key GetAssignedKey(Action action) const;*/
 	void SetMissionStatus(MissionStatus status);
 	MissionStatus GetMissionStatus() const;
 
@@ -34,16 +34,10 @@ private:
 	static bool IsRealTimeAction(Action action);
 
 private:
-	std::map<sf::Keyboard::Key, Action> m_key_binding;
-	std::map<sf::Keyboard::Key, Action> m_key_binding_player2;
-
-//	std::map<sf::Keyboard::Key, Action> m_key_binding_player2;
-	//KeyBinding* m_key_binding;
+	const KeyBinding* m_key_binding;
 	std::map<Action, Command> m_action_binding;
-	std::map<Action, Command> m_action_binding_player2;
-
-
 	MissionStatus m_current_mission_status;
+	int m_id;
 
 };
 

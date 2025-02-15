@@ -35,6 +35,8 @@ public:
 	void Aim() const;
 	void SetRenderTargets(sf::RenderTarget& target);
 	void MoveShip(sf::Time dt, float speed);
+	void SetId(int id);
+	int GetId();
 
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
@@ -79,5 +81,6 @@ private:
 	float original_y;
 
 	sf::RenderTarget* m_render_target;
+	int m_id;
 };
 

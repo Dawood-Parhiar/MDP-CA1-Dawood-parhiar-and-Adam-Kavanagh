@@ -24,8 +24,6 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	LoadTextures();
 	BuildScene();
 	m_camera.setCenter(m_spawn_position);
-	
-
 }
 
 void World::Update(sf::Time dt)
@@ -33,9 +31,6 @@ void World::Update(sf::Time dt)
 	
 	//Scroll the world  
 	m_camera.move(0, m_scrollspeed * dt.asSeconds());
-
-
-	m_scenegraph.Update(dt, m_command_queue);
 
 	for (Ship* player: m_player_ships)
 	{
@@ -55,14 +50,15 @@ void World::Update(sf::Time dt)
 	AdaptPlayerVelocity();
 	HandleCollisions();
 
-	SpawnEnemies();
+
+	auto first_to_remove = std::remove_if(m_player_ships.begin(), m_player_ships.end(), std::mem_fn(&Ship::IsMarkedForRemoval));
+	m_player_ships.erase(first_to_remove, m_player_ships.end());
 
 	m_scenegraph.RemoveWrecks();
+	SpawnEnemies();
+	m_scenegraph.Update(dt, m_command_queue);
 	AdaptPlayerPosition();
 	UpdateSounds();
-
-	
-
 }
 
 void World::Draw()
@@ -100,6 +96,39 @@ CommandQueue& World::GetCommandQueue()
 	return m_command_queue;
 }
 
+Ship* World::AddShip(int id)
+{
+	std::unique_ptr<Ship> player(new Ship(ShipType::kPirateShip, m_textures, m_fonts));
+	player->setPosition(m_camera.getCenter());
+	player->SetId(id);
+
+	m_player_ships.emplace_back(player.get());
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(player));
+	return m_player_ships.back();
+}
+
+void World::RemoveShip(int id)
+{
+	Ship* ship = GetShip(id);
+	if (ship)
+	{
+		ship->Destroy();
+		m_player_ships.erase(std::find(m_player_ships.begin(), m_player_ships.end(), ship));
+	}
+}
+
+Ship* World::GetShip(int id) const
+{
+	for (Ship* a : m_player_ships)
+	{
+		if (a->GetId() == id)
+		{
+			return a;
+		}
+	}
+	return nullptr;
+}
+
 bool World::HasAlivePlayer() const
 {
 	if (!m_player_ships.empty())
@@ -111,7 +140,11 @@ bool World::HasAlivePlayer() const
 
 bool World::HasPlayerReachedEnd() const
 {
-	return !m_world_bounds.contains(m_player_ships.at(0)->getPosition());
+	if (Ship* ship = GetShip(1))
+	{
+		return !m_world_bounds.contains(ship->getPosition());
+	}
+	return false;
 }
 
 
@@ -122,31 +155,19 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kMissile, "Media/Textures/cannon_ball.png");
 	m_textures.Load(TextureID::kEnemyShip2, "Media/EnemyShips/EnemyShip2.png");
 	m_textures.Load(TextureID::kEnemyShip3, "Media/EnemyShips/EnemyShip3.png");
-	/*m_textures.Load(TextureID::kLandscape, "Media/Textures/Desert.png");
-	m_textures.Load(TextureID::kBullet, "Media/Textures/Bullet.png");*/
-
-	//changed the texture
-	
-
 	m_textures.Load(TextureID::kHealthRefill, "Media/Textures/HealthRefill.png");
 	m_textures.Load(TextureID::kMissileRefill, "Media/Textures/MissileRefill.png");
 	m_textures.Load(TextureID::kFireSpread, "Media/Textures/FireSpread.png");
 	m_textures.Load(TextureID::kFireRate, "Media/Textures/FireRate.png");
 	m_textures.Load(TextureID::kFinishLine, "Media/Textures/FinishLine.png");
-
 	m_textures.Load(TextureID::kEntities, "Media/Textures/Entities.png");
-	//m_textures.Load(TextureID::kJungle, "Media/Textures/Jungle.png");
 	m_textures.Load(TextureID::kExplosion, "Media/Textures/Explosion.png");
 	m_textures.Load(TextureID::kParticle, "Media/Textures/Particle.png");
-
-	//Textures for the Ship Battle game
 	m_textures.Load(TextureID::kWater, "Media/Textures/Water3.jpg");
 	m_textures.Load(TextureID::kEnemyCannonBall, "Media/Textures/EnemyBall.png");
 	m_textures.Load(TextureID::kPlayer2Ship, "Media/EnemyShips/ship13.png");
 	m_textures.Load(TextureID::kMountains, "Media/Textures/mountain_area.png");
 	m_textures.Load(TextureID::kCoin, "Media/Textures/coin.png");
-
-
 }
 
 void World::BuildMountains()
@@ -207,12 +228,15 @@ void World::BuildScene()
 
 	//Prepare the background
 	sf::Texture& texture = m_textures.Get(TextureID::kWater);
-	sf::IntRect textureRect(m_world_bounds);
 	texture.setRepeated(true);
+
+	float view_height = m_camera.getSize().y;
+	sf::IntRect textureRect(m_world_bounds);
+	textureRect.height += static_cast<int>(view_height);
 
 	//Add the background sprite to the world
 	std::unique_ptr<SpriteNode> background_sprite(new SpriteNode(texture, textureRect));
-	background_sprite->setPosition(m_world_bounds.left, m_world_bounds.top);
+	background_sprite->setPosition(m_world_bounds.left, m_world_bounds.top - view_height);
 	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(background_sprite));
 
 	//Add the finish line
@@ -225,7 +249,8 @@ void World::BuildScene()
 	SpawnInitialCoins();
 
 	//Add Players here
-	InitializePlayers();
+	//InitializePlayers();
+
 	//Add the particle nodes to the scene
 	std::unique_ptr<ParticleNode> smokeNode(new ParticleNode(ParticleType::kSmoke, m_textures));
 	m_scene_layers[static_cast<int>(SceneLayers::kLowerAir)]->AttachChild(std::move(smokeNode));
@@ -258,7 +283,7 @@ void World::BuildScene()
 void World::AdaptPlayerPosition()
 {
 	//keep each player on the screen
-	sf::FloatRect view_bounds(m_camera.getCenter() - m_camera.getSize() / 2.f, m_camera.getSize());
+	sf::FloatRect view_bounds = GetViewBounds();
 	const float border_distance = 40.f;
 
 	for (Ship* player : m_player_ships)
@@ -531,13 +556,21 @@ void World::HandleCollisions()
 
 void World::UpdateSounds()
 {
-	if (!m_player_ships.empty())
+	sf::Vector2f listener_position;
+	if (m_player_ships.empty())
 	{
-		// Set listener's position to player position
-		m_sounds.SetListenerPosition(m_spawn_position);
-		
+		listener_position = m_camera.getCenter();
 	}
+	else
+	{
+		for (Ship* ship : m_player_ships)
+		{
+			listener_position += ship->GetWorldPosition();
+		}
 
+		listener_position /= static_cast<float>(m_player_ships.size());
+	}
+	m_sounds.SetListenerPosition(listener_position);
 	// Remove unused sounds
 	m_sounds.RemoveStoppedSounds();
 }
