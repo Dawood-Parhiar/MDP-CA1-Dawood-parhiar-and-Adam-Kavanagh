@@ -168,11 +168,11 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kPlayer2Ship, "Media/EnemyShips/ship13.png");
 	m_textures.Load(TextureID::kMountains, "Media/Textures/mountain_area.png");
 	m_textures.Load(TextureID::kCoin, "Media/Textures/coin.png");
+	m_textures.Load(TextureID::kCannon, "Media/Textures/cannon.png");
 }
 
 void World::BuildMountains()
 {
-
 	for (int i = 0; i < 10; i++)
 	{	//Add The mountains in the scene
 		sf::Texture& mountain_texture = m_textures.Get(TextureID::kMountains);
@@ -181,7 +181,6 @@ void World::BuildMountains()
 		m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(mountain));
 	}
 }
-
 
 void World::DropCoins()
 {
@@ -211,7 +210,6 @@ void World::SpawnInitialCoins()
 {
 	for (int i = 0; i < 20; ++i)
 	{
-
 		DropCoins(sf::Vector2f(Utility::RandomInt(800), Utility::RandomInt(3000)));
 	}
 }
@@ -370,7 +368,7 @@ sf::FloatRect World::GetBattleFieldBounds() const
 void World::DestroyEntitiesOutsideView()
 {
 	Command command;
-	command.category = static_cast<int>(ReceiverCategories::kPlayer2Ship) | static_cast<int>(ReceiverCategories::kProjectile);
+	command.category = static_cast<int>(ReceiverCategories::kEnemyShip) | static_cast<int>(ReceiverCategories::kProjectile);
 	command.action = DerivedAction<Entity>([this](Entity& e, sf::Time dt)
 		{
 			//Does the object intersect with the battlefield
@@ -384,11 +382,9 @@ void World::DestroyEntitiesOutsideView()
 
 void World::GuideMissiles()
 {
-
-
 	//Target the closest enemy in the radius
 	Command enemyCollector;
-	enemyCollector.category = static_cast<int>(ReceiverCategories::kPlayer2Ship) & static_cast<int>(ReceiverCategories::kEnemyShip);
+	enemyCollector.category = static_cast<int>(ReceiverCategories::kEnemyProjectile) & static_cast<int>(ReceiverCategories::kEnemyShip);
 	enemyCollector.action = DerivedAction<Ship>([this](Ship& enemy, sf::Time)
 		{
 			if (!enemy.IsDestroyed())
@@ -490,15 +486,6 @@ void World::HandleCollisions()
 			player.Damage(enemy.GetHitPoints());
 			enemy.Destroy();
 		}
-		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kPlayer2Ship))
-		{
-			auto& player = static_cast<Ship&>(*pair.first);
-			auto& player2 = static_cast<Ship&>(*pair.second);
-			//Collision response
-			player.Damage(player2.GetHitPoints());
-			player2.Damage(player.GetHitPoints());
-		}
-
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kPickup))
 		{
 			auto& player = static_cast<Ship&>(*pair.first);
@@ -508,7 +495,7 @@ void World::HandleCollisions()
 			pickup.Destroy();
 			player.PlayLocalSound(m_command_queue, SoundEffect::kCollectPickup);
 		}
-		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyProjectile) || MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kEnemyProjectile))
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyProjectile))
 		{
 			auto& ship = static_cast<Ship&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
@@ -517,7 +504,7 @@ void World::HandleCollisions()
 			projectile.Destroy();
 		}
 
-		else if (MatchesCategories(pair, ReceiverCategories::kEnemyShip, ReceiverCategories::kAlliedProjectile) || MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kAlliedProjectile))
+		else if (MatchesCategories(pair, ReceiverCategories::kEnemyShip, ReceiverCategories::kAlliedProjectile))
 		{
 			auto& ship = static_cast<Ship&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
@@ -527,7 +514,7 @@ void World::HandleCollisions()
 		}
 
 		//if hits the mountain
-		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kObstacle) || MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kObstacle))
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kObstacle))
 		{
 			auto& ship = static_cast<Ship&>(*pair.first);
 			auto& mountain = static_cast<Obstacle&>(*pair.second);
@@ -536,14 +523,6 @@ void World::HandleCollisions()
 		}
 		//coins collision
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kCoin))
-		{
-			auto& ship = static_cast<Ship&>(*pair.first);
-			auto& coin = static_cast<Pickup&>(*pair.second);
-			//Collision response
-			coin.Apply(ship);
-			coin.Destroy();
-		}
-		else if (MatchesCategories(pair, ReceiverCategories::kPlayer2Ship, ReceiverCategories::kCoin))
 		{
 			auto& ship = static_cast<Ship&>(*pair.first);
 			auto& coin = static_cast<Pickup&>(*pair.second);
@@ -575,27 +554,5 @@ void World::UpdateSounds()
 	m_sounds.RemoveStoppedSounds();
 }
 
-void World::InitializePlayers()
-{
-
-	//player 1's ship
-	std::unique_ptr<Ship> ship1(new Ship(ShipType::kPirateShip, m_textures, m_fonts));
-	m_player_ships.push_back(ship1.get());
-	m_player_ships.at(0) = ship1.get();
-	m_player_ships.at(0)->setPosition(m_spawn_position);
-	m_player_ships.at(0)->SetVelocity(50.f, m_scrollspeed);
-
-	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship1));
-
-
-	//player 2's ship
-	/*std::unique_ptr<Ship> ship2(new Ship(ShipType::kPlayer2Ship, m_textures, m_fonts));
-	m_player_ships.push_back(ship2.get());
-	m_player_ships.at(1) = ship2.get();
-	m_player_ships.at(1)->setPosition(300.f , m_spawn_position.y);
-	m_player_ships.at(1)->SetVelocity(50.f, m_scrollspeed);
-
-	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(ship2));*/
-}
 
 

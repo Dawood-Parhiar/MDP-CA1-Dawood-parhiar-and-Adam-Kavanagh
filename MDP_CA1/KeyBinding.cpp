@@ -1,10 +1,8 @@
 ﻿#include "KeyBinding.h"
-
 #include <string>
 #include <algorithm>
 #include <iostream>
 #include <SFML/Window/Keyboard.hpp>
-
 #include "Action.hpp"
 
 KeyBinding::KeyBinding(int control_preconfiguration)

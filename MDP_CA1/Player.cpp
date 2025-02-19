@@ -49,38 +49,6 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue)
         command_queue.Push(m_action_binding[action]);
 
 }
-//
-//void Player::AssignKey(Action action, sf::Keyboard::Key key)
-//{
-//    //Remove keys that are currently bound to the action
-//    for (auto itr = m_key_binding.begin(); itr != m_key_binding.end();)
-//    {
-//        if (itr->second == action)
-//        {
-//            m_key_binding.erase(itr++);
-//        }
-//        else
-//        {
-//            ++itr;
-//        }
-//    }
-//    m_key_binding[key] = action;
-//
-//}
-//
-//sf::Keyboard::Key Player::GetAssignedKey(Action action) const
-//{
-//    for (auto pair : m_key_binding)
-//    {
-//        if (pair.second == action)
-//        {
-//            return pair.first;
-//        }
-//    }
-//  
-//    return sf::Keyboard::Unknown;
-//}
-
 void Player::SetMissionStatus(MissionStatus status)
 {
     m_current_mission_status = status;
@@ -117,12 +85,6 @@ void Player::InitialiseActions()
     	a.rotate(0.5f);
             
 	    });
-
-    // m_action_binding[Action::kBulletFire].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
-    //     {
-    //         a.Fire();
-    //     }
-    // );
 
     m_action_binding[Action::kMissileFire].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
         {

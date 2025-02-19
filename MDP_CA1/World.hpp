@@ -56,7 +56,6 @@ private:
 	void HandleCollisions();
 	void UpdateSounds();
 
-	void InitializePlayers();
 
 
 private:

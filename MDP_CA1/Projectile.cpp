@@ -58,7 +58,6 @@ bool Projectile::IsGuided() const
     return m_type == ProjectileType::kMissile;
 }
 
-
 unsigned int Projectile::GetCategory() const
 {
     if (m_type == ProjectileType::kEnemyCannonBall)

@@ -157,6 +157,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Cannon.cpp" />
     <ClCompile Include="GameWinState.cpp" />
     <ClCompile Include="KeyBinding.cpp" />
     <ClCompile Include="Obstacle.cpp" />
@@ -201,6 +202,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.hpp" />
+    <ClInclude Include="Cannon.hpp" />
     <ClInclude Include="GameWinState.hpp" />
     <ClInclude Include="KeyBinding.h" />
     <ClInclude Include="Obstacle.hpp" />

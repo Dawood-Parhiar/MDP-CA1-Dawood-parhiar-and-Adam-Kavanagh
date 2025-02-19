@@ -4,7 +4,7 @@ enum class ReceiverCategories
 	kNone = 0,
 	kScene = 1 << 0,
 	kPlayerShip = 1 << 1,
-	kPlayer2Ship = 1 << 2,
+	kAlliedShip = 1 << 2,
 	kEnemyShip = 1 << 3,
 	kAlliedProjectile = 1 << 4,
 	kEnemyProjectile = 1 << 5,
@@ -14,7 +14,7 @@ enum class ReceiverCategories
 	kObstacle = 1 << 9,
 	kCoin = 1 << 10,
 
-	kShip = kPlayerShip | kPlayer2Ship | kEnemyShip,
+	kShip = kPlayerShip | kAlliedShip | kEnemyShip,
 	kProjectile = kAlliedProjectile | kEnemyProjectile
 };
 

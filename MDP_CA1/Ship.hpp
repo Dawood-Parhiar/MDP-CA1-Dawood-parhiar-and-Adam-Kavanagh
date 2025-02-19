@@ -7,6 +7,7 @@
 #include "ProjectileType.hpp"
 #include <SFML/Graphics/Sprite.hpp>
 #include "Animation.hpp"
+#include "Cannon.hpp"
 
 class Ship : public Entity
 {
@@ -82,5 +83,7 @@ private:
 
 	sf::RenderTarget* m_render_target;
 	int m_id;
+
+	std::unique_ptr<Cannon> m_cannon;
 };
 

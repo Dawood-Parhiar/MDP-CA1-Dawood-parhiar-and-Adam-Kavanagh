@@ -21,8 +21,8 @@ TextureID ToTextureID(ShipType type)
 	case ShipType::kPirateShip:
 		return TextureID::kPirateShip;
 		break;
-	/*case ShipType::kPlayer2Ship:
-		return TextureID::kPlayer2Ship;
+	/*case ShipType::kAlliedShip:
+		return TextureID::kAlliedShip;
 		break;*/
 	case ShipType::kEnemyShip1:
 		return TextureID::kEnemyShip1;
@@ -51,7 +51,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_is_firing(false)
 	, m_is_launching_missile(false)
 	, m_fire_countdown(sf::Time::Zero)
-	, m_missile_ammo(20)
+	, m_missile_ammo(1)
 	, m_is_marked_for_removal(false)
 	, m_show_explosion(true)
 	, m_spawned_pickup(false)
@@ -59,11 +59,14 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	, original_x(0.f)
 	, original_y(0.f)
 	,m_id(0)
+	,m_cannon(std::make_unique<Cannon>(textures))
 
 {
 	//positions for animation of the ship
 	original_x = m_sprite.getPosition().x;
 	original_y = m_sprite.getPosition().y;
+
+	AttachChild(std::move(m_cannon));
 	
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
 	m_explosion.SetNumFrames(16);
@@ -71,12 +74,12 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	Utility::CentreOrigin(m_sprite);
 	Utility::CentreOrigin(m_explosion);
 
-	/* No Bullets in the game
-	 *m_fire_command.category = static_cast<int>(ReceiverCategories::kScene);
+	 //No Bullets in the game
+	 m_fire_command.category = static_cast<int>(ReceiverCategories::kScene);
 	m_fire_command.action = [this, &textures](SceneNode& node, sf::Time dt)
 		{
 			CreateBullet(node, textures);
-		};*/
+		};
 
 	m_missile_command.category = static_cast<int>(ReceiverCategories::kScene);
 	m_missile_command.action = [this, &textures](SceneNode& node, sf::Time dt)
@@ -97,7 +100,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 
 	
 
-	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayerShip) || Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayer2Ship))
+	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayerShip))// || Ship::GetCategory() == static_cast<int>(ReceiverCategories::kAlliedShip))
 	{
 		m_missile_ammo = 20;
 		std::string* missile_ammo = new std::string("");
@@ -129,7 +132,7 @@ unsigned int Ship::GetCategory() const
 	{
 		return static_cast<unsigned int>(ReceiverCategories::kPlayerShip);
 	}
-	return static_cast<unsigned int>(ReceiverCategories::kPlayer2Ship);
+	return static_cast<unsigned int>(ReceiverCategories::kEnemyShip);
 
 }
 
@@ -164,9 +167,6 @@ void Ship::UpdateTexts()
 	m_health_display->SetString(std::to_string(GetHitPoints()) + "HP");
 	m_health_display->setPosition(0.f, 50.f);
 	m_health_display->setRotation(-getRotation());
-
-	
-
 	if (m_missile_display)
 	{
 		m_missile_display->setPosition(0.f, 90.f);
@@ -219,11 +219,12 @@ void Ship::Fire()
 
 void Ship::LaunchMissile()
 {
-	if (m_missile_ammo > 0)
+	//Dawood Parhiar D00248313
+	if (m_missile_ammo > 0 && Table[static_cast<int>(m_type)].m_fire_interval != sf::Time::Zero)
 	{
 		m_is_launching_missile = true;
 		--m_missile_ammo;
-
+		
 	}
 }
 
@@ -245,7 +246,6 @@ void Ship::CreateBullet(SceneNode& node, const TextureHolder& textures) const
 		CreateProjectile(node, type, 0.5f, 0.5f, textures);
 		break;
 	}
-	
 }
 
 void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
@@ -290,7 +290,6 @@ void Ship::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 	else
 	{
 		target.draw(m_sprite, states);
-		Aim();
 	}
 }
 
@@ -328,8 +327,6 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 	//Check if bullets or misiles are fired
 	CheckProjectileLaunch(dt, commands);
-
-	
 }
 
 void Ship::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
@@ -337,7 +334,7 @@ void Ship::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 	
 	if (!IsAllied())
 	{
-		//Fire();
+		//LaunchMissile();
 	}
 
 	if (m_is_firing && m_fire_countdown <= sf::Time::Zero)
@@ -457,42 +454,7 @@ int Ship::GetId()
 
 void Ship::Aim() const
 {
-	////draw an aim as a Vertex of lines from the ship so it simulates the ship is aiming towrads its target.
 	
-	if (!m_render_target) return;
-	
-	// Draw an aiming arc on the target
-	const float radius = 300.f; 
-	const float arcAngle = 90.f; 
-	const int numSegments = 50;
-	const float transparency = 128; 
-
-	// Base position and rotation of the ship
-	sf::Vector2f shipPosition = GetWorldPosition();
-	float shipRotation = getRotation(); // Assuming GetRotation() gives the ship's current angle in degrees
-
-	// Create the aiming arc
-	sf::VertexArray aimingArc(sf::TriangleStrip, (numSegments + 1) * 2);
-
-	for (int i = 0; i <= numSegments; ++i)
-	{
-		// Calculate the angle for this segment
-		float angle = shipRotation - arcAngle / 2.f + (arcAngle * i / numSegments);
-		float angleRadians = Utility::ToRadians(angle);
-
-		// Outer and inner points for the thick line
-		sf::Vector2f outerPoint = shipPosition + sf::Vector2f(radius * std::cos(angleRadians), radius * std::sin(angleRadians));
-		sf::Vector2f innerPoint = shipPosition + sf::Vector2f((radius - 20.f) * std::cos(angleRadians), (radius - 20.f) * std::sin(angleRadians)); // Adjust thickness
-
-		// Add points to the vertex array
-		aimingArc[i * 2].position = outerPoint;
-		aimingArc[i * 2].color = sf::Color(255, 255, 255, transparency); // Transparent white
-		aimingArc[i * 2 + 1].position = innerPoint;
-		aimingArc[i * 2 + 1].color = sf::Color(255, 255, 255, transparency);
-	}
-
-	// Draw the aiming arc on the target
-	m_render_target->draw(aimingArc);
 }
 
 
