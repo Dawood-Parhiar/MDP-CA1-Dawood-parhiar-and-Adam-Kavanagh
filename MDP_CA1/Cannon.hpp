@@ -1,15 +1,18 @@
-#pragma once
+﻿#pragma once
+
 #include "SceneNode.hpp"
 #include "ResourceHolder.hpp"
 #include "ResourceIdentifiers.hpp"
 
+
+//Dawood Parhiar D00248313
 class Cannon : public SceneNode
 {
 public:
     explicit Cannon(const TextureHolder& textures);
 
-    void RotateLeft();
-    void RotateRight();
+    void SetRotationInput(float rotation);
+    sf::Vector2f GetMouthPosition() const;
 
     virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands) override;
     virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const override;
@@ -17,5 +20,6 @@ public:
 private:
     sf::Sprite m_sprite;
     float m_rotationSpeed;
+    float m_rotationInput;  
 };
 

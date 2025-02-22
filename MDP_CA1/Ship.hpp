@@ -38,6 +38,7 @@ public:
 	void MoveShip(sf::Time dt, float speed);
 	void SetId(int id);
 	int GetId();
+	Cannon* GetCannon() const;
 
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
@@ -47,6 +48,9 @@ private:
 	void CreatePickup(SceneNode& node, const TextureHolder& textures) const;
 	void CheckPickupDrop(CommandQueue& commands);
 	void UpdateRollAnimation(sf::Time dt);
+
+	
+
 
 private:
 	ShipType m_type;
@@ -85,5 +89,6 @@ private:
 	int m_id;
 
 	std::unique_ptr<Cannon> m_cannon;
+	Cannon* m_cannon_ptr = nullptr;
 };
 

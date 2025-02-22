@@ -6,6 +6,7 @@ enum class Action
 	kMissileFire,
 	kRotateLeft,
 	kRotateRight,
-	kAim,
+	kRotateCannonLeft,
+	kRotateCannonRight,
 	kActionCount
 };

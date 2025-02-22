@@ -91,13 +91,22 @@ void Player::InitialiseActions()
             a.LaunchMissile();
         }
     );
-    m_action_binding[Action::kAim].action = DerivedAction<Ship>([this](Ship& a, sf::Time dt)
+    m_action_binding[Action::kRotateCannonLeft].action = DerivedAction<Ship>([this](Ship& s, sf::Time dt)
     {
-       
-        a.Aim();
+            if (s.GetCannon())
+            {
+                s.GetCannon()->SetRotationInput(-0.5);
+            }
         
     });
+    m_action_binding[Action::kRotateCannonRight].action = DerivedAction<Ship>([this](Ship& s, sf::Time dt)
+        {
+            if (s.GetCannon())
+            {
+                s.GetCannon()->SetRotationInput(0.5);
+            }
 
+        });
 }
 
 bool Player::IsRealTimeAction(Action action)
@@ -108,7 +117,8 @@ bool Player::IsRealTimeAction(Action action)
     case Action::kMoveUp:
     case Action::kRotateLeft:
     case Action::kRotateRight:
-    case Action::kAim:
+    case Action::kRotateCannonLeft:
+    case Action::kRotateCannonRight:
     //case Action::kMissileFire:
         return true;
     default:

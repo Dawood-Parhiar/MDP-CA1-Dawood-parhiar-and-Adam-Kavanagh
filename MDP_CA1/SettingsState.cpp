@@ -10,23 +10,15 @@ SettingsState::SettingsState(StateStack& stack, Context context)
 {
 	m_background_sprite.setTexture(context.textures->Get(TextureID::kTitleScreen));
 
-	// //Build key binding buttons and labels
-	// AddButtonLabel(Action::kMoveUp, 150.f, "Move Up", context);
-	// AddButtonLabel(Action::kMoveDown, 200.f, "Move Down", context);
-	// AddButtonLabel(Action::kMoveRight, 250.f, "Move Right", context);
-	// AddButtonLabel(Action::kMoveLeft, 300.f, "Move Left", context);
-	// AddButtonLabel(Action::kBulletFire, 350.f, "Fire", context);
-	// AddButtonLabel(Action::kMissileFire, 400.f, "Missile Fire", context);
-
 	for (std::size_t x = 0; x < 2; ++x)
 	{
 		AddButtonLabel(static_cast<int>(Action::kMoveUp), x, 0, "Move Up", context);
 		AddButtonLabel(static_cast<int>(Action::kMoveDown), x, 1, "Move Down", context);
-		//AddButtonLabel(static_cast<int>(Action::kBulletFire), x, 4, "Fire", context);
-		AddButtonLabel(static_cast<int>(Action::kMissileFire), x, 2, "Missile", context);
-		AddButtonLabel(static_cast<int>(Action::kRotateLeft), x, 3, "Rotate Left", context);
-		AddButtonLabel(static_cast<int>(Action::kRotateRight), x, 4, "Rotate Right", context);
-		AddButtonLabel(static_cast<int>(Action::kAim), x, 5, "Aim", context);
+		AddButtonLabel(static_cast<int>(Action::kRotateLeft), x, 2, "Rotate Left", context);
+		AddButtonLabel(static_cast<int>(Action::kRotateRight), x, 3, "Rotate Right", context);
+		AddButtonLabel(static_cast<int>(Action::kMissileFire), x, 4, "Missile", context);
+		AddButtonLabel(static_cast<int>(Action::kRotateCannonLeft), x, 5, "Rotate Cannon Left", context);
+		AddButtonLabel(static_cast<int>(Action::kRotateCannonRight), x, 6, "Rotate Cannon Right", context);
 	}
 	UpdateLabels();
 

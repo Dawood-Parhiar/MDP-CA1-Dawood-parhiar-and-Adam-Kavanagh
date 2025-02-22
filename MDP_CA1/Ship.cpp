@@ -59,14 +59,18 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	, original_x(0.f)
 	, original_y(0.f)
 	,m_id(0)
-	,m_cannon(std::make_unique<Cannon>(textures))
+	,m_cannon()
 
 {
 	//positions for animation of the ship
 	original_x = m_sprite.getPosition().x;
 	original_y = m_sprite.getPosition().y;
 
-	AttachChild(std::move(m_cannon));
+	m_cannon = std::make_unique<Cannon>(textures);
+	m_cannon->setPosition(getPosition());
+
+	m_cannon_ptr = m_cannon.get();
+	AttachChild(Ptr(m_cannon_ptr));
 	
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
 	m_explosion.SetNumFrames(16);
@@ -121,8 +125,6 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	std::unique_ptr<EmitterNode> splashes(new EmitterNode(ParticleType::kWaterSplashes));
 	splashes->setPosition(0.f, GetBoundingRect().height/2.f);
 	AttachChild(std::move(splashes));
-
-	
 
 }
 
@@ -224,7 +226,7 @@ void Ship::LaunchMissile()
 	{
 		m_is_launching_missile = true;
 		--m_missile_ammo;
-		
+
 	}
 }
 
@@ -250,21 +252,44 @@ void Ship::CreateBullet(SceneNode& node, const TextureHolder& textures) const
 
 void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
 {
+	//std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
+
+	//sf::Vector2f offset(x_offset * Utility::ToRadians(getRotation()), y_offset * Utility::ToRadians(getRotation()));
+	////fire the projectile from the center of the ship
+	//sf::Vector2f velocity(std::cos(getRotation() * 3.14159f / 180.f) * 300.f,  // Speed in x-direction
+	//	std::sin(getRotation() * 3.14159f / 180.f) * 300.f);// fire the projectile horizontally
+
+	//float sign = IsAllied() ? -1.f : 1.f;
+
+	//projectile->setPosition(GetWorldPosition() + offset);
+	///*sf::Vector2f spawnPosition = m_cannon->GetMouthPosition();
+	//projectile->setPosition(spawnPosition);*/
+	//projectile->SetVelocity(velocity* sign);
+
+	//if (type == ProjectileType::kMissile)
+	//{
+	//	projectile->SetLaunchPosition(GetWorldPosition() + offset);
+	//	projectile->SetMaxRadius(300.f);
+	//}
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
 
-	sf::Vector2f offset(x_offset * Utility::ToRadians(getRotation()), y_offset * Utility::ToRadians(getRotation()));
-	//fire the projectile from the center of the ship
-	sf::Vector2f velocity(std::cos(getRotation() * 3.14159f / 180.f) * 300.f,  // Speed in x-direction
-		std::sin(getRotation() * 3.14159f / 180.f) * 300.f);// fire the projectile horizontally
+	// Get the correct spawn position from the cannon's mouth
+	sf::Vector2f spawnPosition = m_cannon->GetMouthPosition();
+	projectile->setPosition(spawnPosition);
+
+	// Get the cannon's rotation to fire in the correct direction
+	float cannonRotation = m_cannon->getRotation();
+	float angleRad = Utility::ToRadians(cannonRotation); // Convert to radians
+
+	// Set velocity based on cannon direction
+	sf::Vector2f velocity(std::cos(angleRad) * 300.f, std::sin(angleRad) * 300.f);
 
 	float sign = IsAllied() ? -1.f : 1.f;
-
-	projectile->setPosition(GetWorldPosition() + offset);
-	projectile->SetVelocity(velocity* sign);
+	projectile->SetVelocity(velocity * sign);
 
 	if (type == ProjectileType::kMissile)
 	{
-		projectile->SetLaunchPosition(projectile->GetWorldPosition());
+		projectile->SetLaunchPosition(spawnPosition);
 		projectile->SetMaxRadius(300.f);
 	}
 
@@ -317,7 +342,10 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 		}
 		return;
 	}
-
+	if (m_cannon)
+	{
+		m_cannon->UpdateCurrent(dt, commands);
+	}
 	Entity::UpdateCurrent(dt, commands);
 	UpdateTexts();
 
@@ -410,6 +438,11 @@ void Ship::UpdateRollAnimation(sf::Time dt)
 		m_sprite.setRotation(tiltAngle);                       // Apply tilt to the sprite
 	}
 
+}
+
+Cannon* Ship::GetCannon() const
+{
+	return m_cannon_ptr;// ? m_cannon.get() : nullptr;
 }
 
 void Ship::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
