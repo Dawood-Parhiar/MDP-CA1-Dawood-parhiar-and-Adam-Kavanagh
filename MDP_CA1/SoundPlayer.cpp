@@ -19,14 +19,13 @@ namespace
 
 SoundPlayer::SoundPlayer()
 {
-	m_sound_buffers.Load(SoundEffect::kAlliedGunfire, "Media/Sound/AlliedGunfire.wav");
-	m_sound_buffers.Load(SoundEffect::kEnemyGunfire, "Media/Sound/EnemyGunfire.wav");
-	m_sound_buffers.Load(SoundEffect::kExplosion1, "Media/Sound/Explosion1.wav");
-	m_sound_buffers.Load(SoundEffect::kExplosion2, "Media/Sound/Explosion2.wav");
-	m_sound_buffers.Load(SoundEffect::kExplosion3, "Media/Sound/Death.wav");
-	m_sound_buffers.Load(SoundEffect::kLaunchMissile, "Media/Sound/CannonShot.wav");
-	m_sound_buffers.Load(SoundEffect::kCollectPickup, "Media/Sound/CollectPickup.wav");
-	m_sound_buffers.Load(SoundEffect::kButton, "Media/Sound/Button.wav");
+	m_sound_buffers.Load(SoundEffect::kAlliedGunfire, "Media/Sound/AlliedGunfire.wav"); // used for ?
+	m_sound_buffers.Load(SoundEffect::kEnemyGunfire, "Media/Sound/Ship-Ambience/Cannon/Cannon 1.wav");
+	m_sound_buffers.Load(SoundEffect::kExplosion1, "Media/Sound/Ship-Ambience/Cannon/Cannon and Shout/Fire 2 & Shout 2.wav");
+		m_sound_buffers.Load(SoundEffect::kExplosion2, "Media/Sound/Ship-Ambience/Cannon/Cannon and Shout/Fire 1 & Shout 1.wav");
+	m_sound_buffers.Load(SoundEffect::kLaunchMissile, "Media/Sound/Ship-Ambience/Cannon/Cannon and Shout/Fire 1 & Shout 1.wav");
+	m_sound_buffers.Load(SoundEffect::kCollectPickup, "Media/Sound/Ship-Ambience/Cannon/Cannon and Shout/Fire 3 & Shout 2.wav");
+	m_sound_buffers.Load(SoundEffect::kButton, "Media/Sound/Bell-Menu.wav");
 
 	// Listener points towards the screen (default in SFML)
 	sf::Listener::setDirection(0.f, 0.f, -1.f);
