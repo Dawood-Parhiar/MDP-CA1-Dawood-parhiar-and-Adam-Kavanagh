@@ -252,25 +252,26 @@ void Ship::CreateBullet(SceneNode& node, const TextureHolder& textures) const
 
 void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
 {
-	//std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
+	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
 
-	//sf::Vector2f offset(x_offset * Utility::ToRadians(getRotation()), y_offset * Utility::ToRadians(getRotation()));
-	////fire the projectile from the center of the ship
-	//sf::Vector2f velocity(std::cos(getRotation() * 3.14159f / 180.f) * 300.f,  // Speed in x-direction
-	//	std::sin(getRotation() * 3.14159f / 180.f) * 300.f);// fire the projectile horizontally
+	sf::Vector2f offset(x_offset * Utility::ToRadians(getRotation()), y_offset * Utility::ToRadians(getRotation()));
+	//fire the projectile from the center of the ship
+	sf::Vector2f velocity(std::cos(getRotation() * 3.14159f / 180.f) * 300.f,  // Speed in x-direction
+		std::sin(getRotation() * 3.14159f / 180.f) * 300.f);// fire the projectile horizontally
 
-	//float sign = IsAllied() ? -1.f : 1.f;
+	float sign = IsAllied() ? -1.f : 1.f;
 
-	//projectile->setPosition(GetWorldPosition() + offset);
-	///*sf::Vector2f spawnPosition = m_cannon->GetMouthPosition();
-	//projectile->setPosition(spawnPosition);*/
-	//projectile->SetVelocity(velocity* sign);
+	projectile->setPosition(GetWorldPosition() + offset);
+	/*sf::Vector2f spawnPosition = m_cannon->GetMouthPosition();
+	projectile->setPosition(spawnPosition);*/
+	projectile->SetVelocity(velocity* sign);
 
-	//if (type == ProjectileType::kMissile)
-	//{
-	//	projectile->SetLaunchPosition(GetWorldPosition() + offset);
-	//	projectile->SetMaxRadius(300.f);
-	//}
+	if (type == ProjectileType::kMissile)
+	{
+		projectile->SetLaunchPosition(GetWorldPosition() + offset);
+		projectile->SetMaxRadius(300.f);
+	}
+	/*
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
 
 	// Get the correct spawn position from the cannon's mouth
@@ -291,7 +292,7 @@ void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset
 	{
 		projectile->SetLaunchPosition(spawnPosition);
 		projectile->SetMaxRadius(300.f);
-	}
+	}*/
 
 	node.AttachChild(std::move(projectile));
 }
