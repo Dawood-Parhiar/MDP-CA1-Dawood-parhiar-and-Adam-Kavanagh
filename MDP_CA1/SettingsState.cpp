@@ -23,8 +23,8 @@ SettingsState::SettingsState(StateStack& stack, Context context)
 	UpdateLabels();
 
 	auto back_button = std::make_shared<gui::Button>(context);
-	back_button->setPosition(80.f, 475.f);
-	back_button->SetText("Back");
+	back_button->setPosition(350, 200.f);
+	back_button->SetText("Return");
 	back_button->SetCallback(std::bind(&SettingsState::RequestStackPop, this));
 	m_gui_container.Pack(back_button);
 }
