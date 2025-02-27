@@ -29,7 +29,7 @@ namespace gui
 
 	private:
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
-		void ChangeTexture(ButtonType buttonType);
+
 
 	private:
 		Callback m_callback;
@@ -37,6 +37,9 @@ namespace gui
 		sf::Text m_text;
 		bool m_is_toggle;
 		SoundPlayer& m_sounds;
+		const sf::Texture& m_normal_texture;
+		const sf::Texture& m_selected_texture;
+		const sf::Texture& m_activated_texture;
 	};
 }
 

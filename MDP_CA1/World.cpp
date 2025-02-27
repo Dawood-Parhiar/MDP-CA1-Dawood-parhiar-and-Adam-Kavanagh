@@ -101,6 +101,7 @@ Ship* World::AddShip(int id)
 	std::unique_ptr<Ship> player(new Ship(ShipType::kPirateShip, m_textures, m_fonts));
 	player->setPosition(m_camera.getCenter());
 	player->SetId(id);
+	
 
 	m_player_ships.emplace_back(player.get());
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(player));
@@ -368,7 +369,7 @@ sf::FloatRect World::GetBattleFieldBounds() const
 void World::DestroyEntitiesOutsideView()
 {
 	Command command;
-	command.category = static_cast<int>(ReceiverCategories::kEnemyShip) | static_cast<int>(ReceiverCategories::kProjectile);
+	command.category = static_cast<int>(ReceiverCategories::kEnemyShip) | static_cast<int>(ReceiverCategories::kProjectile) | static_cast<int>(ReceiverCategories::kCannon);
 	command.action = DerivedAction<Entity>([this](Entity& e, sf::Time dt)
 		{
 			//Does the object intersect with the battlefield
@@ -384,7 +385,7 @@ void World::GuideMissiles()
 {
 	//Target the closest enemy in the radius
 	Command enemyCollector;
-	enemyCollector.category = static_cast<int>(ReceiverCategories::kEnemyProjectile) & static_cast<int>(ReceiverCategories::kEnemyShip);
+	enemyCollector.category =  static_cast<int>(ReceiverCategories::kEnemyShip);
 	enemyCollector.action = DerivedAction<Ship>([this](Ship& enemy, sf::Time)
 		{
 			if (!enemy.IsDestroyed())
@@ -520,6 +521,7 @@ void World::HandleCollisions()
 			auto& mountain = static_cast<Obstacle&>(*pair.second);
 			//Collision response
 			ship.Damage(10);
+			
 		}
 		//coins collision
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kCoin))

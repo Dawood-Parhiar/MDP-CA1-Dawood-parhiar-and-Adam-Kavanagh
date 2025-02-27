@@ -5,9 +5,11 @@
 Cannon::Cannon(const TextureHolder& textures)
     : m_sprite(textures.Get(TextureID::kCannon)),
     m_rotationSpeed(100.f),  
-    m_rotationInput(0.f) 
+    m_rotationInput(0.f),
+	Entity(1)
 {
     Utility::CentreOrigin(m_sprite);
+    
 }
 
 void Cannon::SetRotationInput(float rotation)

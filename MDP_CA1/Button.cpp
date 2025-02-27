@@ -4,12 +4,15 @@
 #include "ButtonType.hpp"
 
 gui::Button::Button(State::Context context)
-    : m_sprite(context.textures->Get(TextureID::kButtons))
-    , m_text("", context.fonts->Get(Font::kMain), 16)
-    , m_is_toggle(false)
+    :
+		m_normal_texture(context.textures->Get(TextureID::kButtonNormal))
+    , m_selected_texture(context.textures->Get(TextureID::kButtonSelected))
+    , m_activated_texture(context.textures->Get(TextureID::kButtonActivated))
+    ,m_text("", context.fonts->Get(Font::kMain), 16)
     , m_sounds(*context.sounds)
+	, m_is_toggle(false)
 {
-    ChangeTexture(ButtonType::kNormal);
+    m_sprite.setTexture(m_normal_texture);
     sf::FloatRect bounds = m_sprite.getLocalBounds();
     m_text.setPosition(bounds.width / 2, bounds.height / 2);
 }
@@ -38,13 +41,13 @@ bool gui::Button::IsSelectable() const
 void gui::Button::Select()
 {
     Component::Select();
-    ChangeTexture(ButtonType::kSelected);
+    m_sprite.setTexture(m_selected_texture);
 }
 
 void gui::Button::Deselect()
 {
     Component::Deselect();
-    ChangeTexture(ButtonType::kNormal);
+    m_sprite.setTexture(m_normal_texture);
 }
 
 void gui::Button::Activate()
@@ -54,7 +57,7 @@ void gui::Button::Activate()
     //If toggle button then show the button is activated
     if (m_is_toggle)
     {
-        ChangeTexture(ButtonType::kPressed);
+        m_sprite.setTexture(m_activated_texture);
     }
     if (m_callback)
     {
@@ -74,11 +77,11 @@ void gui::Button::Deactivate()
     {
         if (IsSelected())
         {
-            ChangeTexture(ButtonType::kSelected);
+            m_sprite.setTexture(m_selected_texture);
         }
         else
         {
-            ChangeTexture(ButtonType::kNormal);
+            m_sprite.setTexture(m_normal_texture);
         }
     }
 }
@@ -92,11 +95,4 @@ void gui::Button::draw(sf::RenderTarget& target, sf::RenderStates states) const
     states.transform *= getTransform();
     target.draw(m_sprite, states);
     target.draw(m_text, states);
-}
-
-
-void gui::Button::ChangeTexture(ButtonType buttonType)
-{
-    sf::IntRect textureRect(0, 50 * static_cast<int>(buttonType), 200, 50);
-    m_sprite.setTextureRect(textureRect);
 }

@@ -33,7 +33,7 @@ public:
 	bool IsMarkedForRemoval() const override;
 	void PlayLocalSound(CommandQueue& commands, SoundEffect effect);
 	//void RotateShip();
-	void Aim() const;
+	
 	void SetRenderTargets(sf::RenderTarget& target);
 	void MoveShip(sf::Time dt, float speed);
 	void SetId(int id);

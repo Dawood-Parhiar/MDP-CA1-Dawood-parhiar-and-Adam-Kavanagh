@@ -9,7 +9,6 @@ SceneNode::SceneNode(ReceiverCategories category):m_children(), m_parent(nullptr
 void SceneNode::AttachChild(Ptr child)
 {
     child->m_parent = this;
-    //Homework: Understand this -> Cherno
     m_children.emplace_back(std::move(child));
 }
 

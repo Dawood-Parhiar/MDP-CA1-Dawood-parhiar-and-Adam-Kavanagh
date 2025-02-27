@@ -59,7 +59,8 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	, original_x(0.f)
 	, original_y(0.f)
 	,m_id(0)
-	,m_cannon()
+	,m_cannon(nullptr)
+	,m_cannon_ptr(nullptr)
 
 {
 	//positions for animation of the ship
@@ -70,7 +71,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	m_cannon->setPosition(getPosition());
 
 	m_cannon_ptr = m_cannon.get();
-	AttachChild(Ptr(m_cannon_ptr));
+	AttachChild(std::move(m_cannon));
 	
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
 	m_explosion.SetNumFrames(16);
@@ -221,8 +222,11 @@ void Ship::Fire()
 
 void Ship::LaunchMissile()
 {
+
 	//Dawood Parhiar D00248313
-	if (m_missile_ammo > 0 && Table[static_cast<int>(m_type)].m_fire_interval != sf::Time::Zero)
+	ProjectileType type = IsAllied() ? ProjectileType::kAlliedCannonBall : ProjectileType::kEnemyCannonBall;
+
+	if (m_missile_ammo > 0 && Table[static_cast<int>(type)].m_fire_interval != sf::Time::Zero)
 	{
 		m_is_launching_missile = true;
 		--m_missile_ammo;
@@ -262,8 +266,6 @@ void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset
 	float sign = IsAllied() ? -1.f : 1.f;
 
 	projectile->setPosition(GetWorldPosition() + offset);
-	/*sf::Vector2f spawnPosition = m_cannon->GetMouthPosition();
-	projectile->setPosition(spawnPosition);*/
 	projectile->SetVelocity(velocity* sign);
 
 	if (type == ProjectileType::kMissile)
@@ -330,7 +332,7 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 		{
 			if (m_type == ShipType::kPirateShip)
 			{
-				SoundEffect soundEffect = SoundEffect::kExplosion3;
+				SoundEffect soundEffect = SoundEffect::kExplosion2;
 				PlayLocalSound(commands, soundEffect);
 			}
 			else
@@ -363,7 +365,9 @@ void Ship::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 	
 	if (!IsAllied())
 	{
-		//LaunchMissile();
+		
+			LaunchMissile();
+		
 	}
 
 	if (m_is_firing && m_fire_countdown <= sf::Time::Zero)
@@ -486,9 +490,5 @@ int Ship::GetId()
 	return m_id;
 }
 
-void Ship::Aim() const
-{
-	
-}
 
 

@@ -13,6 +13,7 @@ enum class ReceiverCategories
 	kSoundEffect = 1 << 8,
 	kObstacle = 1 << 9,
 	kCoin = 1 << 10,
+	kCannon = 1 << 11,
 
 	kShip = kPlayerShip | kAlliedShip | kEnemyShip,
 	kProjectile = kAlliedProjectile | kEnemyProjectile
