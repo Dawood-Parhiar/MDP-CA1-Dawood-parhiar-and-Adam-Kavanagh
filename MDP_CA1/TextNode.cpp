@@ -10,7 +10,7 @@ TextNode::TextNode(const FontHolder& fonts, std::string& text)
 void TextNode::SetString(const std::string& text)
 {
 	m_text.setString(text);
-	m_text.setFillColor(sf::Color::Red);
+	m_text.setFillColor(sf::Color::Black);
 	Utility::CentreOrigin(m_text);
 }
 

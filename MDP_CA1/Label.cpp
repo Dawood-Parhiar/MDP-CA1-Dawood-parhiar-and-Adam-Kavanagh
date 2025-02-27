@@ -14,6 +14,8 @@ bool gui::Label::IsSelectable() const
 void gui::Label::SetText(const std::string& text)
 {
     m_text.setString(text);
+    m_text.setFillColor(sf::Color::Black);
+    
 }
 
 void gui::Label::HandleEvent(const sf::Event& event)

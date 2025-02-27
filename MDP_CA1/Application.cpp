@@ -24,6 +24,7 @@ Application::Application() : m_window(sf::VideoMode(1024, 768), "States", sf::St
 	m_textures.Load(TextureID::kButtonActivated, "Media/Textures/MenuUI/StartSelected.jpg");
 	m_textures.Load(TextureID::kButtons, "Media/Textures/Buttons.png");
 	m_textures.Load(TextureID::kGameWonSprite, "Media/Textures/GameWon.jpeg");
+	m_textures.Load(TextureID::kMenuBoard, "Media/Textures/MenuUI/TITLE.jpg");
 
 
 	RegisterStates();

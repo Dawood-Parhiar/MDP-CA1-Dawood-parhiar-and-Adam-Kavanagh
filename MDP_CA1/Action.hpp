@@ -3,9 +3,9 @@ enum class Action
 {
 	kMoveUp,
 	kMoveDown,
-	kMissileFire,
-	kRotateLeft,
 	kRotateRight,
+	kRotateLeft,
+	kMissileFire,
 	kRotateCannonLeft,
 	kRotateCannonRight,
 	kActionCount
