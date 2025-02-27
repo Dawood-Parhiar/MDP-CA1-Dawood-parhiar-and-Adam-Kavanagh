@@ -10,7 +10,7 @@ SettingsState::SettingsState(StateStack& stack, Context context)
 {
 	m_background_sprite.setTexture(context.textures->Get(TextureID::kMenuBoard));
 
-	for (std::size_t x = 0; x < 2; ++x)
+	for (std::size_t x = 0; x < 2 ; ++x)
 	{
 		if (x == 0)
 		{
@@ -52,10 +52,7 @@ bool SettingsState::HandleEvent(const sf::Event& event)
 	bool is_key_binding = false;
 
 	//Iterate through all of the key binding buttons to see if they are being presssed, waiting for the user to enter a key
-
-	std::size_t totalActions = 4 + 3;
-
-	for (std::size_t action = 0; action < totalActions; ++action)
+	for (std::size_t action = 0; action < (static_cast<int>(Action::kActionCount)*2); ++action)
 	{
 		if (m_binding_buttons[action] && m_binding_buttons[action]->IsActive())
 		{
@@ -63,11 +60,11 @@ bool SettingsState::HandleEvent(const sf::Event& event)
 			if (event.type == sf::Event::KeyReleased)
 			{
 				// Player 1
-				if (action < 4)
-					GetContext().keys1->AssignKey(static_cast<Action>(action), event.key.code);
+				if (action < static_cast<int>(Action::kActionCount))
+				GetContext().keys1->AssignKey(static_cast<Action>(action), event.key.code);
 				// Player 2
-				else if (action >= 4)
-					GetContext().keys2->AssignKey(static_cast<Action>(action - static_cast<int>(Action::kActionCount)), event.key.code);
+				else
+				GetContext().keys2->AssignKey(static_cast<Action>(action - static_cast<int>(Action::kActionCount)), event.key.code);
 				m_binding_buttons[action]->Deactivate();
 			}
 			break;
@@ -88,28 +85,23 @@ bool SettingsState::HandleEvent(const sf::Event& event)
 
 void SettingsState::UpdateLabels()
 {
-	// Assign Player 1 keys
-	for (std::size_t i = 0; i < 4; ++i)  // P1 has 4 actions
+	// Update labels for Player 1's key bindings
+	for (std::size_t i = 0; i < static_cast<int>(Action::kActionCount); ++i)
 	{
 		auto action = static_cast<Action>(i);
 
+		// Update Player 1 key label
 		if (m_binding_labels[i])
 		{
 			sf::Keyboard::Key key1 = GetContext().keys1->GetAssignedKey(action);
 			m_binding_labels[i]->SetText(Utility::toString(key1));
 		}
-	}
 
-	// Assign Player 2 keys (starting from index 4)
-	for (std::size_t i = 0; i < 3; ++i)  // P2 has 3 actions
-	{
-		auto action = static_cast<Action>(i + 4);  // Offset by 4 for P2
-
-		std::size_t player2_index = i + 4;  // P2 starts at index 4
-		if (m_binding_labels[player2_index])
+		// Update Player 2 key label (offset by Action count)
+		if (m_binding_labels[i + static_cast<int>(Action::kActionCount)])
 		{
 			sf::Keyboard::Key key2 = GetContext().keys2->GetAssignedKey(action);
-			m_binding_labels[player2_index]->SetText(Utility::toString(key2));
+			m_binding_labels[i + static_cast<int>(Action::kActionCount)]->SetText(Utility::toString(key2));
 		}
 	}
 
@@ -118,16 +110,19 @@ void SettingsState::UpdateLabels()
 
 void SettingsState::AddButtonLabel(std::size_t index, std::size_t x, std::size_t y, const std::string& text, Context context)
 {
-	// For x==0, start at index 0, otherwise start at half of array
 	index += static_cast<int>(Action::kActionCount) * x;
-	
+
+	if (index >= m_binding_buttons.size())
+		return;
+
 	m_binding_buttons[index] = std::make_shared<gui::Button>(context);
 	m_binding_buttons[index]->setPosition(400.f * x + 100.f, 80.f * y + 200.f);
 	m_binding_buttons[index]->SetText(text);
 	m_binding_buttons[index]->SetToggle(true);
 
 	m_binding_labels[index] = std::make_shared<gui::Label>("", *context.fonts);
-	m_binding_labels[index]->setPosition(400.f * x + 350.f, 80.f * y + 240.f);
+	m_binding_labels[index]->setPosition(400.f * x + 350.f, 80.f * y + 200.f);
+
 	m_gui_container.Pack(m_binding_buttons[index]);
 	m_gui_container.Pack(m_binding_labels[index]);
 }
