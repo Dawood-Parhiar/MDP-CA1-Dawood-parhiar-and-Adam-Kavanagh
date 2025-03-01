@@ -5,7 +5,7 @@
 
 gui::Button::Button(State::Context context)
     :
-		m_normal_texture(context.textures->Get(TextureID::kButtonNormal))
+	  m_normal_texture(context.textures->Get(TextureID::kButtonNormal))
     , m_selected_texture(context.textures->Get(TextureID::kButtonSelected))
     , m_activated_texture(context.textures->Get(TextureID::kButtonActivated))
     ,m_text("", context.fonts->Get(Font::kMain), 16)

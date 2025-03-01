@@ -320,7 +320,7 @@ void World::SpawnEnemies()
 		SpawnPoint spawn = m_enemy_spawn_points.back();
 		std::unique_ptr<Ship> enemy(new Ship(spawn.m_type, m_textures, m_fonts));
 		enemy->setPosition(spawn.m_x, spawn.m_y);
-		enemy->setRotation(180);
+		enemy->setRotation(Utility::RandomInt(300));
 		m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(enemy));
 		m_enemy_spawn_points.pop_back();
 	}
@@ -423,7 +423,7 @@ void World::GuideMissiles()
 				return;
 			}
 
-			for (Ship* enemy : m_active_enemies)
+			/*for (Ship* enemy : m_active_enemies)
 			{
 				float enemy_distance = Distance(missile, *enemy);
 				if (enemy_distance < min_distance && enemy_distance <= missile.GetMaxRadius())
@@ -436,7 +436,7 @@ void World::GuideMissiles()
 			if (closest_enemy)
 			{
 				missile.GuideTowards(closest_enemy->GetWorldPosition());
-			}
+			}*/
 		});
 
 	m_command_queue.Push(enemyCollector);

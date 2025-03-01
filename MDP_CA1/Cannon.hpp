@@ -12,7 +12,7 @@ public:
 	Cannon(const TextureHolder& textures);
 
     void SetRotationInput(float rotation);
-    sf::Vector2f GetMouthPosition() const;
+	sf::Vector2f GetMouthPosition() const;
 
     virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands) override;
     virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const override;
@@ -20,6 +20,6 @@ public:
 private:
     sf::Sprite m_sprite;
     float m_rotationSpeed;
-    float m_rotationInput;  
+    float m_rotationInput;
 };
 

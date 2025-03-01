@@ -120,7 +120,7 @@ void SettingsState::AddButtonLabel(std::size_t index, std::size_t x, std::size_t
 	m_binding_buttons[index]->SetText(text);
 	m_binding_buttons[index]->SetToggle(true);
 
-	m_binding_labels[index] = std::make_shared<gui::Label>("", *context.fonts);
+	m_binding_labels[index] = std::make_shared<gui::Label>("", *context.fonts,*context.textures);
 	m_binding_labels[index]->setPosition(400.f * x + 350.f, 80.f * y + 200.f);
 
 	m_gui_container.Pack(m_binding_buttons[index]);

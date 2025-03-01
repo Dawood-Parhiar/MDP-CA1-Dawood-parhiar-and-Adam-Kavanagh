@@ -1,6 +1,7 @@
 #pragma once
 #include "Component.hpp"
 #include "ResourceIdentifiers.hpp"
+#include "State.hpp"
 
 namespace gui
 {
@@ -10,7 +11,7 @@ namespace gui
 		typedef std::shared_ptr<Label> Ptr;
 
 	public:
-		Label(const std::string& text, const FontHolder& fonts);
+		Label(const std::string& text, const FontHolder& fonts, const TextureHolder& textures);
 		virtual bool IsSelectable() const override;
 		void SetText(const std::string& text);
 		void HandleEvent(const sf::Event& event) override;
@@ -20,7 +21,7 @@ namespace gui
 
 	private:
 		sf::Text m_text;
-
+		sf::Sprite m_sprite;
 	};
 }
 

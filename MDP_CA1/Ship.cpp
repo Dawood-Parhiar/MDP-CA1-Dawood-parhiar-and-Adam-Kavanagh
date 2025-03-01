@@ -258,44 +258,54 @@ void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset
 {
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
 
-	sf::Vector2f offset(x_offset * Utility::ToRadians(getRotation()), y_offset * Utility::ToRadians(getRotation()));
-	//fire the projectile from the center of the ship
-	sf::Vector2f velocity(std::cos(getRotation() * 3.14159f / 180.f) * 300.f,  // Speed in x-direction
-		std::sin(getRotation() * 3.14159f / 180.f) * 300.f);// fire the projectile horizontally
-
-	float sign = IsAllied() ? -1.f : 1.f;
-
-	projectile->setPosition(GetWorldPosition() + offset);
-	projectile->SetVelocity(velocity* sign);
-
-	if (type == ProjectileType::kMissile)
+	if (!IsAllied())
 	{
-		projectile->SetLaunchPosition(GetWorldPosition() + offset);
-		projectile->SetMaxRadius(300.f);
+		sf::Vector2f enemyOffset(
+			x_offset * std::cos(Utility::ToRadians(getRotation())),
+			y_offset * std::sin(Utility::ToRadians(getRotation()))
+		);
+
+		// Reverse the direction by adding 180 degrees so they fire from cannon
+		float reversedAngleRad = Utility::ToRadians(getRotation() + 180.f);
+
+		// Compute the new velocity in the opposite direction
+		sf::Vector2f velocity(
+			std::cos(reversedAngleRad) * 300.f,  // Reverse X-direction
+			std::sin(reversedAngleRad) * 300.f   // Reverse Y-direction
+		);
+		float sign = 1.f;
+
+		projectile->setPosition(GetWorldPosition() + enemyOffset);
+		projectile->SetVelocity(velocity * sign);
+
+		if (type == ProjectileType::kMissile)
+		{
+			projectile->SetLaunchPosition(GetWorldPosition() + enemyOffset);
+			projectile->SetMaxRadius(300.f);
+		}
 	}
-	/*
-	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
-
-	// Get the correct spawn position from the cannon's mouth
-	sf::Vector2f spawnPosition = m_cannon->GetMouthPosition();
-	projectile->setPosition(spawnPosition);
-
-	// Get the cannon's rotation to fire in the correct direction
-	float cannonRotation = m_cannon->getRotation();
-	float angleRad = Utility::ToRadians(cannonRotation); // Convert to radians
-
-	// Set velocity based on cannon direction
-	sf::Vector2f velocity(std::cos(angleRad) * 300.f, std::sin(angleRad) * 300.f);
-
-	float sign = IsAllied() ? -1.f : 1.f;
-	projectile->SetVelocity(velocity * sign);
-
-	if (type == ProjectileType::kMissile)
+	else
 	{
-		projectile->SetLaunchPosition(spawnPosition);
-		projectile->SetMaxRadius(300.f);
-	}*/
+		// Get the correct spawn position from the cannon's mouth
+		sf::Vector2f spawnPosition = m_cannon_ptr->GetMouthPosition();
+		projectile->setPosition(spawnPosition);
 
+		// Get the cannon's rotation to fire in the correct direction
+		float cannonRotation = m_cannon_ptr->getRotation();
+		float angleRad = Utility::ToRadians(cannonRotation); // Convert to radians
+
+		// Set velocity based on cannon direction
+		sf::Vector2f velocity(std::cos(angleRad) * 300.f, std::sin(angleRad) * 300.f);
+
+		float sign = -1.f;
+		projectile->SetVelocity(velocity * sign);
+
+		if (type == ProjectileType::kMissile)
+		{
+			projectile->SetLaunchPosition(spawnPosition);
+			projectile->SetMaxRadius(300.f);
+		}
+	}
 	node.AttachChild(std::move(projectile));
 }
 
@@ -365,9 +375,7 @@ void Ship::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 	
 	if (!IsAllied())
 	{
-		
-			LaunchMissile();
-		
+		Fire();
 	}
 
 	if (m_is_firing && m_fire_countdown <= sf::Time::Zero)
@@ -447,7 +455,7 @@ void Ship::UpdateRollAnimation(sf::Time dt)
 
 Cannon* Ship::GetCannon() const
 {
-	return m_cannon_ptr;// ? m_cannon.get() : nullptr;
+	return m_cannon_ptr;
 }
 
 void Ship::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
