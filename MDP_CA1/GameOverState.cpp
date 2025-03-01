@@ -10,6 +10,9 @@ GameOverState::GameOverState(StateStack& stack, Context context, const std::stri
     , m_game_over_text()
     , m_elapsed_time(sf::Time::Zero)
 {
+    sf::Texture& texture = context.textures->Get(TextureID::kGameLoseSprite);
+    m_sprite.setTexture(texture);
+
     sf::Font& font = context.fonts->Get(Font::kMain);
     sf::Vector2f window_size(context.window->getSize());
 
@@ -32,6 +35,7 @@ void GameOverState::Draw()
     background_shape.setFillColor(sf::Color(0, 0, 0, 150));
     background_shape.setSize(window.getView().getSize());
 
+    window.draw(m_sprite);
     window.draw(background_shape);
     window.draw(m_game_over_text);
 }

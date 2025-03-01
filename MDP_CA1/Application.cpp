@@ -23,7 +23,8 @@ Application::Application() : m_window(sf::VideoMode(1024, 768), "States", sf::St
 	m_textures.Load(TextureID::kButtonSelected, "Media/Textures/MenuUI/OptionSelected.jpg");
 	m_textures.Load(TextureID::kButtonActivated, "Media/Textures/MenuUI/StartSelected.jpg");
 	m_textures.Load(TextureID::kButtons, "Media/Textures/Buttons.png");
-	m_textures.Load(TextureID::kGameWonSprite, "Media/Textures/GameWon.jpeg");
+	m_textures.Load(TextureID::kGameWonSprite, "Media/Textures/MenuUI/Victory.png");
+	m_textures.Load(TextureID::kGameLoseSprite, "Media/Textures/MenuUI/Defeat.png");
 	m_textures.Load(TextureID::kMenuBoard, "Media/Textures/MenuUI/TITLE.jpg");
 	m_textures.Load(TextureID::kLabel, "Media/Textures/MenuUI/LabelBg.png");
 

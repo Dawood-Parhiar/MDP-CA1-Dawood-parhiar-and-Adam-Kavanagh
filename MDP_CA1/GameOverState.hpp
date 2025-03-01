@@ -1,4 +1,6 @@
 #pragma once
+#include <SFML/Graphics/Sprite.hpp>
+
 #include "State.hpp"
 #include <SFML/Graphics/Text.hpp>
 
@@ -13,5 +15,6 @@ public:
 private:
 	sf::Text m_game_over_text;
 	sf::Time m_elapsed_time;
+	sf::Sprite m_sprite;
 };
 

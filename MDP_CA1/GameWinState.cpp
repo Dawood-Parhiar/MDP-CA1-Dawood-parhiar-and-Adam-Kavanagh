@@ -11,7 +11,6 @@ GameWinState::GameWinState(StateStack& stack, Context context, const std::string
     , m_elapsed_time(sf::Time::Zero)
 {
     sf::Texture& texture = context.textures->Get(TextureID::kGameWonSprite);
-
     m_bg_sprite.setTexture(texture);
 
     sf::Font& font = context.fonts->Get(Font::kMain);
@@ -33,7 +32,7 @@ void GameWinState::Draw()
 
     //Create a dark semi-transparent background
     sf::RectangleShape background_shape;
-    background_shape.setFillColor(sf::Color(0, 0, 0, 150));
+    background_shape.setFillColor(sf::Color(0, 0, 0, 200));
     background_shape.setSize(window.getView().getSize());
 
     window.draw(m_bg_sprite);
