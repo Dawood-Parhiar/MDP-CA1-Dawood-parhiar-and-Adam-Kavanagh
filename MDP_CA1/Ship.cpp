@@ -62,7 +62,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	,m_cannon(nullptr)
 	,m_cannon_ptr(nullptr)
 
-{
+{//Code changes from Dawood Parhiar D00248313 in Ship class
 	//positions for animation of the ship
 	original_x = m_sprite.getPosition().x;
 	original_y = m_sprite.getPosition().y;
@@ -256,6 +256,7 @@ void Ship::CreateBullet(SceneNode& node, const TextureHolder& textures) const
 
 void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
 {
+	//Debug and code help from Chatgpt https://chatgpt.com/share/67c3b95b-234c-800c-895c-f4a224fcee05 
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
 
 	if (!IsAllied())

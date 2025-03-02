@@ -5,7 +5,7 @@
 gui::Label::Label(const std::string& text, const FontHolder& fonts, const TextureHolder& textures)
     :m_text(text, fonts.Get(Font::kMain), 16)
 	
-{
+{//Code changes from Dawood Parhiar D00248313
     m_text.setFillColor(sf::Color::Black);
     m_sprite.setTexture(textures.Get(TextureID::kLabel));
     sf::FloatRect bounds = m_sprite.getLocalBounds();

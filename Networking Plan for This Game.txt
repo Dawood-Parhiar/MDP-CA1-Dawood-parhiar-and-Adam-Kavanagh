@@ -1,9 +1,11 @@
 To make this game a networked multiplayer game, I will use TCP (Transmission Control Protocol). A new State called multiplayer state will be preferred here instead of game state. multiplayer state will hold our Players lets say 15 or 30 max. we will draw our World that we have built, as this state will be extending from State class so we will handle input of our players and update by frames. The game will have a client-server based structure where server will know the realtime inputs and events requests(Packets) coming from the clients (players in our case). I would create a lobby system to support this game's multiplayer functionality, where player's would join a lobby and make themselves ready. if all ready or min players ready then the server will get a message to start the game and players get countdown of 5 saying game starts in 5 seconds. I would make the world a bit wider and longer to deal with the amount of players mentioned above e.g 16. the enemies NPCs available in the current version of the game may be taken out so the game will be players against players.
 
+Addition to the plan, we will be creating a system to assign one ship to 2 players in the lobby so 2 players can play the co-op game. because of this reason we now will have to think about showing the same perspective from player1 and player2 as in co-op point of view, which will basically track ship1 for example. 
+
 Summary of Implementation Steps
 Phase 1: Basic Networking Setup
 ✔️ Set up a TCP server to handle client connections.
-✔️ Create a lobby system where players can join, chat, and get ready.
+✔️ Create a lobby system where players can join, chat, and get ships ready.
 
 Phase 2: Synchronizing the Game World
 ✔️ Implement a MultiplayerState to handle networked gameplay.

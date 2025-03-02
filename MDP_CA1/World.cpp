@@ -27,7 +27,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 }
 
 void World::Update(sf::Time dt)
-{
+{//Code changes from Dawood Parhiar D00248313
 	
 	//Scroll the world  
 	m_camera.move(0, m_scrollspeed * dt.asSeconds());
@@ -62,7 +62,7 @@ void World::Update(sf::Time dt)
 }
 
 void World::Draw()
-{
+{//Code changes from Dawood Parhiar D00248313
 	if (PostEffect::IsSupported())
 	{
 		//Apply Water Effect to Background ---
@@ -70,7 +70,7 @@ void World::Draw()
 		m_scene_texture.setView(m_camera);
 		m_scene_texture.draw(m_scenegraph);
 		m_scene_texture.display();
-		//m_water_effect.Apply(m_scene_texture, m_target);  // Apply water effect to background
+		m_water_effect.Apply(m_scene_texture, m_target);  // Apply water effect to background
 
 		// Draw  Layers Normally ---
 		m_target.setView(m_camera);
@@ -97,7 +97,7 @@ CommandQueue& World::GetCommandQueue()
 }
 
 Ship* World::AddShip(int id)
-{
+{//Code changes from Dawood Parhiar D00248313
 	std::unique_ptr<Ship> player(new Ship(ShipType::kPirateShip, m_textures, m_fonts));
 	player->setPosition(m_camera.getCenter());
 	player->SetId(id);
@@ -109,7 +109,7 @@ Ship* World::AddShip(int id)
 }
 
 void World::RemoveShip(int id)
-{
+{//Code changes from Dawood Parhiar D00248313
 	Ship* ship = GetShip(id);
 	if (ship)
 	{
@@ -119,7 +119,7 @@ void World::RemoveShip(int id)
 }
 
 Ship* World::GetShip(int id) const
-{
+{//Code changes from Dawood Parhiar D00248313
 	for (Ship* a : m_player_ships)
 	{
 		if (a->GetId() == id)
@@ -131,7 +131,7 @@ Ship* World::GetShip(int id) const
 }
 
 bool World::HasAlivePlayer() const
-{
+{//Code changes from Dawood Parhiar D00248313
 	if (!m_player_ships.empty())
 	{
 			return true;
@@ -140,7 +140,7 @@ bool World::HasAlivePlayer() const
 }
 
 bool World::HasPlayerReachedEnd() const
-{
+{//Code changes from Dawood Parhiar D00248313
 	if (Ship* ship = GetShip(1))
 	{
 		return !m_world_bounds.contains(ship->getPosition());
@@ -150,7 +150,7 @@ bool World::HasPlayerReachedEnd() const
 
 
 void World::LoadTextures()
-{
+{//Code changes from Dawood Parhiar D00248313
 	m_textures.Load(TextureID::kPirateShip, "Media/Textures/ship.png");
 	m_textures.Load(TextureID::kEnemyShip1, "Media/EnemyShips/EnemyShip1.png");
 	m_textures.Load(TextureID::kMissile, "Media/Textures/cannon_ball.png");
@@ -173,7 +173,7 @@ void World::LoadTextures()
 }
 
 void World::BuildMountains()
-{
+{//Code changes from Dawood Parhiar D00248313
 	for (int i = 0; i < 10; i++)
 	{	//Add The mountains in the scene
 		sf::Texture& mountain_texture = m_textures.Get(TextureID::kMountains);
@@ -184,7 +184,7 @@ void World::BuildMountains()
 }
 
 void World::DropCoins()
-{
+{//Code changes from Dawood Parhiar D00248313
 	//Drop coins when an enemy is destroyed
 	Command command;
 	command.category = static_cast<int>(ReceiverCategories::kEnemyShip);
@@ -202,20 +202,20 @@ void World::DropCoins()
 }
 
 void World::DropCoins(sf::Vector2f position)
-{
+{//Code changes from Dawood Parhiar D00248313
 	std::unique_ptr<Pickup> coin(new Pickup(PickupType::kCoins, m_textures));
 	coin->setPosition(position);
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(coin));
 }
 void World::SpawnInitialCoins()
-{
+{//Code changes from Dawood Parhiar D00248313
 	for (int i = 0; i < 20; ++i)
 	{
 		DropCoins(sf::Vector2f(Utility::RandomInt(800), Utility::RandomInt(3000)));
 	}
 }
 void World::BuildScene()
-{
+{//Code changes from Dawood Parhiar D00248313
 	//Initialize the different layers
 	for (std::size_t i = 0; i < static_cast<int>(SceneLayers::kLayerCount); ++i)
 	{
@@ -280,7 +280,7 @@ void World::BuildScene()
 }
 
 void World::AdaptPlayerPosition()
-{
+{//Code changes from Dawood Parhiar D00248313
 	//keep each player on the screen
 	sf::FloatRect view_bounds = GetViewBounds();
 	const float border_distance = 40.f;
@@ -297,7 +297,7 @@ void World::AdaptPlayerPosition()
 }
 
 void World::AdaptPlayerVelocity()
-{
+{//Code changes from Dawood Parhiar D00248313
 	for (Ship* player : m_player_ships)
 	{
 		sf::Vector2f velocity = player->GetVelocity();
@@ -313,7 +313,7 @@ void World::AdaptPlayerVelocity()
 }
 
 void World::SpawnEnemies()
-{
+{//Code changes from Dawood Parhiar D00248313
 	//Spawn an enemy when it is relevant i.e when it is in the Battlefieldboudns
 	while (!m_enemy_spawn_points.empty() && m_enemy_spawn_points.back().m_y > GetBattleFieldBounds().top)
 	{
@@ -327,7 +327,7 @@ void World::SpawnEnemies()
 }
 
 void World::AddEnemies()
-{
+{//Code changes from Dawood Parhiar D00248313
 	AddEnemy(ShipType::kEnemyShip2, 0.f, 500.f);
 	AddEnemy(ShipType::kEnemyShip2, 0.f, 1000.f);
 	AddEnemy(ShipType::kEnemyShip2, 100.f, 1100.f);
@@ -382,7 +382,7 @@ void World::DestroyEntitiesOutsideView()
 }
 
 void World::GuideMissiles()
-{
+{	//Code changes from Dawood Parhiar D00248313
 	//Target the closest enemy in the radius
 	Command enemyCollector;
 	enemyCollector.category =  static_cast<int>(ReceiverCategories::kEnemyShip);
@@ -466,7 +466,7 @@ bool MatchesCategories(SceneNode::Pair& colliders, ReceiverCategories type1, Rec
 
 
 void World::HandleCollisions()
-{
+{//Code changes from Dawood Parhiar D00248313
 	std::set<SceneNode::Pair> collision_pairs;
 	m_scenegraph.CheckSceneCollision(m_scenegraph, collision_pairs);
 	for (SceneNode::Pair pair : collision_pairs)

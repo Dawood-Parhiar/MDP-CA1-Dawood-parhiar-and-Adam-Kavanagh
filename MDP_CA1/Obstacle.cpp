@@ -1,7 +1,7 @@
 #include "Obstacle.hpp"
 #include "Utility.hpp"
 
-Obstacle::Obstacle(const sf::Texture& texture)
+Obstacle::Obstacle(const sf::Texture& texture)//Code changes from Dawood Parhiar D00248313
     : Entity(1)  // Assign some hitpoints if needed
     , m_sprite(texture)
 {

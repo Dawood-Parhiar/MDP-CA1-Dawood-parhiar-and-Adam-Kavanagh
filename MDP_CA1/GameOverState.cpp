@@ -32,7 +32,7 @@ void GameOverState::Draw()
 
     //Create a dark semi-transparent background
     sf::RectangleShape background_shape;
-    background_shape.setFillColor(sf::Color(0, 0, 0, 150));
+    background_shape.setFillColor(sf::Color(0, 0, 0, 200));
     background_shape.setSize(window.getView().getSize());
 
     window.draw(m_sprite);
