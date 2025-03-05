@@ -59,6 +59,11 @@ MissionStatus Player::GetMissionStatus() const
     return m_current_mission_status;
 }
 
+void Player::HandleRealtimeNetworkInput(const CommandQueue& commands)
+{
+
+}
+
 void Player::InitialiseActions()
 {
     const float kPlayerSpeed = 200.f;

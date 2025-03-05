@@ -39,6 +39,7 @@ public:
 	void SetId(int id);
 	int GetId();
 	Cannon* GetCannon() const;
+	int GetMissileAmmo();
 
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;

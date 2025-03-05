@@ -6,7 +6,7 @@
 #include "ParticleNode.hpp"
 #include "SoundNode.hpp"
 
-World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sounds)
+World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sounds, bool networked)
 	:m_target(output_target)
 	,m_camera(output_target.getDefaultView())
 	,m_textures()

@@ -28,6 +28,7 @@ public:
 	sf::Keyboard::Key GetAssignedKey(Action action) const;*/
 	void SetMissionStatus(MissionStatus status);
 	MissionStatus GetMissionStatus() const;
+	void HandleRealtimeNetworkInput(const CommandQueue& commands);
 
 private:
 	void InitialiseActions();

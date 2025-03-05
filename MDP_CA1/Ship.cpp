@@ -459,6 +459,11 @@ Cannon* Ship::GetCannon() const
 	return m_cannon_ptr;
 }
 
+int Ship::GetMissileAmmo()
+{
+	return m_missile_ammo;
+}
+
 void Ship::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
 {
 	sf::Vector2f world_position = GetWorldPosition();

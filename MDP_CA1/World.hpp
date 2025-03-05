@@ -19,7 +19,7 @@
 class World : private sf::NonCopyable
 {
 public:
-	explicit World(sf::RenderTarget& target, FontHolder& font, SoundPlayer& sounds);
+	explicit World(sf::RenderTarget& target, FontHolder& font, SoundPlayer& sounds, bool networked = false);
 	void Update(sf::Time dt);
 	void Draw();
 
@@ -92,5 +92,7 @@ private:
 
 	BloomEffect m_bloom_effect;
 	WaterEffects m_water_effect;
+	bool m_networked_world;
+	NetworkNode* m_network_node;
 };
 
