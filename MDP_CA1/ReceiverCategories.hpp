@@ -14,9 +14,10 @@ enum class ReceiverCategories
 	kObstacle = 1 << 9,
 	kCoin = 1 << 10,
 	kCannon = 1 << 11,
-
+	kNetwork = 1 << 12,
 	kShip = kPlayerShip | kAlliedShip | kEnemyShip,
-	kProjectile = kAlliedProjectile | kEnemyProjectile
+	kProjectile = kAlliedProjectile | kEnemyProjectile,
+	
 };
 
 // A message would be sent to all aircraft

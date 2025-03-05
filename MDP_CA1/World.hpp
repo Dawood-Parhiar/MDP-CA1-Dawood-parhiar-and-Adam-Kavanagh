@@ -13,6 +13,8 @@
 
 #include <array>
 
+#include "NetworkNode.hpp"
+#include "PickupType.hpp"
 #include "Player.hpp"
 #include "WaterEffects.h"
 
@@ -23,15 +25,27 @@ public:
 	void Update(sf::Time dt);
 	void Draw();
 
+
+	sf::FloatRect GetViewBounds() const;
 	CommandQueue& GetCommandQueue();
 
 	Ship* AddShip(int id);
 	void RemoveShip(int id);
+	void SetCurrentBattleFieldPosition(float line_y);
+	void SetWorldHeight(float height);
 
 	Ship* GetShip(int id) const;
 
 	bool HasAlivePlayer() const;
 	bool HasPlayerReachedEnd() const;
+
+	void AddEnemy(ShipType type, float relx, float rely);
+	void SortEnemies();
+
+	void SetWorldScrollCompensation(float compensation);
+	sf::FloatRect GetBattlefieldBounds() const;
+	void CreatePickup(sf::Vector2f position, PickupType type);
+	bool PollGameAction(GameActions::Action& out);
 
 
 private:
@@ -46,8 +60,6 @@ private:
 
 	void SpawnEnemies();
 	void AddEnemies();
-	void AddEnemy(ShipType type, float relx, float rely);
-	sf::FloatRect GetViewBounds() const;
 	sf::FloatRect GetBattleFieldBounds() const;
 
 	void DestroyEntitiesOutsideView();
@@ -83,6 +95,7 @@ private:
 	sf::Vector2f m_spawn_position;
 
 	float m_scrollspeed;
+	float m_scrollspeed_compensation;
 
 	std::vector<Ship*> m_player_ships;
 	CommandQueue m_command_queue;

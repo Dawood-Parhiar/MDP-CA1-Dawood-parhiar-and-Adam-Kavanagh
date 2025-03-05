@@ -1,21 +1,30 @@
 #include "Player.hpp"
+
+#include "NetworkProtocol.hpp"
 #include "ReceiverCategories.hpp"
 #include "Ship.hpp"
 
-//struct ShipMover
-//{
-//    ShipMover(float vx, float vy) :velocity(vx,vy)
-//    {}
-//    void operator()(Ship& ship, sf::Time dt) const
-//    {
-//        ship.Accelerate(velocity);
-//    }
-//    sf::Vector2f velocity;
-//};
+struct ShipMissileTrigger
+{
+    ShipMissileTrigger(int identifier)
+        : ship_id(identifier)
+    {
+    }
 
-Player::Player(sf::Int32 id, const KeyBinding* binding) //Code changes from Dawood Parhiar D00248313
-: m_current_mission_status(MissionStatus::kMissionRunning)
-,m_key_binding(binding)
+    void operator() (Ship& ship, sf::Time) const
+    {
+        if (ship.GetIdentifier() == ship_id)
+            ship.LaunchMissile();
+    }
+
+    int ship_id;
+};
+
+Player::Player(sf::TcpSocket* socket,sf::Int32 id, const KeyBinding* binding) //Code changes from Dawood Parhiar D00248313
+	: m_current_mission_status(MissionStatus::kMissionRunning)
+	,m_key_binding(binding)
+    ,m_identifier(id)
+	,m_socket(socket)
 {
     InitialiseActions();
 
@@ -35,20 +44,54 @@ void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
        
         if (m_key_binding && m_key_binding->CheckAction(event.key.code, action) && !IsRealtimeAction(action))
         {
-            command_queue.Push(m_action_binding[action]);
+            // Network connected -> send event over network
+            if (m_socket)
+            {
+                sf::Packet packet;
+                packet << static_cast<sf::Int32>(Client::PacketType::kPlayerEvent);
+                packet << m_identifier;
+                packet << static_cast<sf::Int32>(action);
+                m_socket->send(packet);
+            }
+            else
+            {
+                command_queue.Push(m_action_binding[action]);
+            }
         }
-
-
+    }
+    // Realtime change (network connected)
+    if ((event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased) && m_socket)
+    {
+        Action action;
+        if (m_key_binding && m_key_binding->CheckAction(event.key.code, action) && IsRealtimeAction(action))
+        {
+            // Send realtime change over network
+            sf::Packet packet;
+            packet << static_cast<sf::Int32>(Client::PacketType::kPlayerRealtimeChange);
+            packet << m_identifier;
+            packet << static_cast<sf::Int32>(action);
+            packet << (event.type == sf::Event::KeyPressed);
+            m_socket->send(packet);
+        }
     }
 }
 
-void Player::HandleRealTimeInput(CommandQueue& command_queue)
+bool Player::IsLocal() const
 {
-    std::vector<Action> activeActions = m_key_binding->GetRealtimeActions();
-    for (Action action : activeActions)
-        command_queue.Push(m_action_binding[action]);
-
+    // No key binding means this player is remote
+    return m_key_binding != nullptr;
 }
+
+void Player::HandleRealtimeInput(CommandQueue& command_queue)
+{
+    if (m_socket && !IsLocal() || !m_socket) 
+    {
+        std::vector<Action> activeActions = m_key_binding->GetRealtimeActions();
+        for (Action action : activeActions)
+            command_queue.Push(m_action_binding[action]);
+    }
+}
+
 void Player::SetMissionStatus(MissionStatus status)
 {
     m_current_mission_status = status;
@@ -59,9 +102,39 @@ MissionStatus Player::GetMissionStatus() const
     return m_current_mission_status;
 }
 
-void Player::HandleRealtimeNetworkInput(const CommandQueue& commands)
+void Player::HandleRealtimeNetworkInput(CommandQueue& commands)
 {
+    if (m_socket && !IsLocal())
+    {
+	    for (auto pair: m_action_proxies)
+	    {
+            if (pair.second && IsRealtimeAction(pair.first))
+                commands.Push(m_action_binding[pair.first]);
+	    }
+    }
+}
 
+void Player::HandleNetworkEvent(Action action, CommandQueue& commands)
+{
+    commands.Push(m_action_binding[action]);
+}
+
+void Player::HandleNetworkRealtimeChange(Action action, bool action_enabled)
+{
+    m_action_proxies[action] = action_enabled;
+}
+
+void Player::DisableAllRealtimeActions()
+{
+    for (auto& action : m_action_proxies)
+    {
+        sf::Packet packet;
+        packet << static_cast<sf::Int32>(Client::PacketType::kPlayerRealtimeChange);
+        packet << m_identifier;
+        packet << static_cast<sf::Int32>(action.first);
+        packet << false;
+        m_socket->send(packet);
+    }
 }
 
 void Player::InitialiseActions()
@@ -114,19 +187,3 @@ void Player::InitialiseActions()
         });
 }
 
-bool Player::IsRealTimeAction(Action action)
-{
-    switch (action)
-    {
-    case Action::kMoveDown:
-    case Action::kMoveUp:
-    case Action::kRotateLeft:
-    case Action::kRotateRight:
-    case Action::kRotateCannonLeft:
-    case Action::kRotateCannonRight:
-    //case Action::kMissileFire:
-        return true;
-    default:
-        return false;
-    }
-}

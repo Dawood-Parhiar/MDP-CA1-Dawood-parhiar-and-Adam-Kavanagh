@@ -8,5 +8,8 @@ enum class StateID
 	kPause,
 	kSettings,
 	kGameOver,
-	kGameWon,
+	kMissionSuccess,
+	kNetworkPause,
+	kHostGame,
+	kJoinGame
 };

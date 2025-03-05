@@ -15,7 +15,7 @@ public:
 	virtual bool HandleEvent(const sf::Event& event);
 	virtual void OnActivate();
 	void OnDestroy();
-	voiid DisableAllRealtimeActions();
+	void DisableAllRealtimeActions();
 
 private:
 	void UpdateBroadcastMessage(sf::Time elpased_time);
@@ -50,6 +50,7 @@ private:
 	bool m_has_focus;
 	bool m_host;
 	bool m_game_started;
+
 	sf::Time m_client_timeout;
 	sf::Time m_time_since_last_packet;
 };

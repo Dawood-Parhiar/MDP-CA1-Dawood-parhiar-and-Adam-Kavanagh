@@ -168,7 +168,7 @@ bool MultiplayerGameState::Update(sf::Time dt)
 			CommandQueue& commands = m_world.GetCommandQueue();
 			for (auto& pair : m_players)
 			{
-				pair.second->HandleRealTimeInput(commands);
+				pair.second->HandleRealtimeInput(commands);
 			}
 		}
 
@@ -481,7 +481,7 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 	//Mission Successfully completed
 	case Server::PacketType::kMissionSuccess:
 	{
-		RequestStackPush(StateID::kGameWon);
+		RequestStackPush(StateID::kMissionSuccess);
 	}
 	break;
 

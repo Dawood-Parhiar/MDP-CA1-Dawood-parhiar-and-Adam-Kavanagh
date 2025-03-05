@@ -17,13 +17,21 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_world_bounds(0.f,0.f, m_camera.getSize().x, 3000.f)
 	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.height - m_camera.getSize().y/2.f)//
 	,m_scrollspeed(-50.f)
+	,m_scrollspeed_compensation(1.f)
 	,m_player_ships()
+	,m_networked_world(networked)
+	,m_network_node(nullptr)
 	
 {
 	m_scene_texture.create(m_target.getSize().x, m_target.getSize().y);
 	LoadTextures();
 	BuildScene();
 	m_camera.setCenter(m_spawn_position);
+}
+
+void World::SetWorldScrollCompensation(float compensation)
+{
+	m_scrollspeed_compensation = compensation;
 }
 
 void World::Update(sf::Time dt)
@@ -122,12 +130,37 @@ Ship* World::GetShip(int id) const
 {//Code changes from Dawood Parhiar D00248313
 	for (Ship* a : m_player_ships)
 	{
-		if (a->GetId() == id)
+		if (a->GetIdentifier() == id)
 		{
 			return a;
 		}
 	}
 	return nullptr;
+}
+
+
+void World::CreatePickup(sf::Vector2f position, PickupType type)
+{
+	std::unique_ptr<Pickup> pickup(new Pickup(type, m_textures));
+	pickup->setPosition(position);
+	pickup->SetVelocity(0.f, 1.f);
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(pickup));
+}
+
+bool World::PollGameAction(GameActions::Action& out)
+{
+	return m_network_node->PollGameAction(out);
+}
+
+void World::SetCurrentBattleFieldPosition(float lineY)
+{
+	m_camera.setCenter(m_camera.getCenter().x, lineY - m_camera.getSize().y / 2);
+	m_spawn_position.y = m_world_bounds.height;
+}
+
+void World::SetWorldHeight(float height)
+{
+	m_world_bounds.height = height;
 }
 
 bool World::HasAlivePlayer() const
@@ -336,12 +369,17 @@ void World::AddEnemies()
 	AddEnemy(ShipType::kEnemyShip2, 70.f, 1400.f);
 	AddEnemy(ShipType::kEnemyShip2, 70.f, 1600.f);
 
-	//Sort the enemies according to y-value so that enemies are checked first
-	std::sort(m_enemy_spawn_points.begin(), m_enemy_spawn_points.end(), [](SpawnPoint lhs, SpawnPoint rhs)
-	{
-		return lhs.m_y < rhs.m_y;
-	});
+	
+	SortEnemies();
+}
 
+void World::SortEnemies()
+{
+	//Sort all enemies according to their y-value, such that lower enemies are checked first for spawning
+	std::sort(m_enemy_spawn_points.begin(), m_enemy_spawn_points.end(), [](SpawnPoint lhs, SpawnPoint rhs)
+		{
+			return lhs.m_y < rhs.m_y;
+		});
 }
 
 void World::AddEnemy(ShipType type, float relx, float rely)

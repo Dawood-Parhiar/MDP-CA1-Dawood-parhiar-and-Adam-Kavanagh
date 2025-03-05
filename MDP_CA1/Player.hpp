@@ -4,8 +4,9 @@
 #include "CommandQueue.hpp"
 #include "MissionStatus.hpp"
 #include <map>
-#include <SFML/Graphics/RenderTarget.hpp>
-
+#include "SFML/Graphics/RenderTarget.hpp"
+#include "SFML/Network/TcpSocket.hpp"
+#include "SFML/Network/Packet.hpp"
 #include "KeyBinding.h"
 
 class Command;
@@ -14,31 +15,31 @@ class Command;
 class Player
 {
 public:
-	Player(sf::Int32 id, const KeyBinding* binding);
-
-	// Default constructor
-
-
-	//Player(): m_key_binding(), m_current_mission_status(MissionStatus::kMissionRunning) {}
-
+	Player(sf::TcpSocket* socket,sf::Int32 id, const KeyBinding* binding);
 	void HandleEvent(const sf::Event& event, CommandQueue& command_queue);
-	void HandleRealTimeInput(CommandQueue& command_queue);
+	void HandleRealtimeInput(CommandQueue& command_queue);
+	void HandleRealtimeNetworkInput(CommandQueue& commands);
 
-	/*void AssignKey(Action action, sf::Keyboard::Key key);
-	sf::Keyboard::Key GetAssignedKey(Action action) const;*/
+	void HandleNetworkEvent(Action action, CommandQueue& commands);
+	void HandleNetworkRealtimeChange(Action action, bool action_enabled);
+
 	void SetMissionStatus(MissionStatus status);
 	MissionStatus GetMissionStatus() const;
-	void HandleRealtimeNetworkInput(const CommandQueue& commands);
+
+	void DisableAllRealtimeActions();
+	bool IsLocal() const;
 
 private:
 	void InitialiseActions();
-	static bool IsRealTimeAction(Action action);
+	//static bool IsRealTimeAction(Action action);
 
 private:
 	const KeyBinding* m_key_binding;
 	std::map<Action, Command> m_action_binding;
+	std::map<Action, bool> m_action_proxies;
 	MissionStatus m_current_mission_status;
-	int m_id;
+	int m_identifier;
+	sf::TcpSocket* m_socket;
 
 };
 

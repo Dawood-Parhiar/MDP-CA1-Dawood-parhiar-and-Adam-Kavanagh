@@ -499,7 +499,7 @@ void Ship::SetId(int id)
 	m_id = id;
 }
 
-int Ship::GetId()
+int Ship::GetIdentifier()
 {
 	return m_id;
 }
