@@ -4,6 +4,7 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include "DataTables.hpp"
 #include "EmitterNode.hpp"
+#include "NetworkNode.hpp"
 #include "Projectile.hpp"
 #include "PickupType.hpp"
 #include "Pickup.hpp"
@@ -58,9 +59,11 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_played_explosion_sound(false)
 	, original_x(0.f)
 	, original_y(0.f)
-	,m_id(0)
+	,m_identifier(0)
 	,m_cannon(nullptr)
 	,m_cannon_ptr(nullptr)
+	,m_explosion_began(false)
+	,m_pickups_enabled(true)
 
 {//Code changes from Dawood Parhiar D00248313 in Ship class
 	//positions for animation of the ship
@@ -339,7 +342,7 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 		CheckPickupDrop(commands);
 		m_explosion.Update(dt);
 		// Play explosion sound only once
-		if (!m_played_explosion_sound)
+		if (!m_explosion_began)
 		{
 			if (m_type == ShipType::kPirateShip)
 			{
@@ -348,11 +351,22 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 			}
 			else
 			{
-				SoundEffect soundEffect = (Utility::RandomInt(2) == 0) ? SoundEffect::kExplosion1 : SoundEffect::kExplosion2;
-				PlayLocalSound(commands, soundEffect);
+				/*SoundEffect soundEffect = (Utility::RandomInt(2) == 0) ? SoundEffect::kExplosion1 : SoundEffect::kExplosion2;
+				PlayLocalSound(commands, soundEffect);*/
+
+				sf::Vector2f position = GetWorldPosition();
+
+				Command command;
+				command.category = static_cast<int>(ReceiverCategories::kNetwork);
+				command.action = DerivedAction<NetworkNode>([position](NetworkNode& node, sf::Time)
+					{
+						node.NotifyGameAction(GameActions::kEnemyExplode, position);
+					});
+
+				commands.Push(command);
 			}
 
-			m_played_explosion_sound = true;
+			m_explosion_began = true;
 		}
 		return;
 	}
@@ -464,6 +478,11 @@ int Ship::GetMissileAmmo()
 	return m_missile_ammo;
 }
 
+void Ship::DisablePickups()
+{
+	m_pickups_enabled = false;
+}
+
 void Ship::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
 {
 	sf::Vector2f world_position = GetWorldPosition();
@@ -477,6 +496,12 @@ void Ship::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
 		});
 
 	commands.Push(command);
+}
+
+void Ship::Remove()
+{
+	Entity::Remove();
+	m_show_explosion = false;
 }
 
 void Ship::SetRenderTargets(sf::RenderTarget& target)
@@ -496,12 +521,12 @@ void Ship::MoveShip(sf::Time dt, float speed)
 
 void Ship::SetId(int id)
 {
-	m_id = id;
+	m_identifier = id;
 }
 
 int Ship::GetIdentifier()
 {
-	return m_id;
+	return m_identifier;
 }
 
 

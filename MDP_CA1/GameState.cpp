@@ -4,8 +4,8 @@
 
 GameState::GameState(StateStack& stack, Context context) : State(stack, context)
 	, m_world(*context.window, *context.fonts, *context.sounds)
-	, m_player(1,context.keys1)
-	, m_player2(2, context.keys2)
+	, m_player(nullptr,1,context.keys1)
+	, m_player2(nullptr,2, context.keys2)
 
 {
 	m_world.AddShip(1);
@@ -35,8 +35,8 @@ bool GameState::Update(sf::Time dt)
 		RequestStackPush(StateID::kMissionSuccess);
 	}
 	CommandQueue& commands = m_world.GetCommandQueue();
-	m_player.HandleRealTimeInput(commands);
-	m_player2.HandleRealTimeInput(commands);
+	m_player.HandleRealtimeInput(commands);
+	m_player2.HandleRealtimeInput(commands);
 	return true;
 }
 

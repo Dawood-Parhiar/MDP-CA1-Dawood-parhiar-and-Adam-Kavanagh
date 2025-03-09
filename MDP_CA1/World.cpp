@@ -354,6 +354,11 @@ void World::SpawnEnemies()
 		std::unique_ptr<Ship> enemy(new Ship(spawn.m_type, m_textures, m_fonts));
 		enemy->setPosition(spawn.m_x, spawn.m_y);
 		enemy->setRotation(Utility::RandomInt(300));
+
+		if (m_networked_world)
+		{
+			enemy->DisablePickups();
+		}
 		m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(enemy));
 		m_enemy_spawn_points.pop_back();
 	}

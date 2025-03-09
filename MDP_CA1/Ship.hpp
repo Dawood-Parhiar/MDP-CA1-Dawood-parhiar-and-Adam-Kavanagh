@@ -32,14 +32,16 @@ public:
 	sf::FloatRect GetBoundingRect() const override;
 	bool IsMarkedForRemoval() const override;
 	void PlayLocalSound(CommandQueue& commands, SoundEffect effect);
-	//void RotateShip();
+	void Remove() override;
 	
 	void SetRenderTargets(sf::RenderTarget& target);
 	void MoveShip(sf::Time dt, float speed);
 	void SetId(int id);
 	int GetIdentifier();
 	Cannon* GetCannon() const;
+
 	int GetMissileAmmo();
+	void DisablePickups();
 
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
@@ -87,9 +89,12 @@ private:
 	float original_y;
 
 	sf::RenderTarget* m_render_target;
-	int m_id;
+	int m_identifier;
 
 	std::unique_ptr<Cannon> m_cannon;
 	Cannon* m_cannon_ptr = nullptr;
+
+	bool m_explosion_began;
+	bool m_pickups_enabled;
 };
 
