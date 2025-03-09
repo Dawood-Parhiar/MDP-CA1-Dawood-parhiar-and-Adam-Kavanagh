@@ -104,7 +104,7 @@ private:
 	std::vector<Ship*> m_active_enemies;
 
 	BloomEffect m_bloom_effect;
-	WaterEffects m_water_effect;
+	//WaterEffects m_water_effect;
 	bool m_networked_world;
 	NetworkNode* m_network_node;
 };

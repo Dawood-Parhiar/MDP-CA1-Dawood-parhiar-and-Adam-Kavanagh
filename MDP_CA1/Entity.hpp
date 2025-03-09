@@ -13,6 +13,7 @@ public:
 	void Accelerate(float vx, float vy);
 
 	int GetHitPoints() const;
+	void SetHitpoints(sf::Int32 hitPoints);
 	void Repair(int points);
 	void Damage(int points);
 	void Destroy();

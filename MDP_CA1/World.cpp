@@ -14,7 +14,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_sounds(sounds)
 	,m_scenegraph(ReceiverCategories::kNone)
 	,m_scene_layers()
-	,m_world_bounds(0.f,0.f, m_camera.getSize().x, 3000.f)
+	,m_world_bounds(0.f,0.f, m_camera.getSize().x, 4000.f)
 	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.height - m_camera.getSize().y/2.f)//
 	,m_scrollspeed(-50.f)
 	,m_scrollspeed_compensation(1.f)
@@ -75,12 +75,7 @@ void World::Draw()
 	{
 		//Apply Water Effect to Background ---
 		m_scene_texture.clear();
-		m_scene_texture.setView(m_camera);
 		m_scene_texture.draw(m_scenegraph);
-		m_scene_texture.display();
-		m_water_effect.Apply(m_scene_texture, m_target);  // Apply water effect to background
-
-		// Draw  Layers Normally ---
 		m_target.setView(m_camera);
 		for (int i = static_cast<int>(SceneLayers::kBackground); i < static_cast<int>(SceneLayers::kLayerCount); ++i)
 		{
@@ -89,6 +84,7 @@ void World::Draw()
 				m_target.draw(*m_scene_layers[i]);
 			}
 		}
+		m_scene_texture.display();
 	}
 	else
 	{
@@ -197,7 +193,7 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kEntities, "Media/Textures/Entities.png");
 	m_textures.Load(TextureID::kExplosion, "Media/Textures/Explosion.png");
 	m_textures.Load(TextureID::kParticle, "Media/Textures/Particle.png");
-	m_textures.Load(TextureID::kWater, "Media/Textures/Water3.jpg");
+	m_textures.Load(TextureID::kWater, "Media/Textures/Water3.png");
 	m_textures.Load(TextureID::kEnemyCannonBall, "Media/Textures/EnemyBall.png");
 	m_textures.Load(TextureID::kPlayer2Ship, "Media/EnemyShips/ship13.png");
 	m_textures.Load(TextureID::kMountains, "Media/Textures/mountain_area.png");
@@ -300,6 +296,13 @@ void World::BuildScene()
 	// Add sound effect node
 	std::unique_ptr<SoundNode> soundNode(new SoundNode(m_sounds));
 	m_scenegraph.AttachChild(std::move(soundNode));
+
+	if (m_networked_world)
+	{
+		std::unique_ptr<NetworkNode> network_node(new NetworkNode());
+		m_network_node = network_node.get();
+		m_scenegraph.AttachChild(std::move(network_node));
+	}
 
 	AddEnemies();
 

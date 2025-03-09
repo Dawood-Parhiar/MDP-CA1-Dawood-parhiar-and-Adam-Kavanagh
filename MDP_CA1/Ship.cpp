@@ -483,6 +483,13 @@ void Ship::DisablePickups()
 	m_pickups_enabled = false;
 }
 
+
+
+void Ship::SetMissileAmmo(sf::Int32 ammo)
+{
+	m_missile_ammo = ammo;
+}
+
 void Ship::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
 {
 	sf::Vector2f world_position = GetWorldPosition();

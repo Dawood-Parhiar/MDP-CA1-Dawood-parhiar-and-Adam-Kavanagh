@@ -10,7 +10,7 @@
 
 const sf::Time Application::kTimePerFrame = sf::seconds(1.f/60.f);
 
-Application::Application() : m_window(sf::VideoMode(1920, 1080), "Networked Game", sf::Style::Close),
+Application::Application() : m_window(sf::VideoMode(1024, 768), "Networked Game", sf::Style::Close),
 	m_player_1_keys(1),
 	m_player_2_keys(2),
 	m_stack(State::Context(m_window, m_textures, m_fonts, m_music, m_sound, m_player_1_keys, m_player_2_keys))

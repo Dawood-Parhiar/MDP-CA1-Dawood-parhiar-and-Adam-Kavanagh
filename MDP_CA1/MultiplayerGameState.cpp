@@ -47,13 +47,13 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context, b
 	m_broadcast_text.setFont(context.fonts->Get(Font::kMain));
 	m_broadcast_text.setPosition(1024.f / 2, 100.f);
 
-	/*
-	m_player_invitation_text.setFont(context.fonts->Get(Font::kMain));
+	
+	/*m_player_invitation_text.setFont(context.fonts->Get(Font::kMain));
 	m_player_invitation_text.setCharacterSize(20);
 	m_player_invitation_text.setFillColor(sf::Color::White);
 	m_player_invitation_text.setString("Press Enter to spawn player 2");
-	m_player_invitation_text.setPosition(1000 - m_player_invitation_text.getLocalBounds().width, 760 - m_player_invitation_text.getLocalBounds().height);
-	*/
+	m_player_invitation_text.setPosition(1000 - m_player_invitation_text.getLocalBounds().width, 760 - m_player_invitation_text.getLocalBounds().height);*/
+	
 
 	//Use this for "Attempt to connect" and "Failed to connect" messages
 	m_failed_connection_text.setFont(context.fonts->Get(Font::kMain));
@@ -132,13 +132,13 @@ bool MultiplayerGameState::Update(sf::Time dt)
 		m_world.Update(dt);
 
 		//Remove players whose aircraft were destroyed
-		bool found_local_plane = false;
+		bool found_local_ship = false;
 		for (auto itr = m_players.begin(); itr != m_players.end();)
 		{
 			//Check if there are no more local planes for remote clients
 			if (std::find(m_local_player_identifiers.begin(), m_local_player_identifiers.end(), itr->first) != m_local_player_identifiers.end())
 			{
-				found_local_plane = true;
+				found_local_ship = true;
 			}
 
 			if (!m_world.GetShip(itr->first))
@@ -157,7 +157,7 @@ bool MultiplayerGameState::Update(sf::Time dt)
 			}
 		}
 
-		if (!found_local_plane && m_game_started)
+		if (!found_local_ship && m_game_started)
 		{
 			RequestStackPush(StateID::kGameOver);
 		}
@@ -265,15 +265,15 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
 
 	if (event.type == sf::Event::KeyPressed)
 	{
-		/*If enter pressed, add second player co-op only if there is only 1 player
-		if (event.key.code == sf::Keyboard::Return && m_local_player_identifiers.size() == 1)
+		//If enter pressed, add second player co-op only if there is only 1 player
+		/*if (event.key.code == sf::Keyboard::Return && m_local_player_identifiers.size() == 1)
 		{
 			sf::Packet packet;
 			packet << static_cast<sf::Int32>(Client::PacketType::kRequestCoopPartner);
 			m_socket.send(packet);
-		}
+		}*/
 		//If escape is pressed, show the pause screen
-		else*/ if (event.key.code == sf::Keyboard::Escape)
+		if (event.key.code == sf::Keyboard::Escape)
 		{
 			DisableAllRealtimeActions();
 			RequestStackPush(StateID::kNetworkPause);
@@ -369,6 +369,7 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 		Ship* aircraft = m_world.AddShip(ship_identifier);
 		aircraft->setPosition(ship_position);
 		m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, GetContext().keys1));
+		m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, GetContext().keys2));
 		m_local_player_identifiers.push_back(ship_identifier);
 		m_game_started = true;
 	}
@@ -415,8 +416,8 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 
 			Ship* ship = m_world.AddShip(ship_identifier);
 			ship->setPosition(ship_position);
-			//ship->SetHitpoints(hitpoints);
-			//ship->SetMissileAmmo(missile_ammo);
+			ship->SetHitpoints(hitpoints);
+			ship->SetMissileAmmo(missile_ammo);
 
 			m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, nullptr));
 		}
@@ -425,12 +426,12 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 
 	case Server::PacketType::kAcceptCoopPartner:
 	{
-		sf::Int32 ship_identifier;
-		packet >> ship_identifier;
+		/*sf::Int32 ship_identifier;
+		packet >> ship_identifier;*/
 
-		m_world.AddShip(ship_identifier);
-		m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, GetContext().keys2));
-		m_local_player_identifiers.emplace_back(ship_identifier);
+		//m_world.AddShip(ship_identifier);
+		//m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, GetContext().keys2));
+		//m_local_player_identifiers.emplace_back(ship_identifier);
 	}
 	break;
 
@@ -520,8 +521,8 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 			{
 				sf::Vector2f interpolated_position = ship->getPosition() + (ship_position - ship->getPosition()) * 0.1f;
 				ship->setPosition(interpolated_position);
-				//ship->SetHitpoints(hitpoints);
-				//ship->SetMissileAmmo(ammo);
+				ship->SetHitpoints(hitpoints);
+				ship->SetMissileAmmo(ammo);
 			}
 		}
 	}

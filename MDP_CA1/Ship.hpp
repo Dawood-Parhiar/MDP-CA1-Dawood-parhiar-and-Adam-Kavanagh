@@ -42,6 +42,7 @@ public:
 
 	int GetMissileAmmo();
 	void DisablePickups();
+	void SetMissileAmmo(sf::Int32 missile_ammo);
 
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
