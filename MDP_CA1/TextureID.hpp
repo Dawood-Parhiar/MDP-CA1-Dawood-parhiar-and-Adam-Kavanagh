@@ -32,5 +32,6 @@ enum class TextureID
 	kCannon,
 	kMenuBoard,
 	kLabel,
-	kGameLoseSprite
+	kGameLoseSprite,
+	kLobbyBg
 };

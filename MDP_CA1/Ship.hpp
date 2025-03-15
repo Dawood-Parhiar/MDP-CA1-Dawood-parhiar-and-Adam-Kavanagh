@@ -25,8 +25,8 @@ public:
 
 	float GetMaxSpeed() const;
 	void Fire();
-	void LaunchMissile();
-	void CreateBullet(SceneNode& node, const TextureHolder& textures) const;
+	void LaunchPlayerCannon();
+	void LaunchEnemyCannon(SceneNode& node, const TextureHolder& textures) const;
 	void CreateProjectile(SceneNode& node, ProjectileType type, float x_float, float y_offset, const TextureHolder& textures) const;
 
 	sf::FloatRect GetBoundingRect() const override;

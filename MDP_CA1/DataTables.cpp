@@ -57,7 +57,7 @@ std::vector<ProjectileData> InitializeProjectileData()
 
     //cannon balls from enemy hitting to the player
     data[static_cast<int>(ProjectileType::kEnemyCannonBall)].m_damage = 10;
-    data[static_cast<int>(ProjectileType::kEnemyCannonBall)].m_speed = 100;
+    data[static_cast<int>(ProjectileType::kEnemyCannonBall)].m_speed = 50;
     data[static_cast<int>(ProjectileType::kEnemyCannonBall)].m_texture = TextureID::kEnemyCannonBall;
     
 

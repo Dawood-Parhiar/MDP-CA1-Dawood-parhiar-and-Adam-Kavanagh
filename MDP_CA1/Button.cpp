@@ -90,6 +90,18 @@ void gui::Button::HandleEvent(const sf::Event& event)
 {
 }
 
+void gui::Button::SetEnabled(bool cond)
+{
+    bool enabled = cond;
+    if (enabled)
+    {
+        m_sprite.setColor(sf::Color::White);
+
+    }else
+    {
+        m_sprite.setColor(sf::Color(100, 100, 100));
+    }
+}
 void gui::Button::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
     states.transform *= getTransform();

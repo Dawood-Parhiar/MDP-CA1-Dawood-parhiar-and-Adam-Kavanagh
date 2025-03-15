@@ -6,7 +6,7 @@ gui::Label::Label(const std::string& text, const FontHolder& fonts, const Textur
     :m_text(text, fonts.Get(Font::kMain), 16)
 	
 {//Code changes from Dawood Parhiar D00248313
-    m_text.setFillColor(sf::Color::Black);
+    m_text.setFillColor(sf::Color::Cyan);
     m_sprite.setTexture(textures.Get(TextureID::kLabel));
     sf::FloatRect bounds = m_sprite.getLocalBounds();
     Utility::CentreOrigin(m_text);

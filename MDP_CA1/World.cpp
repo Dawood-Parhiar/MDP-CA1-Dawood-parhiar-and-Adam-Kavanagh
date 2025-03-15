@@ -203,11 +203,18 @@ void World::LoadTextures()
 
 void World::BuildMountains()
 {//Code changes from Dawood Parhiar D00248313
-	for (int i = 0; i < 10; i++)
-	{	//Add The mountains in the scene
-		sf::Texture& mountain_texture = m_textures.Get(TextureID::kMountains);
+	sf::Texture& mountain_texture = m_textures.Get(TextureID::kMountains);
+
+	// Define fixed positions for mountains
+	std::vector<sf::Vector2f> mountain_positions = {
+		{100.f, 500.f}, {500.f, 1000.f}, {200.f, 1500.f}, {600.f, 1700.f}, {100.f, 2400.f},
+		{500.f, 3000.f}, {200.f, 3500.f}, {600.f, 3800.f}
+	};
+
+	for (const auto& pos : mountain_positions)
+	{
 		std::unique_ptr<Obstacle> mountain = std::make_unique<Obstacle>(mountain_texture);
-		mountain->setPosition(Utility::RandomInt(500),Utility::RandomInt(2500));
+		mountain->setPosition(pos);
 		m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(mountain));
 	}
 }

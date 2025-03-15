@@ -14,7 +14,7 @@ struct ShipMissileTrigger
     void operator() (Ship& ship, sf::Time) const
     {
         if (ship.GetIdentifier() == ship_id)
-            ship.LaunchMissile();
+            ship.LaunchPlayerCannon();
     }
 
     int ship_id;
@@ -84,7 +84,7 @@ bool Player::IsLocal() const
 
 void Player::HandleRealtimeInput(CommandQueue& command_queue)
 {
-    if (m_socket && !IsLocal() || !m_socket) 
+    if (m_socket && IsLocal() || !m_socket) 
     {
         std::vector<Action> activeActions = m_key_binding->GetRealtimeActions();
         for (Action action : activeActions)
@@ -166,7 +166,7 @@ void Player::InitialiseActions()
 
     m_action_binding[Action::kMissileFire].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
         {
-            a.LaunchMissile();
+            a.LaunchPlayerCannon();
         }
     );
     m_action_binding[Action::kRotateCannonLeft].action = DerivedAction<Ship>([this](Ship& s, sf::Time dt)

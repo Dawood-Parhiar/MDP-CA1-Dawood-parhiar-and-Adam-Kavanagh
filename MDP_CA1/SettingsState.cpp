@@ -31,7 +31,7 @@ SettingsState::SettingsState(StateStack& stack, Context context)
 	auto back_button = std::make_shared<gui::Button>(context);
 	back_button->setPosition(350, 100.f);
 	back_button->SetText("Return");
-	back_button->SetCallback(std::bind(&SettingsState::RequestStackPop, this));
+	back_button->SetCallback([this] { RequestStackPop(); });
 	m_gui_container.Pack(back_button);
 }
 

@@ -266,12 +266,12 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
 	if (event.type == sf::Event::KeyPressed)
 	{
 		//If enter pressed, add second player co-op only if there is only 1 player
-		/*if (event.key.code == sf::Keyboard::Return && m_local_player_identifiers.size() == 1)
+		if (event.key.code == sf::Keyboard::Space  && m_local_player_identifiers.size() == 1)
 		{
 			sf::Packet packet;
 			packet << static_cast<sf::Int32>(Client::PacketType::kRequestCoopPartner);
 			m_socket.send(packet);
-		}*/
+		}
 		//If escape is pressed, show the pause screen
 		if (event.key.code == sf::Keyboard::Escape)
 		{
@@ -369,7 +369,7 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 		Ship* aircraft = m_world.AddShip(ship_identifier);
 		aircraft->setPosition(ship_position);
 		m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, GetContext().keys1));
-		m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, GetContext().keys2));
+		//m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, GetContext().keys2));
 		m_local_player_identifiers.push_back(ship_identifier);
 		m_game_started = true;
 	}

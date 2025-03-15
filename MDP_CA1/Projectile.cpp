@@ -41,9 +41,15 @@ Projectile::Projectile(ProjectileType type, const TextureHolder& textures)
         smoke->setPosition(0.f, GetBoundingRect().height / 2.f);
         AttachChild(std::move(smoke));
 
-        std::unique_ptr<EmitterNode> propellant(new EmitterNode(ParticleType::kPropellant));
-        propellant->setPosition(0.f, GetBoundingRect().height / 2.f);
-        AttachChild(std::move(propellant));
+        
+    }
+
+    if (m_type == ProjectileType::kEnemyCannonBall)
+    {
+	    std::unique_ptr<EmitterNode> smoke(new EmitterNode(ParticleType::kSmoke));
+        smoke->setPosition(0.f, GetBoundingRect().height / 2.f);
+        AttachChild(std::move(smoke));
+
     }
 }
 

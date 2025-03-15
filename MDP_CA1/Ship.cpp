@@ -82,17 +82,17 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	Utility::CentreOrigin(m_sprite);
 	Utility::CentreOrigin(m_explosion);
 
-	 //No Bullets in the game
+	
 	 m_fire_command.category = static_cast<int>(ReceiverCategories::kScene);
 	m_fire_command.action = [this, &textures](SceneNode& node, sf::Time dt)
 		{
-			CreateBullet(node, textures);
+			LaunchEnemyCannon(node, textures);
 		};
-
+	
 	m_missile_command.category = static_cast<int>(ReceiverCategories::kScene);
 	m_missile_command.action = [this, &textures](SceneNode& node, sf::Time dt)
 		{
-			CreateProjectile(node, ProjectileType::kMissile, original_x , 0.f, textures);
+			CreateProjectile(node, ProjectileType::kMissile,original_x,0, textures);
 		};
 
 	m_drop_pickup_command.category = static_cast<int>(ReceiverCategories::kScene);
@@ -171,16 +171,17 @@ void Ship::CollectMissile(unsigned int count)
 void Ship::UpdateTexts()
 {
 	m_health_display->SetString(std::to_string(GetHitPoints()) + "HP");
-	m_health_display->setPosition(0.f, 50.f);
-	m_health_display->setRotation(-getRotation());
+	m_health_display->setPosition(0.f, 70.f);
+	
 	if (m_missile_display)
 	{
 		m_missile_display->setPosition(0.f, 90.f);
 		m_missile_display->SetString("M: " + std::to_string(m_missile_ammo));
+		
 		//display coins if missile display is present to a ship
 		m_coins_display->SetString("Coins: " + std::to_string(m_coins));
-		m_coins_display->setPosition(0.f, 70.f);
-		m_coins_display->setRotation(-getRotation());
+		m_coins_display->setPosition(0.f, 110.f);
+		
 	}
 }
 
@@ -223,7 +224,7 @@ void Ship::Fire()
 }
 
 
-void Ship::LaunchMissile()
+void Ship::LaunchPlayerCannon()
 {
 
 	//Dawood Parhiar D00248313
@@ -237,24 +238,10 @@ void Ship::LaunchMissile()
 	}
 }
 
-void Ship::CreateBullet(SceneNode& node, const TextureHolder& textures) const
+void Ship::LaunchEnemyCannon(SceneNode& node, const TextureHolder& textures) const
 {
-	ProjectileType type = IsAllied() ? ProjectileType::kAlliedCannonBall : ProjectileType::kEnemyCannonBall;
-	switch (m_spread_level)
-	{
-	case 1:
-		CreateProjectile(node, type, 0.0f, 0.5f, textures);
-		break;
-	case 2:
-		CreateProjectile(node, type, -0.5f, 0.5f, textures);
-		CreateProjectile(node, type, 0.5f, 0.5f, textures);
-		break;
-	case 3:
-		CreateProjectile(node, type, 0.0f, 0.5f, textures);
-		CreateProjectile(node, type, -0.5f, 0.5f, textures);
-		CreateProjectile(node, type, 0.5f, 0.5f, textures);
-		break;
-	}
+	ProjectileType type =  ProjectileType::kEnemyCannonBall;
+	CreateProjectile(node, type,0,0.5, textures);
 }
 
 void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
@@ -303,14 +290,16 @@ void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset
 
 		float sign = -1.f;
 		projectile->SetVelocity(velocity * sign);
-
-		if (type == ProjectileType::kMissile)
-		{
-			projectile->SetLaunchPosition(spawnPosition);
-			projectile->SetMaxRadius(300.f);
-		}
+		projectile->SetLaunchPosition(spawnPosition);
+		projectile->SetMaxRadius(300.f);
+		
 	}
 	node.AttachChild(std::move(projectile));
+
+	//if (m_cannon_ptr) // Ensure cannon exists
+	//{
+	//	m_cannon_ptr->CreateProjectile(node, type, textures);
+	//}
 }
 
 sf::FloatRect Ship::GetBoundingRect() const
