@@ -64,6 +64,8 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	,m_cannon_ptr(nullptr)
 	,m_explosion_began(false)
 	,m_pickups_enabled(true)
+	,m_player_cannon_cooldown(sf::Time::Zero)
+
 
 {//Code changes from Dawood Parhiar D00248313 in Ship class
 	//positions for animation of the ship
@@ -226,15 +228,18 @@ void Ship::Fire()
 
 void Ship::LaunchPlayerCannon()
 {
-
-	//Dawood Parhiar D00248313
-	ProjectileType type = IsAllied() ? ProjectileType::kAlliedCannonBall : ProjectileType::kEnemyCannonBall;
-
-	if (m_missile_ammo > 0 && Table[static_cast<int>(type)].m_fire_interval != sf::Time::Zero)
+	if (m_player_cannon_cooldown <= sf::Time::Zero)
 	{
-		m_is_launching_missile = true;
-		--m_missile_ammo;
+		//Dawood Parhiar D00248313
+		ProjectileType type = IsAllied() ? ProjectileType::kAlliedCannonBall : ProjectileType::kEnemyCannonBall;
 
+		if (m_missile_ammo > 0 && Table[static_cast<int>(type)].m_fire_interval != sf::Time::Zero)
+		{
+			m_is_launching_missile = true;
+			--m_missile_ammo;
+
+			m_player_cannon_cooldown = sf::seconds(1.5); //Adam
+		}
 	}
 }
 
@@ -372,6 +377,12 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 	//Check if bullets or misiles are fired
 	CheckProjectileLaunch(dt, commands);
+	
+	if (m_player_cannon_cooldown > sf::Time::Zero) // Adam
+	{
+		m_player_cannon_cooldown -= dt;
+	}
+
 }
 
 void Ship::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
