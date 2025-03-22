@@ -43,7 +43,7 @@ public:
 	virtual bool HandleEvent(const sf::Event& event) = 0;
 	virtual void OnActivate();
 	virtual void OnDestroy();
-
+	virtual void OnStackPopped();
 
 protected:
 	void RequestStackPush(StateID state_id);

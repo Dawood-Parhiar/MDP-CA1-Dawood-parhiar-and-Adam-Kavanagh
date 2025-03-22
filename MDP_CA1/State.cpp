@@ -48,3 +48,8 @@ void State::OnActivate()
 void State::OnDestroy()
 {
 }
+
+void State::OnStackPopped()
+{
+    //do nothing
+}

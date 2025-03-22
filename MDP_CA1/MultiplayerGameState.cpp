@@ -570,16 +570,9 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 		//Determine ship ID, each ship has 2 players
 		Ship* ship = m_world.AddShip(ship_identifier);
 		ship->setPosition(ship_position);
-		
-		
-		bool is_Pilot = player_id % 2 == 1;
-		if (is_Pilot)
-		{
-			m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys1));
-		}else
-		{
-			m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys2));
-		}
+
+		m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys1));
+			ship->SetPilot(player_id);
 
 		m_local_player_identifiers.push_back(player_id);
 		m_game_started = true;
