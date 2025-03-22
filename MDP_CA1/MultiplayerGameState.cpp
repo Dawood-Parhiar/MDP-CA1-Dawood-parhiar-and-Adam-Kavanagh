@@ -70,6 +70,8 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context, b
 	m_failed_connection_text.setString("Failed to connect to server");
 	Utility::CentreOrigin(m_failed_connection_text);
 
+	
+
 	//If this is the host, create a server
 	sf::IpAddress ip;
 
@@ -95,12 +97,59 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context, b
 	//Set socket to non-blocking
 	m_socket.setBlocking(false);
 
+	//if (m_connected && !m_game_started)
+	//{
+	//	m_window.clear(sf::Color::Cyan);
+	//	m_window.setView(m_window.getDefaultView());
+	//	// Draw lobby UI
+	//	sf::RectangleShape lobby_container(sf::Vector2f(600.f, 400.f));
+	//	lobby_container.setFillColor(sf::Color(50, 50, 50, 200));
+	//	lobby_container.setOutlineColor(sf::Color::White);
+	//	lobby_container.setOutlineThickness(3.f);
+	//	lobby_container.setPosition((m_window.getSize().x - 600.f) / 2, (m_window.getSize().y - 400.f) / 2);
+
+	//	m_window.draw(lobby_container);
+
+	//	// Draw title
+	//	sf::Text title("Multiplayer Lobby", *m_failed_connection_text.getFont(), 30);
+	//	title.setFillColor(sf::Color::White);
+	//	Utility::CentreOrigin(title);
+	//	title.setPosition(m_window.getSize().x / 2, (m_window.getSize().y / 2) - 160.f);
+	//	m_window.draw(title);
+
+	//	// Display player list
+	//	float y_offset = (m_window.getSize().y / 2) - 100.f;
+	//	for (const auto& player : m_players)
+	//	{
+	//		sf::Text player_text("Player " + std::to_string(player.first) + " - " + (m_ready_players[player.first] ? "Ready" : "Not Ready"),
+	//			*m_failed_connection_text.getFont(), 20);
+	//		player_text.setFillColor(m_ready_players[player.first] ? sf::Color::Green : sf::Color::Red);
+	//		Utility::CentreOrigin(player_text);
+	//		player_text.setPosition(m_window.getSize().x / 2, y_offset);
+	//		y_offset += 40.f;
+	//		m_window.draw(player_text);
+	//	}
+
+	//	// Show "Press Enter to Start" only for host
+	//	if (m_host)
+	//	{
+	//		sf::Text start_text("Press G to Start", *m_failed_connection_text.getFont(), 25);
+	//		start_text.setFillColor(sf::Color::White);
+	//		Utility::CentreOrigin(start_text);
+	//		start_text.setPosition(m_window.getSize().x / 2, y_offset + 50.f);
+	//		m_window.draw(start_text);
+	//	}
+
+	//	m_window.display();
+	//}
+
 	//Play the game music
 	context.music->Play(MusicThemes::kMissionTheme);
 }
 
 void MultiplayerGameState::Draw()
 {
+
 	if (m_connected)
 	{
 		m_world.Draw();
@@ -123,6 +172,72 @@ void MultiplayerGameState::Draw()
 		m_window.draw(m_failed_connection_text);
 	}
 }
+
+//void MultiplayerGameState::Draw()
+//{
+//	if (!m_game_started)
+//	{
+//		m_window.clear();
+//		m_window.setView(m_window.getDefaultView());
+//
+//		// Draw lobby UI
+//		sf::RectangleShape lobby_container(sf::Vector2f(600.f, 400.f));
+//		lobby_container.setFillColor(sf::Color(50, 50, 50, 200));
+//		lobby_container.setOutlineColor(sf::Color::White);
+//		lobby_container.setOutlineThickness(3.f);
+//		lobby_container.setPosition((m_window.getSize().x - 600.f) / 2, (m_window.getSize().y - 400.f) / 2);
+//
+//		m_window.draw(lobby_container);
+//
+//		// Draw title
+//		sf::Text title("Multiplayer Lobby", *m_failed_connection_text.getFont(),30);
+//		title.setFillColor(sf::Color::White);
+//		Utility::CentreOrigin(title);
+//		title.setPosition(m_window.getSize().x / 2, (m_window.getSize().y / 2) - 160.f);
+//		m_window.draw(title);
+//
+//		// Display player list
+//		float y_offset = (m_window.getSize().y / 2) - 100.f;
+//		for (const auto& player : m_players)
+//		{
+//			sf::Text player_text("Player " + std::to_string(player.first) + " - " + (m_ready_players[player.first] ? "Ready" : "Not Ready"),
+//				*m_failed_connection_text.getFont(), 20);
+//			player_text.setFillColor(m_ready_players[player.first] ? sf::Color::Green : sf::Color::Red);
+//			Utility::CentreOrigin(player_text);
+//			player_text.setPosition(m_window.getSize().x / 2, y_offset);
+//			y_offset += 40.f;
+//			m_window.draw(player_text);
+//		}
+//
+//		// Show "Press Enter to Start" only for host
+//		if (m_host)
+//		{
+//			sf::Text start_text("Press G to Start", *m_failed_connection_text.getFont(), 25);
+//			start_text.setFillColor(sf::Color::White);
+//			Utility::CentreOrigin(start_text);
+//			start_text.setPosition(m_window.getSize().x / 2, y_offset + 50.f);
+//			m_window.draw(start_text);
+//		}
+//
+//		m_window.display();
+//	}
+//	else
+//	{
+//		// Draw the game world when game starts
+//		m_world.Draw();
+//		m_window.setView(m_window.getDefaultView());
+//
+//		if (!m_broadcasts.empty())
+//		{
+//			m_window.draw(m_broadcast_text);
+//		}
+//
+//		if (m_local_player_identifiers.size() < 2 && m_player_invitation_time < sf::seconds(0.5f))
+//		{
+//			m_window.draw(m_player_invitation_text);
+//		}
+//	}
+//}
 
 bool MultiplayerGameState::Update(sf::Time dt)
 {
@@ -266,12 +381,12 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
 	if (event.type == sf::Event::KeyPressed)
 	{
 		//If enter pressed, add second player co-op only if there is only 1 player
-		if (event.key.code == sf::Keyboard::Space  && m_local_player_identifiers.size() == 1)
+		/*if (event.key.code == sf::Keyboard::Space  && m_local_player_identifiers.size() == 1)
 		{
 			sf::Packet packet;
 			packet << static_cast<sf::Int32>(Client::PacketType::kRequestCoopPartner);
 			m_socket.send(packet);
-		}
+		}*/
 		//If escape is pressed, show the pause screen
 		if (event.key.code == sf::Keyboard::Escape)
 		{
@@ -289,6 +404,71 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
 	}
 	return true;
 }
+//
+//bool MultiplayerGameState::HandleEvent(const sf::Event& event)
+//{
+//	// Game input handling
+//	CommandQueue& commands = m_world.GetCommandQueue();
+//
+//	// Forward events to all players
+//	for (auto& pair : m_players)
+//	{
+//		pair.second->HandleEvent(event, commands);
+//	}
+//
+//	if (!m_game_started)
+//	{
+//		// Lobby-related event handling
+//
+//		if (event.type == sf::Event::KeyPressed)
+//		{
+//			// Players toggle ready status
+//			if (event.key.code == sf::Keyboard::R)
+//			{
+//				m_ready_players[m_local_player_identifiers[0]] = !m_ready_players[m_local_player_identifiers[0]];
+//
+//				// Send a "Ready" update to the server
+//				sf::Packet packet;
+//				packet << static_cast<sf::Int32>(Client::PacketType::kPlayerReady);
+//				packet << static_cast<sf::Int32>(m_local_player_identifiers[0]) << m_ready_players[m_local_player_identifiers[0]];
+//				m_socket.send(packet);
+//			}
+//
+//			// Host can start the game if all are ready
+//			else if (m_host && event.key.code == sf::Keyboard::G)
+//			{
+//				bool all_ready = std::all_of(m_ready_players.begin(), m_ready_players.end(), [](const auto& pair) {
+//					return pair.second;
+//					});
+//
+//				if (all_ready)
+//				{
+//					sf::Packet start_packet;
+//					start_packet << static_cast<sf::Int32>(Client::PacketType::kGameStart);
+//					m_socket.send(start_packet);
+//					
+//				}
+//			}
+//
+//		}
+//	}// If escape is pressed, show the pause screen
+//	else if (event.key.code == sf::Keyboard::Escape)
+//	{
+//		DisableAllRealtimeActions();
+//		RequestStackPush(StateID::kNetworkPause);
+//	}
+//	// Focus handling
+//	else if (event.type == sf::Event::GainedFocus)
+//	{
+//		m_has_focus = true;
+//	}
+//	else if (event.type == sf::Event::LostFocus)
+//	{
+//		m_has_focus = false;
+//	}
+//
+//	return true;  // Event handled in lobby state
+//}
 
 void MultiplayerGameState::OnActivate()
 {
@@ -343,6 +523,23 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 {
 	switch (static_cast<Server::PacketType>(packet_type))
 	{
+		// Player readied up
+	/*case Server::PacketType::kPlayerReady:
+	{
+		sf::Int32 player_id;
+		bool is_ready;
+		packet >> player_id >> is_ready;
+		m_ready_players[player_id] = is_ready;
+	}
+	break;*/
+
+	// Server starts the game
+	/*case Server::PacketType::kGameStart:
+	{
+		m_game_started = true;
+	}
+	break;*/
+
 		//Send message to all Clients
 	case Server::PacketType::kBroadcastMessage:
 	{
@@ -363,27 +560,87 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 	//Sent by the server to spawn player 1 airplane on connect
 	case Server::PacketType::kSpawnSelf:
 	{
-		sf::Int32 ship_identifier;
+			//spawn odd connecting player as player 1 with binding to keys1, even connecting player as player 2 with binding to keys2
+		
+		sf::Int32 player_id;
 		sf::Vector2f ship_position;
-		packet >> ship_identifier >> ship_position.x >> ship_position.y;
-		Ship* aircraft = m_world.AddShip(ship_identifier);
-		aircraft->setPosition(ship_position);
-		m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, GetContext().keys1));
-		//m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, GetContext().keys2));
-		m_local_player_identifiers.push_back(ship_identifier);
+		packet >> player_id >> ship_position.x >> ship_position.y;
+
+		sf::Int32 ship_identifier = 1;
+		//Determine ship ID, each ship has 2 players
+		Ship* ship = m_world.AddShip(ship_identifier);
+		ship->setPosition(ship_position);
+		
+		
+		bool is_Pilot = player_id % 2 == 1;
+		if (is_Pilot)
+		{
+			m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys1));
+		}else
+		{
+			m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys2));
+		}
+
+		m_local_player_identifiers.push_back(player_id);
 		m_game_started = true;
+
+		/*sf::Int32 aircraft_identifier;
+		sf::Vector2f aircraft_position;
+		packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y;
+		Ship* aircraft = m_world.AddShip(aircraft_identifier);
+		aircraft->setPosition(aircraft_position);
+		m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, GetContext().keys1));
+		m_local_player_identifiers.push_back(aircraft_identifier);
+		m_game_started = true;*/
 	}
 	break;
 
 	case Server::PacketType::kPlayerConnect:
 	{
-		sf::Int32 ship_identifier;
+		sf::Int32 player_id;
 		sf::Vector2f ship_position;
-		packet >> ship_identifier >> ship_position.x >> ship_position.y;
+		packet >> player_id >> ship_position.x >> ship_position.y;
 
-		Ship* aircraft = m_world.AddShip(ship_identifier);
-		aircraft->setPosition(ship_position);
-		m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, nullptr));
+		std::cerr << "New player connected: " << player_id << std::endl;
+
+		// Find an available ship or create a new one
+		Ship* assigned_ship = nullptr;
+		sf::Int32 ship_identifier = -1;
+
+		for (auto& ship : m_world.GetShips()) 
+		{
+			if (!ship->HasGunner()) // If the ship has space for a second player
+			{
+				assigned_ship = ship;
+				ship_identifier = ship->GetIdentifier();
+				break;
+			}
+		}
+
+		// If no existing ship had space, create a new one
+		if (!assigned_ship)
+		{
+			ship_identifier = m_world.GetShips().size();  // New ship ID
+			assigned_ship = m_world.AddShip(ship_identifier);
+			assigned_ship->setPosition(ship_position);
+
+			std::cerr << "Created new ship (ID: " << ship_identifier << ")" << std::endl;
+		}
+
+		// Assign player as pilot or gunner
+		bool is_pilot = (assigned_ship->GetPilot() == -1);
+		if (is_pilot)
+		{
+			m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys1));
+			assigned_ship->SetPilot(player_id);
+		}
+		else
+		{
+			m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys2));
+			assigned_ship->SetGunner(player_id);
+		}
+
+		m_local_player_identifiers.push_back(player_id);
 	}
 	break;
 
@@ -529,3 +786,4 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 	break;
 	}
 }
+

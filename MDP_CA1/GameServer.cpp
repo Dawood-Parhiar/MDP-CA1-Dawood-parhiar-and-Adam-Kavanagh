@@ -1,4 +1,4 @@
-#include "GameServer.hpp"
+﻿#include "GameServer.hpp"
 #include <SFML/Network/Packet.hpp>
 #include "NetworkProtocol.hpp"
 #include <SFML/System/Sleep.hpp>
@@ -21,6 +21,7 @@ GameServer::GameServer(sf::Vector2f battlefield_size)
     , m_waiting_thread_end(false)
     , m_last_spawn_time(sf::Time::Zero)
     , m_time_for_next_spawn(sf::seconds(5.f))
+	//,m_in_lobby(true)
 {
     m_listener_socket.setBlocking(false);
     m_peers[0].reset(new RemotePeer());
@@ -242,113 +243,188 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
 
     switch (static_cast<Client::PacketType> (packet_type))
     {
-    case Client::PacketType::kQuit:
-    {
-        receiving_peer.m_timed_out = true;
-        detected_timeout = true;
-    }
-    break;
+	    case Client::PacketType::kQuit:
+	    {
+	        receiving_peer.m_timed_out = true;
+	        detected_timeout = true;
+	    }
+	    break;
 
-    case Client::PacketType::kPlayerEvent:
-    {
-        sf::Int32 aircraft_identifier;
-        sf::Int32 action;
-        packet >> aircraft_identifier >> action;
-        NotifyPlayerEvent(aircraft_identifier, action);
-    }
-    break;
+	    case Client::PacketType::kPlayerEvent:
+	    {
+	        sf::Int32 aircraft_identifier;
+	        sf::Int32 action;
+	        packet >> aircraft_identifier >> action;
+	        NotifyPlayerEvent(aircraft_identifier, action);
+	    }
+	    break;
 
-    case Client::PacketType::kPlayerRealtimeChange:
-    {
-        sf::Int32 aircraft_identifier;
-        sf::Int32 action;
-        bool action_enabled;
-        packet >> aircraft_identifier >> action >> action_enabled;
-        NotifyPlayerRealtimeChange(aircraft_identifier, action, action_enabled);
-    }
-    break;
+	    case Client::PacketType::kPlayerRealtimeChange:
+	    {
+	        sf::Int32 aircraft_identifier;
+	        sf::Int32 action;
+	        bool action_enabled;
+	        packet >> aircraft_identifier >> action >> action_enabled;
+	        NotifyPlayerRealtimeChange(aircraft_identifier, action, action_enabled);
+	    }
+	    break;
 
-    case Client::PacketType::kRequestCoopPartner:
-    {
-        receiving_peer.m_ship_identifiers.emplace_back(m_ship_identifier_counter);
-        m_ship_info[m_ship_identifier_counter].m_position = sf::Vector2f(m_battlefield_rect.width / 2, m_battlefield_rect.top + m_battlefield_rect.height / 2);
-        m_ship_info[m_ship_identifier_counter].m_hitpoints = 100;
-        m_ship_info[m_ship_identifier_counter].m_missile_ammo = 2;
+	    case Client::PacketType::kRequestCoopPartner:
+	    {
+	        receiving_peer.m_ship_identifiers.emplace_back(m_ship_identifier_counter);
+	        m_ship_info[m_ship_identifier_counter].m_position = sf::Vector2f(m_battlefield_rect.width / 2, m_battlefield_rect.top + m_battlefield_rect.height / 2);
+	        m_ship_info[m_ship_identifier_counter].m_hitpoints = 100;
+	        m_ship_info[m_ship_identifier_counter].m_missile_ammo = 2;
 
-        sf::Packet request_packet;
-        request_packet << static_cast<sf::Int32>(Server::PacketType::kAcceptCoopPartner);
-        request_packet << m_ship_identifier_counter;
-        request_packet << m_ship_info[m_ship_identifier_counter].m_position.x;
-        request_packet << m_ship_info[m_ship_identifier_counter].m_position.y;
+	        sf::Packet request_packet;
+	        request_packet << static_cast<sf::Int32>(Server::PacketType::kAcceptCoopPartner);
+	        request_packet << m_ship_identifier_counter;
+	        request_packet << m_ship_info[m_ship_identifier_counter].m_position.x;
+	        request_packet << m_ship_info[m_ship_identifier_counter].m_position.y;
 
-        receiving_peer.m_socket.send(request_packet);
-        m_ship_count++;
+	        receiving_peer.m_socket.send(request_packet);
+	        m_ship_count++;
 
-        // Tell everyone else about the new plane
-        sf::Packet notify_packet;
-        notify_packet << static_cast<sf::Int32>(Server::PacketType::kPlayerConnect);
-        notify_packet << m_ship_identifier_counter;
-        notify_packet << m_ship_info[m_ship_identifier_counter].m_position.x;
-        notify_packet << m_ship_info[m_ship_identifier_counter].m_position.y;
+	        // Tell everyone else about the new plane
+	        sf::Packet notify_packet;
+	        notify_packet << static_cast<sf::Int32>(Server::PacketType::kPlayerConnect);
+	        notify_packet << m_ship_identifier_counter;
+	        notify_packet << m_ship_info[m_ship_identifier_counter].m_position.x;
+	        notify_packet << m_ship_info[m_ship_identifier_counter].m_position.y;
 
-        for (PeerPtr& peer : m_peers)
-        {
-            if (peer.get() != &receiving_peer && peer->m_ready)
-            {
+	        for (PeerPtr& peer : m_peers)
+	        {
+	            if (peer.get() != &receiving_peer && peer->m_ready)
+	            {
 
-                peer->m_socket.send(notify_packet);
-            }
-        }
+	                peer->m_socket.send(notify_packet);
+	            }
+	        }
 
-        m_ship_identifier_counter++;
-    }
-    break;
+	        m_ship_identifier_counter++;
+	    }
+	    break;
 
-    case Client::PacketType::kStateUpdate:
-    {
-        sf::Int32 num_aircraft;
-        packet >> num_aircraft;
+	    case Client::PacketType::kStateUpdate:
+	    {
+	        sf::Int32 num_aircraft;
+	        packet >> num_aircraft;
 
-        for (sf::Int32 i = 0; i < num_aircraft; ++i)
-        {
-            sf::Int32 aircraft_identifier;
-            sf::Int32 aircraft_hitpoints;
-            sf::Int32 missile_ammo;
-            sf::Vector2f aircraft_position;
-            packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y >> aircraft_hitpoints >> missile_ammo;
-            m_ship_info[aircraft_identifier].m_position = aircraft_position;
-            m_ship_info[aircraft_identifier].m_hitpoints = aircraft_hitpoints;
-            m_ship_info[aircraft_identifier].m_missile_ammo = missile_ammo;
-        }
-    }
-    break;
+	        for (sf::Int32 i = 0; i < num_aircraft; ++i)
+	        {
+	            sf::Int32 aircraft_identifier;
+	            sf::Int32 aircraft_hitpoints;
+	            sf::Int32 missile_ammo;
+	            sf::Vector2f aircraft_position;
+	            packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y >> aircraft_hitpoints >> missile_ammo;
+	            m_ship_info[aircraft_identifier].m_position = aircraft_position;
+	            m_ship_info[aircraft_identifier].m_hitpoints = aircraft_hitpoints;
+	            m_ship_info[aircraft_identifier].m_missile_ammo = missile_ammo;
+	        }
+	    }
+	    break;
 
-    case Client::PacketType::kGameEvent:
-    {
-        sf::Int32 action;
-        float x;
-        float y;
+	    case Client::PacketType::kGameEvent:
+	    {
+	        sf::Int32 action;
+	        float x;
+	        float y;
 
-        packet >> action;
-        packet >> x;
-        packet >> y;
+	        packet >> action;
+	        packet >> x;
+	        packet >> y;
 
-        //Enemy explodes, with a certain probability, drop a pickup
-        //To avoid multiple messages only listen to the first peer (host)
-        if (action == GameActions::kEnemyExplode && Utility::RandomInt(3) == 0 && &receiving_peer == m_peers[0].get())
-        {
-            sf::Packet packet;
-            packet << static_cast<sf::Int32>(Server::PacketType::kSpawnPickup);
-            packet << static_cast<sf::Int32>(Utility::RandomInt(static_cast<int>(PickupType::kPickupCount)));
-            packet << x;
-            packet << y;
+	        //Enemy explodes, with a certain probability, drop a pickup
+	        //To avoid multiple messages only listen to the first peer (host)
+	        if (action == GameActions::kEnemyExplode && Utility::RandomInt(3) == 0 && &receiving_peer == m_peers[0].get())
+	        {
+	            sf::Packet packet;
+	            packet << static_cast<sf::Int32>(Server::PacketType::kSpawnPickup);
+	            packet << static_cast<sf::Int32>(Utility::RandomInt(static_cast<int>(PickupType::kPickupCount)));
+	            packet << x;
+	            packet << y;
 
-            SendToAll(packet);
-        }
-    }
+	            SendToAll(packet);
+	        }
+	    }
+        //break;
+        //case Client::PacketType::kPlayerReady:
+        //{
+        //    sf::Int32 ship_identifier;
+        //    packet >> ship_identifier;
+
+        //    // Mark the player as ready
+        //    m_ready_players[ship_identifier] = true;
+
+        //    // Broadcast updated lobby state
+        //    SendLobbyUpdate();
+
+        //    // Check if all players are ready
+        //    if (AllPlayersReady())
+        //    {
+        //        StartGame();
+        //    }
+        //}
+        //break;
+
+
     }
 }
-
+//
+//void GameServer::HandleIncomingConnections()
+//{
+//    if (!m_listening_state)
+//    {
+//        return;
+//    }
+//
+//    //if (m_in_lobby)
+//    //{
+//    //    // Add player to lobby
+//    //    m_ready_players[m_ship_identifier_counter] = false; // Default to not ready
+//
+//    //    // Notify everyone about new player
+//    //    SendLobbyUpdate();
+//    //}
+//
+//    if (m_listener_socket.accept(m_peers[m_connected_players]->m_socket) == sf::TcpListener::Done)
+//    {
+//        //Order the new client to spawn its player 1
+//        m_ship_info[m_ship_identifier_counter].m_position = sf::Vector2f(m_battlefield_rect.width / 2, m_battlefield_rect.top + m_battlefield_rect.height / 2);
+//        m_ship_info[m_ship_identifier_counter].m_hitpoints = 100;
+//        m_ship_info[m_ship_identifier_counter].m_missile_ammo = 2;
+//
+//        sf::Packet packet;
+//        packet << static_cast<sf::Int32>(Server::PacketType::kSpawnSelf);
+//        packet << m_ship_identifier_counter;
+//        packet << m_ship_info[m_ship_identifier_counter].m_position.x;
+//        packet << m_ship_info[m_ship_identifier_counter].m_position.y;
+//
+//        m_peers[m_connected_players]->m_ship_identifiers.emplace_back(m_ship_identifier_counter);
+//
+//        BroadcastMessage("New player");
+//        InformWorldState(m_peers[m_connected_players]->m_socket);
+//        NotifyPlayerSpawn(m_ship_identifier_counter++);
+//
+//        m_peers[m_connected_players]->m_socket.send(packet);
+//        m_peers[m_connected_players]->m_ready = true;
+//        m_peers[m_connected_players]->m_last_packet_time = Now();
+//
+//        m_ship_count++;
+//        m_connected_players++;
+//
+//        if (m_connected_players >= m_max_connected_players)
+//        {
+//            SetListening(false);
+//        }
+//        else
+//        {
+//            m_peers.emplace_back(PeerPtr(new RemotePeer()));
+//        }
+//        
+//
+//    }
+//}
 void GameServer::HandleIncomingConnections()
 {
     if (!m_listening_state)
@@ -358,30 +434,67 @@ void GameServer::HandleIncomingConnections()
 
     if (m_listener_socket.accept(m_peers[m_connected_players]->m_socket) == sf::TcpListener::Done)
     {
-        //Order the new client to spawn its player 1
-        m_ship_info[m_ship_identifier_counter].m_position = sf::Vector2f(m_battlefield_rect.width / 2, m_battlefield_rect.top + m_battlefield_rect.height / 2);
-        m_ship_info[m_ship_identifier_counter].m_hitpoints = 100;
-        m_ship_info[m_ship_identifier_counter].m_missile_ammo = 2;
+        sf::Int32 assigned_ship_id = -1;
+        bool is_pilot = false;
 
+        // Find an existing ship that has space
+        for (auto& ship_pair : m_ship_info)  
+        {
+            sf::Int32 ship_id = ship_pair.first;  // Extract key
+            ShipInfo& ship = ship_pair.second;    // Extract value
+
+            if (!ship.HasGunner())  // Ship has an empty gunner seat
+            {
+                assigned_ship_id = ship_id;
+                is_pilot = false;
+                break;
+            }
+        }
+
+        // If no existing ship has space, create a new one
+        if (assigned_ship_id == -1)
+        {
+            assigned_ship_id = m_ship_identifier_counter;
+            is_pilot = true;
+
+            // Initialize new ship info
+            ShipInfo new_ship;
+            new_ship.m_position = sf::Vector2f(m_battlefield_rect.width / 2,
+                m_battlefield_rect.top + m_battlefield_rect.height / 2);
+            new_ship.m_hitpoints = 100;
+            new_ship.m_missile_ammo = 20;
+
+            m_ship_info[assigned_ship_id] = new_ship;
+            m_ship_identifier_counter++;
+        }
+
+        // Assign player to their role
+        if (is_pilot)
+        {
+            m_ship_info[assigned_ship_id].m_pilot_id = m_connected_players;
+        }
+        else
+        {
+            m_ship_info[assigned_ship_id].m_gunner_id = m_connected_players;
+        }
+
+        // Notify client
         sf::Packet packet;
         packet << static_cast<sf::Int32>(Server::PacketType::kSpawnSelf);
-        packet << m_ship_identifier_counter;
-        packet << m_ship_info[m_ship_identifier_counter].m_position.x;
-        packet << m_ship_info[m_ship_identifier_counter].m_position.y;
+        packet << assigned_ship_id;
+        packet << m_ship_info[assigned_ship_id].m_position.x;
+        packet << m_ship_info[assigned_ship_id].m_position.y;
 
-        m_peers[m_connected_players]->m_ship_identifiers.emplace_back(m_ship_identifier_counter);
-
-        BroadcastMessage("New player");
+        m_peers[m_connected_players]->m_ship_identifiers.emplace_back(assigned_ship_id);
+        BroadcastMessage("New player joined");
         InformWorldState(m_peers[m_connected_players]->m_socket);
-        NotifyPlayerSpawn(m_ship_identifier_counter++);
-
+        NotifyPlayerSpawn(assigned_ship_id);
         m_peers[m_connected_players]->m_socket.send(packet);
         m_peers[m_connected_players]->m_ready = true;
         m_peers[m_connected_players]->m_last_packet_time = Now();
 
-        m_ship_count++;
+        // Update connected players
         m_connected_players++;
-
         if (m_connected_players >= m_max_connected_players)
         {
             SetListening(false);
@@ -498,3 +611,55 @@ GameServer::RemotePeer::RemotePeer() : m_ready(false), m_timed_out(false)
 {
     m_socket.setBlocking(false);
 }
+//void GameServer::HandlePlayerReady(sf::Packet& packet)
+//{
+//    sf::Int32 player_id;
+//    bool is_ready;
+//    packet >> player_id >> is_ready;
+//
+//    // Update the ready status of the player in the server's state
+//    m_ready_players[player_id] = is_ready;
+//
+//    // Broadcast the updated status to all clients
+//    SendLobbyUpdate();  // Send an updated "Ready" status to all clients
+//}
+//
+//void GameServer::SendLobbyUpdate()
+//{
+//    sf::Packet packet;
+//    packet << static_cast<sf::Int32>(Server::PacketType::kLobbyUpdate);
+//    packet << static_cast<sf::Int32>(m_ready_players.size());
+//
+//    for (const auto& pair : m_ready_players)
+//    {
+//        sf::Int32 ship_id = pair.first;
+//        bool is_ready = pair.second;
+//        packet << ship_id << is_ready;
+//    }
+//
+//    SendToAll(packet);
+//}
+//
+//bool GameServer::AllPlayersReady() const
+//{
+//    if (m_ready_players.empty()) return false;
+//
+//    for (const auto& pair : m_ready_players)
+//    {
+//        if (!pair.second) return false;
+//    }
+//
+//    return true;
+//}
+//
+//void GameServer::StartGame()
+//{
+//    if (!m_in_lobby) return;  // Ensure we only start once
+//
+//    m_in_lobby = false;  // Mark game as started
+//
+//    sf::Packet packet;
+//    packet << static_cast<sf::Int32>(Server::PacketType::kGameStart);
+//
+//    SendToAll(packet);
+//}

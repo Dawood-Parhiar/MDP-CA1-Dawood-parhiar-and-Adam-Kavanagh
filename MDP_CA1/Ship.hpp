@@ -44,6 +44,12 @@ public:
 	void DisablePickups();
 	void SetMissileAmmo(sf::Int32 missile_ammo);
 
+	void SetPilot(sf::Int32 pilot_id) { m_pilot = pilot_id; }
+	void SetGunner(sf::Int32 gunner_id) { m_gunner = gunner_id; }
+
+	bool HasGunner() const { return m_gunner != -1; }
+	sf::Int32 GetPilot() const { return m_pilot; }
+
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
 	virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands) override;
@@ -97,5 +103,8 @@ private:
 
 	bool m_explosion_began;
 	bool m_pickups_enabled;
+
+	sf::Int32 m_pilot = -1;
+	sf::Int32 m_gunner = -1;
 };
 

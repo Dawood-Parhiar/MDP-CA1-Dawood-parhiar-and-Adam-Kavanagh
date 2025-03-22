@@ -124,11 +124,11 @@ void World::RemoveShip(int id)
 
 Ship* World::GetShip(int id) const
 {//Code changes from Dawood Parhiar D00248313
-	for (Ship* a : m_player_ships)
+	for (Ship* s : m_player_ships)
 	{
-		if (a->GetIdentifier() == id)
+		if (s->GetIdentifier() == id)
 		{
-			return a;
+			return s;
 		}
 	}
 	return nullptr;
@@ -146,6 +146,11 @@ void World::CreatePickup(sf::Vector2f position, PickupType type)
 bool World::PollGameAction(GameActions::Action& out)
 {
 	return m_network_node->PollGameAction(out);
+}
+
+std::vector<Ship*>& World::GetShips()
+{
+	return m_player_ships;
 }
 
 void World::SetCurrentBattleFieldPosition(float lineY)

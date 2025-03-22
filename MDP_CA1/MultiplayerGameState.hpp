@@ -30,6 +30,7 @@ private:
 	TextureHolder& m_texture_holder;
 
 	std::map<int, PlayerPtr> m_players;
+	//std::map<int, bool> m_ready_players;
 	std::vector<sf::Int32> m_local_player_identifiers;
 	sf::TcpSocket m_socket;
 	bool m_connected;

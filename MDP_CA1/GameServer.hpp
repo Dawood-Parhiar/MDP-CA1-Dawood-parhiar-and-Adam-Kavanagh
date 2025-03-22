@@ -8,6 +8,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <SFML/Graphics/Rect.hpp>
 
 class GameServer
@@ -18,6 +19,10 @@ public:
 	void NotifyPlayerSpawn(sf::Int32 ship_identifier);
 	void NotifyPlayerRealtimeChange(sf::Int32 ship_identifier, sf::Int32 action, bool action_enabled);
 	void NotifyPlayerEvent(sf::Int32 ship_identifier, sf::Int32 action);
+	/*void HandlePlayerReady(sf::Packet& packet);
+	void SendLobbyUpdate();
+	bool AllPlayersReady() const;
+	void StartGame();*/
 
 private:
 	struct RemotePeer
@@ -36,6 +41,14 @@ private:
 		sf::Int32 m_hitpoints;
 		sf::Int32 m_missile_ammo;
 		std::map<sf::Int32, bool> m_realtime_actions;
+
+		sf::Int32 m_pilot_id = -1;  // Default to no pilot
+		sf::Int32 m_gunner_id = -1; // Default to no gunner
+
+		// Check if the ship has an available seat
+		bool HasPilot() const { return m_pilot_id != -1; }
+		bool HasGunner() const { return m_gunner_id != -1; }
+		bool IsFull() const { return HasPilot() && HasGunner(); }
 	};
 
 	typedef std::unique_ptr<RemotePeer> PeerPtr;
@@ -80,5 +93,12 @@ private:
 
 	sf::Time m_last_spawn_time;
 	sf::Time m_time_for_next_spawn;
+
+	////handle lobby
+	//bool m_in_lobby;  // Track if the game is in lobby state
+	//std::unordered_map<int, bool> m_ready_players;  // Track which players are ready
+
+
+
 };
 

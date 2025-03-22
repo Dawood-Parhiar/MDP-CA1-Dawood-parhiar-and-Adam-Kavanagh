@@ -46,7 +46,7 @@ public:
 	sf::FloatRect GetBattlefieldBounds() const;
 	void CreatePickup(sf::Vector2f position, PickupType type);
 	bool PollGameAction(GameActions::Action& out);
-
+	std::vector<Ship*>& GetShips();
 
 private:
 	void LoadTextures();
