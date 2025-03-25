@@ -89,19 +89,22 @@
 //};
 //
 
-/*
+
 #pragma once
 #include <SFML/Network/IpAddress.hpp>
 #include <SFML/Network/Packet.hpp>
 
 #include "Button.hpp"
 #include "Container.hpp"
+#include "GameServer.hpp"
 #include "Label.hpp"
 #include "State.hpp"
 
 class LobbyState : public State
 {
 public:
+	sf::TcpSocket* ConnectToServer(sf::IpAddress ip_address);
+	void HostServer();
 	LobbyState(StateStack& stack, Context& context, bool is_host);
 	void CreateUI(Context& context);
 	bool TeamHasPlace(sf::Int8 id);
@@ -114,6 +117,7 @@ public:
 	void NotifyServerOfExistence() const;
 	bool Update(sf::Time dt) override;
 	bool HandleEvent(const sf::Event& event) override;
+	void DisconnectServer();
 	void OnStackPopped() override;
 
 private:
@@ -125,7 +129,7 @@ private:
 	auto IsHostAndInTeam();
 	auto HandleLeaveTeamButtonPress();
 	auto IsInATeam();
-	auto HandleBackButtonPressed() const;
+	auto HandleBackButtonPressed();
 	void HandleGameStart();
 	void HandleGameStartCountdown();
 	void HandlePacket(sf::Int8 packet_type, sf::Packet& packet);
@@ -140,7 +144,9 @@ private:
 	void HandleSpawnSelf(sf::Packet& packet);
 
 private:
-	sf::TcpSocket* m_socket;
+	std::unique_ptr<GameServer> m_game_server;
+	std::unique_ptr<sf::TcpSocket> m_socket;
+	
 
 	gui::Container m_gui_container;
 	gui::Container m_gui_fail_container;
@@ -173,4 +179,3 @@ private:
 	bool m_is_connecting;
 	sf::IpAddress ip;
 };
-*/

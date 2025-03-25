@@ -16,7 +16,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_scene_layers()
 	,m_world_bounds(0.f,0.f, m_camera.getSize().x, 4000.f)
 	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.height - m_camera.getSize().y/2.f)//
-	,m_scrollspeed(-50.f)
+	,m_scrollspeed(-20.f)
 	,m_scrollspeed_compensation(1.f)
 	,m_player_ships()
 	,m_networked_world(networked)

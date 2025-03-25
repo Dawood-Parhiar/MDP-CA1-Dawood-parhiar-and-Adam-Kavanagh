@@ -616,7 +616,6 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 			ship_identifier = m_world.GetShips().size();  // New ship ID
 			assigned_ship = m_world.AddShip(ship_identifier);
 			assigned_ship->setPosition(ship_position);
-
 			std::cerr << "Created new ship (ID: " << ship_identifier << ")" << std::endl;
 		}
 
@@ -641,7 +640,7 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 	{
 		sf::Int32 ship_identifier;
 		packet >> ship_identifier;
-		m_world.RemoveShip(ship_identifier);
+		//m_world.RemoveShip(ship_identifier);
 		m_players.erase(ship_identifier);
 	}
 	break;

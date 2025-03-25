@@ -160,6 +160,7 @@
     <ClCompile Include="Cannon.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="GameWinState.cpp" />
+    <ClCompile Include="JoinServerState.cpp" />
     <ClCompile Include="KeyBinding.cpp" />
     <ClCompile Include="LobbyState.cpp" />
     <ClCompile Include="MultiplayerGameState.cpp" />
@@ -209,6 +210,7 @@
     <ClInclude Include="Cannon.hpp" />
     <ClInclude Include="GameServer.hpp" />
     <ClInclude Include="GameWinState.hpp" />
+    <ClInclude Include="JoinServerState.h" />
     <ClInclude Include="KeyBinding.h" />
     <ClInclude Include="LobbyState.hpp" />
     <ClInclude Include="MultiplayerGameState.hpp" />

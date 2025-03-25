@@ -6,6 +6,7 @@
 #include "SettingsState.hpp"
 #include "GameOverState.hpp"
 #include "GameWinState.hpp"
+#include "JoinServerState.h"
 #include "MultiplayerGameState.hpp"
 #include "LobbyState.hpp"
 
@@ -88,7 +89,9 @@ void Application::RegisterStates()
 {
 	m_stack.RegisterState<TitleState>(StateID::kTitle);
 	m_stack.RegisterState<MenuState>(StateID::kMenu);
-	//m_stack.RegisterState<LobbyState>(StateID::kLobby);
+	m_stack.RegisterState<LobbyState>(StateID::kLobbyHost,true);
+	m_stack.RegisterState<LobbyState>(StateID::kLobbyJoin,false);
+	m_stack.RegisterState<JoinServerState>(StateID::kJoinSettings);
 	m_stack.RegisterState<GameState>(StateID::kGame);
 	m_stack.RegisterState<MultiplayerGameState>(StateID::kHostGame, true);
 	m_stack.RegisterState<MultiplayerGameState>(StateID::kJoinGame, false);

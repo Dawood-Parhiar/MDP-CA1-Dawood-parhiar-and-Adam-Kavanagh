@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include <SFML/Graphics.hpp>
 namespace gui
 {
@@ -18,11 +19,13 @@ namespace gui
 		virtual void Activate();
 		virtual void Deactivate();
 
+		void SetDrawPredicate(const std::function<bool()>& predicate);
 		virtual void HandleEvent(const sf::Event& event) = 0;
 
 	private:
 		bool m_is_selected;
 		bool m_is_active;
+		std::function<bool()> m_draw_predicate;
 	};
 }
 
