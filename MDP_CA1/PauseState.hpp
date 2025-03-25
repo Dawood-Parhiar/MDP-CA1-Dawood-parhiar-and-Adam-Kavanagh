@@ -5,6 +5,9 @@
 
 #include "Container.hpp"
 
+#include "Slider.hpp"
+
+
 class PauseState : public State
 {
 public:
@@ -19,5 +22,8 @@ private:
 	sf::Text m_paused_text;
 	gui::Container m_gui_container;
 	bool m_lets_updates_through;
+
+	Interface::Slider m_volume_slider;
+	Interface::Slider m_sound_slider;
 };
 

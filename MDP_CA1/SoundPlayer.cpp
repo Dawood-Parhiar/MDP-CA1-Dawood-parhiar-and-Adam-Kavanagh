@@ -18,11 +18,12 @@ namespace
 }
 
 SoundPlayer::SoundPlayer()
+	:m_volume(100.f)
 {
 	m_sound_buffers.Load(SoundEffect::kAlliedGunfire, "Media/Sound/AlliedGunfire.wav"); // used for ?
 	m_sound_buffers.Load(SoundEffect::kEnemyGunfire, "Media/Sound/Ship-Ambience/Cannon/Cannon 1.wav");
 	m_sound_buffers.Load(SoundEffect::kExplosion1, "Media/Sound/Ship-Ambience/Cannon/Cannon and Shout/Fire 2 & Shout 2.wav");
-		m_sound_buffers.Load(SoundEffect::kExplosion2, "Media/Sound/Ship-Ambience/Cannon/Cannon and Shout/Fire 1 & Shout 1.wav");
+	m_sound_buffers.Load(SoundEffect::kExplosion2, "Media/Sound/Ship-Ambience/Cannon/Cannon and Shout/Fire 1 & Shout 1.wav");
 	m_sound_buffers.Load(SoundEffect::kLaunchMissile, "Media/Sound/Ship-Ambience/Cannon/Cannon and Shout/Fire 1 & Shout 1.wav");
 	m_sound_buffers.Load(SoundEffect::kCollectPickup, "Media/Sound/Ship-Ambience/Cannon/Cannon and Shout/Fire 3 & Shout 2.wav");
 	m_sound_buffers.Load(SoundEffect::kButton, "Media/Sound/Bell-Menu.wav");
@@ -67,4 +68,18 @@ sf::Vector2f SoundPlayer::GetListenerPosition() const
 {
 	sf::Vector3f position = sf::Listener::getPosition();
 	return sf::Vector2f(position.x, -position.y);
+}
+
+void SoundPlayer::SetVolume(float volume)
+{
+	m_volume = volume;
+	for (auto& sound : m_sounds)
+	{
+		sound.setVolume(m_volume);
+	}
+}
+
+float SoundPlayer::GetVolume() const
+{
+	return m_volume;
 }

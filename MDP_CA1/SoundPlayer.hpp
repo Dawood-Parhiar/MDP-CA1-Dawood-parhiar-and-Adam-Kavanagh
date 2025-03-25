@@ -21,8 +21,11 @@ public:
 	void SetListenerPosition(sf::Vector2f position);
 	sf::Vector2f GetListenerPosition() const;
 
+	void SetVolume(float volume); //Adam
+	float GetVolume() const;
 
 private:
 	SoundBufferHolder m_sound_buffers;
 	std::list<sf::Sound> m_sounds;
+	float m_volume; 
 };

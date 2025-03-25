@@ -192,6 +192,7 @@
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="SceneNode.cpp" />
     <ClCompile Include="SettingsState.cpp" />
+    <ClCompile Include="Slider.cpp" />
     <ClCompile Include="SoundNode.cpp" />
     <ClCompile Include="SoundPlayer.cpp" />
     <ClCompile Include="SpriteNode.cpp" />
@@ -259,6 +260,7 @@
     <ClInclude Include="SceneNode.hpp" />
     <ClInclude Include="SettingsState.hpp" />
     <ClInclude Include="ShaderTypes.hpp" />
+    <ClInclude Include="Slider.hpp" />
     <ClInclude Include="SoundEffect.hpp" />
     <ClInclude Include="SoundNode.hpp" />
     <ClInclude Include="SoundPlayer.hpp" />

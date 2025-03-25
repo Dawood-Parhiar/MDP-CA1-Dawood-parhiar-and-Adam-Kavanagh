@@ -5,9 +5,13 @@
 #include "Button.hpp"
 #include "Utility.hpp"
 
+#include "Slider.hpp"
+
 PauseState::PauseState(StateStack& stack, Context context, bool lets_update_through)
     :State(stack, context)
 	, m_lets_updates_through(lets_update_through)
+    , m_volume_slider(0.f, 100.f, context.music->GetVolume(), context.fonts->Get(Font::kMain))
+    , m_sound_slider(0.f, 100.f, context.sounds->GetVolume(), context.fonts->Get(Font::kMain))
 {
     sf::Font& font = context.fonts->Get(Font::kMain);
     sf::Vector2f view_size = context.window->getView().getSize();
@@ -26,24 +30,6 @@ PauseState::PauseState(StateStack& stack, Context context, bool lets_update_thro
             RequestStackPop();
         });
 
-    auto volumeUpButton = std::make_shared<gui::Button>(context);
-    volumeUpButton->setPosition(0.5f * view_size.x - 100, 0.4f * view_size.y + 175);
-    volumeUpButton->SetText("Volume Up");
-    volumeUpButton->SetCallback([this]()
-        {
-            float volume = GetContext().music->GetVolume();
-            GetContext().music->SetVolume(std::min(volume + 10.f, 100.f));
-        });
-
-    auto volumeDownButton = std::make_shared<gui::Button>(context);
-    volumeDownButton->setPosition(0.5f * view_size.x - 100, 0.4f * view_size.y + 275);
-    volumeDownButton->SetText("Volume Down");
-    volumeDownButton->SetCallback([this]()
-        {
-            float volume = GetContext().music->GetVolume();
-            GetContext().music->SetVolume(std::max(volume - 10.f, 0.f));
-        });
-
     auto backToMenuButton = std::make_shared<gui::Button>(context);
     backToMenuButton->setPosition(0.5f * view_size.x - 100, 0.4f * view_size.y + 375);
     backToMenuButton->SetText("Back to menu");
@@ -53,10 +39,19 @@ PauseState::PauseState(StateStack& stack, Context context, bool lets_update_thro
             RequestStackPush(StateID::kMenu);
         });
 
+    m_volume_slider.setPosition(0.5f * view_size.x - 100, 0.4f * view_size.y + 200);
+    m_volume_slider.SetCallback([this](float value)
+        {
+            GetContext().music->SetVolume(value);
+        });
+
+    m_sound_slider.setPosition(0.5f * view_size.x - 100, 0.4f * view_size.y + 300);
+    m_sound_slider.SetCallback([this](float value)
+        {
+            GetContext().sounds->SetVolume(value);
+        });
 
     m_gui_container.Pack(returnButton);
-    m_gui_container.Pack(volumeUpButton);
-    m_gui_container.Pack(volumeDownButton);
     m_gui_container.Pack(backToMenuButton);
 
 
@@ -76,6 +71,10 @@ void PauseState::Draw()
     window.draw(backgroundShape);
     window.draw(m_paused_text);
     window.draw(m_gui_container);
+
+
+	window.draw(m_volume_slider);
+    window.draw(m_sound_slider);
 }
 
 bool PauseState::Update(sf::Time dt)
@@ -87,6 +86,8 @@ bool PauseState::HandleEvent(const sf::Event& event)
 {
     
     m_gui_container.HandleEvent(event);
+    m_volume_slider.HandleEvent(event, *GetContext().window);
+    m_sound_slider.HandleEvent(event, *GetContext().window);
     return false;
 }
 
