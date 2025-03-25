@@ -18,7 +18,6 @@ PauseState::PauseState(StateStack& stack, Context context, bool lets_update_thro
     Utility::CentreOrigin(m_paused_text);
     m_paused_text.setPosition(0.5f * view_size.x, 0.4f * view_size.y);
 
-
     auto returnButton = std::make_shared<gui::Button>(context);
     returnButton->setPosition(0.5f * view_size.x - 100, 0.4f * view_size.y + 75);
     returnButton->SetText("Return");
@@ -27,8 +26,26 @@ PauseState::PauseState(StateStack& stack, Context context, bool lets_update_thro
             RequestStackPop();
         });
 
+    auto volumeUpButton = std::make_shared<gui::Button>(context);
+    volumeUpButton->setPosition(0.5f * view_size.x - 100, 0.4f * view_size.y + 175);
+    volumeUpButton->SetText("Volume Up");
+    volumeUpButton->SetCallback([this]()
+        {
+            float volume = GetContext().music->GetVolume();
+            GetContext().music->SetVolume(std::min(volume + 10.f, 100.f));
+        });
+
+    auto volumeDownButton = std::make_shared<gui::Button>(context);
+    volumeDownButton->setPosition(0.5f * view_size.x - 100, 0.4f * view_size.y + 275);
+    volumeDownButton->SetText("Volume Down");
+    volumeDownButton->SetCallback([this]()
+        {
+            float volume = GetContext().music->GetVolume();
+            GetContext().music->SetVolume(std::max(volume - 10.f, 0.f));
+        });
+
     auto backToMenuButton = std::make_shared<gui::Button>(context);
-    backToMenuButton->setPosition(0.5f * view_size.x - 100, 0.4f * view_size.y + 175);
+    backToMenuButton->setPosition(0.5f * view_size.x - 100, 0.4f * view_size.y + 375);
     backToMenuButton->SetText("Back to menu");
     backToMenuButton->SetCallback([this]()
         {
@@ -36,7 +53,10 @@ PauseState::PauseState(StateStack& stack, Context context, bool lets_update_thro
             RequestStackPush(StateID::kMenu);
         });
 
+
     m_gui_container.Pack(returnButton);
+    m_gui_container.Pack(volumeUpButton);
+    m_gui_container.Pack(volumeDownButton);
     m_gui_container.Pack(backToMenuButton);
 
 

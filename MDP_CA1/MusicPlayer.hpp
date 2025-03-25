@@ -18,6 +18,8 @@ public:
 	void Play(MusicThemes theme);
 	void Stop();
 
+	float GetVolume() const;
+
 	void SetPaused(bool paused);
 	void SetVolume(float volume);
 

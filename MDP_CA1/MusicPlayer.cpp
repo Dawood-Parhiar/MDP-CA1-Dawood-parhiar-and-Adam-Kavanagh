@@ -24,9 +24,15 @@ void MusicPlayer::Stop()
 	m_music.stop();
 }
 
+float MusicPlayer::GetVolume() const
+{
+	return m_volume;
+}
+
 void MusicPlayer::SetVolume(float volume)
 {
 	m_volume = volume;
+	m_music.setVolume(m_volume);
 }
 
 void MusicPlayer::SetPaused(bool paused)
