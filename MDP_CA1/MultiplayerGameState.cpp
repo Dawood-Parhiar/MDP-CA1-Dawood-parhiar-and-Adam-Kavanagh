@@ -1,4 +1,4 @@
-#include "MultiplayerGameState.hpp"
+﻿#include "MultiplayerGameState.hpp"
 #include "MusicPlayer.hpp"
 #include "Utility.hpp"
 
@@ -560,33 +560,63 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 	//Sent by the server to spawn player 1 airplane on connect
 	case Server::PacketType::kSpawnSelf:
 	{
-			//spawn odd connecting player as player 1 with binding to keys1, even connecting player as player 2 with binding to keys2
-		
-		sf::Int32 player_id;
-		sf::Vector2f ship_position;
-		packet >> player_id >> ship_position.x >> ship_position.y;
+		if (m_host)
+		{
+			sf::Int8 player_id;
+			sf::Vector2f ship_position;
+			packet >> player_id >> ship_position.x >> ship_position.y;
 
-		sf::Int32 ship_identifier = 1;
-		//Determine ship ID, each ship has 2 players
-		Ship* ship = m_world.AddShip(ship_identifier);
-		ship->setPosition(ship_position);
+			// Determine ship ID: each ship has 2 players (pilot + gunner)
+			sf::Int8 ship_identifier = player_id / 2; // Every 2 players share a ship
 
-		m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys1));
-			ship->SetPilot(player_id);
+			Ship* ship = nullptr;
 
-		m_local_player_identifiers.push_back(player_id);
-		m_game_started = true;
+			// Check if this ship already exists
+			if (m_world.HasShip(ship_identifier))
+			{
+				ship = m_world.GetShip(ship_identifier);
+			}
+			else
+			{
+				// Create a new ship if needed
+				ship = m_world.AddShip(-1);
+				ship->setPosition(ship_position);
+			}
 
-		/*sf::Int32 aircraft_identifier;
-		sf::Vector2f aircraft_position;
-		packet >> aircraft_identifier >> aircraft_position.x >> aircraft_position.y;
-		Ship* aircraft = m_world.AddShip(aircraft_identifier);
-		aircraft->setPosition(aircraft_position);
-		m_players[aircraft_identifier].reset(new Player(&m_socket, aircraft_identifier, GetContext().keys1));
-		m_local_player_identifiers.push_back(aircraft_identifier);
-		m_game_started = true;*/
+			// Assign pilot or gunner based on player number
+			if (player_id % 2 == 0)
+			{
+				ship->SetPilot(player_id);
+			}
+			else
+			{
+				ship->SetGunner(player_id);
+			}
+
+			// Bind correct controls: odd players get keys1, even players get keys2
+			if (player_id % 2 == 0)
+			{
+				m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys1));
+			}
+			else
+			{
+				m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys2));
+			}
+
+			m_local_player_identifiers.push_back(player_id);
+			m_game_started = true;
+		}
+		else
+		{
+			// Ensure non-host clients store their identifiers correctly
+			sf::Int32 player_id;
+			packet >> player_id;
+			m_local_player_identifiers.push_back(player_id);
+			m_game_started = true;
+		}
 	}
 	break;
+
 
 	case Server::PacketType::kPlayerConnect:
 	{
@@ -596,52 +626,81 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 
 		std::cerr << "New player connected: " << player_id << std::endl;
 
-		// Find an available ship or create a new one
+		// Find an available ship with a free seat
 		Ship* assigned_ship = nullptr;
-		sf::Int32 ship_identifier = -1;
 
-		for (auto& ship : m_world.GetShips()) 
+		for (auto& ship : m_world.GetShips())
 		{
-			if (!ship->HasGunner()) // If the ship has space for a second player
+			if (!ship->HasGunner())  // If a gunner seat is available
 			{
 				assigned_ship = ship;
-				ship_identifier = ship->GetIdentifier();
 				break;
 			}
 		}
 
-		// If no existing ship had space, create a new one
+		// No existing ship available → create a new one
 		if (!assigned_ship)
 		{
-			ship_identifier = m_world.GetShips().size();  // New ship ID
-			assigned_ship = m_world.AddShip(ship_identifier);
+			assigned_ship = m_world.AddShip(player_id);
 			assigned_ship->setPosition(ship_position);
-			std::cerr << "Created new ship (ID: " << ship_identifier << ")" << std::endl;
+			std::cerr << "Created new ship (ID: " << assigned_ship->GetIdentifier() << ")" << std::endl;
 		}
 
 		// Assign player as pilot or gunner
 		bool is_pilot = (assigned_ship->GetPilot() == -1);
 		if (is_pilot)
 		{
-			m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys1));
 			assigned_ship->SetPilot(player_id);
+			m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys1));
+			std::cerr << "Player " << player_id << " assigned as pilot of ship " << assigned_ship << std::endl;
 		}
 		else
 		{
-			m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys2));
 			assigned_ship->SetGunner(player_id);
+			m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys2));
+			std::cerr << "Player " << player_id << " assigned as gunner of ship " << assigned_ship << std::endl;
 		}
 
 		m_local_player_identifiers.push_back(player_id);
 	}
 	break;
 
+
 	case Server::PacketType::kPlayerDisconnect:
 	{
-		sf::Int32 ship_identifier;
-		packet >> ship_identifier;
-		//m_world.RemoveShip(ship_identifier);
-		m_players.erase(ship_identifier);
+		sf::Int8 player_id;
+		packet >> player_id;
+		std::cerr << "Player " << player_id << "Disconnected" << std::endl;
+
+		// Find the ship they were on
+		Ship* ship_to_update = nullptr;
+		for (auto& ship : m_world.GetShips())
+		{
+			if (ship->GetPilot() == player_id)
+			{
+				std::cerr << "Pilot " << player_id << " removed from ship " << ship->GetIdentifier() << std::endl;
+				ship->SetPilot(-1);
+				ship_to_update = ship;
+				break;
+			}
+			else if (ship->HasGunner() == player_id)
+			{
+				std::cerr << "Gunner " << player_id << " removed from ship " << ship->GetIdentifier() << std::endl;
+				ship->SetGunner(-1);
+				ship_to_update = ship;
+				break;
+			}
+		}
+
+		// If the ship is empty, remove it
+		if (ship_to_update && ship_to_update->GetPilot() == -1 && ship_to_update->HasGunner() == -1)
+		{
+			std::cerr << "Ship " << ship_to_update->GetIdentifier() << " is now empty and removed." << std::endl;
+			m_world.RemoveShip(ship_to_update->GetIdentifier());
+		}
+
+		// Remove player from the game
+		m_players.erase(player_id);
 	}
 	break;
 
@@ -667,8 +726,10 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 			ship->setPosition(ship_position);
 			ship->SetHitpoints(hitpoints);
 			ship->SetMissileAmmo(missile_ammo);
-
-			m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, nullptr));
+			if (i%2 == 1)
+			m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, GetContext().keys1));
+			else
+			m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, GetContext().keys2));
 		}
 	}
 	break;

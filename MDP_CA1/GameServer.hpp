@@ -30,7 +30,7 @@ private:
 		RemotePeer();
 		sf::TcpSocket m_socket;
 		sf::Time m_last_packet_time;
-		std::vector<sf::Int8> m_ship_identifiers;
+		sf::Int8 m_identifier{};
 		bool m_ready;
 		bool m_timed_out;
 	};
@@ -43,12 +43,12 @@ private:
 		std::map<sf::Int32, bool> m_realtime_actions;
 
 		sf::Int8 m_ship_id;
-		sf::Int8 m_pilot_id = -1;  // Default to no pilot
+		sf::Int8 m_pilot_id = 1;  // Default to no pilot
 		sf::Int8 m_gunner_id = -1; // Default to no gunner
 
 		// Check if the ship has an available seat
-		bool HasPilot() const { return m_pilot_id != -1; }
-		bool HasGunner() const { return m_gunner_id != -1; }
+		bool HasPilot() const { return m_pilot_id; }
+		bool HasGunner() const { return m_gunner_id; }
 		bool IsFull() const { return HasPilot() && HasGunner(); }
 	};
 
@@ -63,7 +63,7 @@ private:
 	void HandleIncomingPackets();
 	void PlayerEvent(sf::Packet& packet);
 	void RealTimeChange(sf::Packet& packet);
-	void RequestCoopPartner(RemotePeer& receiving_peer);
+	//void RequestCoopPartner(RemotePeer& receiving_peer);
 	void StateUpdate(sf::Packet& packet);
 	void GameEvent(sf::Packet& packet, RemotePeer& receiving_peer);
 	void NotifyTeamChange(sf::Int8 id, sf::Int8 ship_id, sf::Int8 gunner_id, sf::Int8 pilot_id);
@@ -73,6 +73,7 @@ private:
 	void NotifyGameStart();
 	void HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving_peer, bool& detected_timeout);
 
+	void GetAndSetID(sf::Int8& int8);
 	void HandleIncomingConnections();
 	void HandleDisconnections();
 

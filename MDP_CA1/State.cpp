@@ -2,7 +2,7 @@
 #include "StateID.hpp"
 #include "StateStack.hpp"
 
-State::Context::Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, MusicPlayer& music, SoundPlayer& sounds, KeyBinding& key1, KeyBinding& key2)
+State::Context::Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, MusicPlayer& music, SoundPlayer& sounds, KeyBinding& key1, KeyBinding& key2, MultiplayerManager& multiplayer_manager)
     : window(&window)
       , textures(&textures)
       , fonts(&fonts)
@@ -10,6 +10,7 @@ State::Context::Context(sf::RenderWindow& window, TextureHolder& textures, FontH
       , sounds(&sounds)
       , keys1(&key1)
       , keys2(&key2)
+	  , multiplayer_manager(&multiplayer_manager)
       
 {
 }

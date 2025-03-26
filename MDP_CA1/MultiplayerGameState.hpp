@@ -16,6 +16,7 @@ public:
 	virtual void OnActivate();
 	void OnDestroy();
 	void DisableAllRealtimeActions();
+	
 
 private:
 	void UpdateBroadcastMessage(sf::Time elpased_time);
@@ -54,5 +55,6 @@ private:
 
 	sf::Time m_client_timeout;
 	sf::Time m_time_since_last_packet;
+
 };
 

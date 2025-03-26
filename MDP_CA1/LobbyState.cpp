@@ -341,22 +341,9 @@ static sf::IpAddress GetAddressFromFile()
 }
 
 
-sf::TcpSocket* LobbyState::ConnectToServer(sf::IpAddress ip_address)
-{
-	m_socket = std::make_unique<sf::TcpSocket>();
-	m_socket->setBlocking(false);
-	m_socket->connect(ip_address, SERVER_PORT, sf::seconds(5));
-	return m_socket.get();
-}
-
-
-void LobbyState::HostServer()
-{
-	m_game_server = std::make_unique<GameServer>(sf::Vector2f(1600, 1080));
-}
 LobbyState::LobbyState(StateStack& stack, Context& context, const bool is_host)
 	: State(stack, context)
-	, m_player_input_name()
+	, m_player_input_name("Default")
 	, m_connected(false)
 	, m_is_host(is_host)
 	, m_unpaired_y_pos(TEAM_POS_Y - 20)
@@ -371,7 +358,7 @@ LobbyState::LobbyState(StateStack& stack, Context& context, const bool is_host)
 
 	if (m_is_host)
 	{
-		HostServer();
+		context.multiplayer_manager->HostServer();
 		ip = "127.0.0.1";
 	}
 	else
@@ -379,7 +366,7 @@ LobbyState::LobbyState(StateStack& stack, Context& context, const bool is_host)
 		ip = GetAddressFromFile();
 	}
 
-	m_socket = std::unique_ptr<sf::TcpSocket>(ConnectToServer(ip));
+	m_socket = context.multiplayer_manager->ConnectToServer(ip);
 	m_is_connecting = true;
 	m_failed_connection_clock.restart();
 
@@ -751,28 +738,24 @@ bool LobbyState::HandleEvent(const sf::Event& event)
 		m_gui_container.HandleEvent(event);
 	}
 
-	/*if (event.type == sf::Event::GainedFocus)
+	if (event.type == sf::Event::GainedFocus)
 	{
-		return true;
+		GetContext().multiplayer_manager->SetPassFocus(true);
+	}
 	else if (event.type == sf::Event::LostFocus)
 	{
-		return false;
-	}*/
+		GetContext().multiplayer_manager->SetPassFocus(false);
+	}
 
 	return false;
 }
 
-void LobbyState::DisconnectServer()
-{
-	m_game_server.reset();
-	m_socket.reset();
-}
 
 void LobbyState::OnStackPopped()
 {
 	//disconnect the player if the state was popped (except when it was popped because the game started)
 	if (!m_game_started)
-		DisconnectServer();
+		GetContext().multiplayer_manager->Disconnect();
 }
 
 void LobbyState::HandleTeamSelection(sf::Packet& packet)
