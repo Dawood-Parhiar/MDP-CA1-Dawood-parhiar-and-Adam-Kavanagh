@@ -6,6 +6,7 @@
 #include "SettingsState.hpp"
 #include "GameOverState.hpp"
 #include "GameWinState.hpp"
+#include "JoinServerState.h"
 #include "MultiplayerGameState.hpp"
 #include "LobbyState.hpp"
 
@@ -14,7 +15,7 @@ const sf::Time Application::kTimePerFrame = sf::seconds(1.f/60.f);
 Application::Application() : m_window(sf::VideoMode(1920, 1080), "Networked Game", sf::Style::Close),
 	m_player_1_keys(1),
 	m_player_2_keys(2),
-	m_stack(State::Context(m_window, m_textures, m_fonts, m_music, m_sound, m_player_1_keys, m_player_2_keys))
+	m_stack(State::Context(m_window, m_textures, m_fonts, m_music, m_sound, m_player_1_keys, m_player_2_keys,m_multiplayer_manager))
                              
 {
 	m_window.setKeyRepeatEnabled(false);
@@ -88,7 +89,9 @@ void Application::RegisterStates()
 {
 	m_stack.RegisterState<TitleState>(StateID::kTitle);
 	m_stack.RegisterState<MenuState>(StateID::kMenu);
-	//m_stack.RegisterState<LobbyState>(StateID::kLobby);
+	m_stack.RegisterState<LobbyState>(StateID::kLobbyHost,true);
+	m_stack.RegisterState<LobbyState>(StateID::kLobbyJoin,false);
+	m_stack.RegisterState<JoinServerState>(StateID::kJoinSettings);
 	m_stack.RegisterState<GameState>(StateID::kGame);
 	m_stack.RegisterState<MultiplayerGameState>(StateID::kHostGame, true);
 	m_stack.RegisterState<MultiplayerGameState>(StateID::kJoinGame, false);

@@ -89,13 +89,14 @@
 //};
 //
 
-/*
+
 #pragma once
 #include <SFML/Network/IpAddress.hpp>
 #include <SFML/Network/Packet.hpp>
 
 #include "Button.hpp"
 #include "Container.hpp"
+#include "GameServer.hpp"
 #include "Label.hpp"
 #include "State.hpp"
 
@@ -125,7 +126,7 @@ private:
 	auto IsHostAndInTeam();
 	auto HandleLeaveTeamButtonPress();
 	auto IsInATeam();
-	auto HandleBackButtonPressed() const;
+	auto HandleBackButtonPressed();
 	void HandleGameStart();
 	void HandleGameStartCountdown();
 	void HandlePacket(sf::Int8 packet_type, sf::Packet& packet);
@@ -173,4 +174,3 @@ private:
 	bool m_is_connecting;
 	sf::IpAddress ip;
 };
-*/

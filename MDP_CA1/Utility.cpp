@@ -1,6 +1,10 @@
 #define _USE_MATH_DEFINES
 #include "Utility.hpp"
+
+#include <iostream>
 #include <math.h>
+
+#include "Label.hpp"
 
 
 namespace
@@ -13,6 +17,24 @@ namespace
 	auto RandomEngine = CreateRandomEngine();
 }
 
+
+void Utility::CreateButton(State::Context& context, std::shared_ptr<gui::Button>& play_button, int x, int y,
+	const std::string& label, const gui::Button::Callback& callback, bool toggle,
+	const std::function<bool()>& predicate)
+{
+	play_button = std::make_shared<gui::Button>(context);
+	play_button->setPosition(static_cast<float>(x), static_cast<float>(y));
+	play_button->SetText(label);
+	play_button->SetToggle(toggle);
+	if (callback != nullptr)
+	{
+		play_button->SetCallback(callback);
+	}
+	if (predicate != nullptr)
+	{
+		play_button->SetDrawPredicate(predicate);
+	}
+}
 
 sf::Vector2f Utility::UnitVector(const sf::Vector2f& source)
 {
@@ -184,4 +206,31 @@ int Utility::RandomInt(int exclusive_max)
 int Utility::Length(sf::Vector2f vector)
 {
 	return sqrtf(powf(vector.x, 2) + powf(vector.y, 2));
+}
+
+void Utility::CreateButton(State::Context& context, std::shared_ptr<gui::Button>& button, const int x,
+	const int y,
+	const std::string& label, const gui::Button::Callback& callback,
+	const std::function<bool()>& predicate)
+{
+	CreateButton(context, button, x, y, label, callback, false, predicate);
+}
+
+void Utility::CreateButton(State::Context& context, std::shared_ptr<gui::Button>& button, const int x,
+	const int y,
+	const std::string& label, const bool toggle)
+{
+	CreateButton(context, button, x, y, label, nullptr, toggle, nullptr);
+}
+
+void Utility::CreateLabel(const State::Context& context, std::shared_ptr<gui::Label>& label, const int x,
+	const int y, const std::string& label_text, const int text_size)
+{
+	label = std::make_shared<gui::Label>(label_text, *context.fonts, text_size);
+	label->setPosition(static_cast<float>(x), static_cast<float>(y));
+}
+
+void Utility::Debug(const std::string& message)
+{
+	std::cout << message << std::endl;
 }

@@ -153,6 +153,12 @@
     <ClCompile Include="LobbyState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="JoinServerState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiplayerManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.hpp">
@@ -360,6 +366,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LobbyState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JoinServerState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiplayerManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

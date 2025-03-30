@@ -34,5 +34,7 @@ private:
 	
 	KeyBinding m_player_1_keys;
 	KeyBinding m_player_2_keys;
+
+	MultiplayerManager m_multiplayer_manager;
 };
 
