@@ -9,16 +9,26 @@
 class MultiplayerGameState : public State
 {
 public:
-	MultiplayerGameState(StateStack& stack, Context context, bool is_host);
+	MultiplayerGameState(StateStack& stack, Context context ,bool is_host);
 	virtual void Draw();
 	virtual bool Update(sf::Time dt);
 	virtual bool HandleEvent(const sf::Event& event);
 	virtual void OnActivate();
 	void OnDestroy();
 	void DisableAllRealtimeActions();
+	
 
 private:
 	void UpdateBroadcastMessage(sf::Time elpased_time);
+	void HandleBroadcastMessage(sf::Packet& packet);
+	void HandleSpawnSelf(sf::Packet& packet);
+	void HandlePlayerConnect(sf::Packet& packet);
+	void HandlePlayerDisconnect(sf::Packet& packet);
+	void HandleInitialState(sf::Packet& packet);
+	void HandlePlayerEvent(sf::Packet& packet);
+	void HandleRealTimeChange(sf::Packet& packet);
+	void HandleSpawnEnemy(sf::Packet& packet);
+	void HandleUpdateClient(sf::Packet& packet);
 	void HandlePacket(sf::Int32 packet_type, sf::Packet& packet);
 
 private:
@@ -31,7 +41,10 @@ private:
 
 	std::map<int, PlayerPtr> m_players;
 	//std::map<int, bool> m_ready_players;
-	std::vector<sf::Int32> m_local_player_identifiers;
+	std::unordered_map<sf::Int8, sf::Int8> m_playerShip;
+
+
+	sf::Int8 m_local_player_id = -1;
 	sf::TcpSocket m_socket;
 	bool m_connected;
 	std::unique_ptr<GameServer> m_game_server;
@@ -54,5 +67,6 @@ private:
 
 	sf::Time m_client_timeout;
 	sf::Time m_time_since_last_packet;
+
 };
 

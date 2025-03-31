@@ -13,6 +13,16 @@ gui::Label::Label(const std::string& text, const FontHolder& fonts, const Textur
     m_text.setPosition(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
 }
 
+gui::Label::Label(const std::string& text, const FontHolder& fonts, int fontSize)
+	:m_text(text,fonts.Get(Font::kMain) ,fontSize)
+{
+}
+
+sf::Text& gui::Label::GetText()
+{
+    return m_text;
+}
+
 bool gui::Label::IsSelectable() const
 {
     return false;
@@ -21,7 +31,7 @@ bool gui::Label::IsSelectable() const
 void gui::Label::SetText(const std::string& text)
 {
     m_text.setString(text);
-    m_text.setFillColor(sf::Color::Black);
+    //m_text.setFillColor(sf::Color::Black);
     
 }
 

@@ -42,4 +42,8 @@ namespace gui
     {
         m_is_active = false;
     }
+    void Component::SetDrawPredicate(const std::function<bool()>& predicate)
+    {
+        m_draw_predicate = predicate;
+    }
 }

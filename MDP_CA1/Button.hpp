@@ -27,6 +27,7 @@ namespace gui
 		virtual void Deactivate() override;
 		virtual void HandleEvent(const sf::Event& event) override;
 		void SetEnabled(bool cond);
+		
 
 	private:
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;

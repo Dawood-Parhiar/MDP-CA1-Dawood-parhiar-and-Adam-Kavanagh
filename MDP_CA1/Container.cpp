@@ -45,6 +45,13 @@ void gui::Container::HandleEvent(const sf::Event& event)
     }
 }
 
+void gui::Container::Pull(const Component::Ptr& component)
+{
+    auto& components = m_children;
+    const auto remove = std::remove(components.begin(), components.end(), component);
+    components.erase(remove, components.end());
+}
+
 void gui::Container::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
     states.transform *= getTransform();

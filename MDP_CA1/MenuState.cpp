@@ -19,17 +19,25 @@ MenuState::MenuState(StateStack& stack, Context context)
         RequestStackPush(StateID::kGame);
     });
 
-    /*auto lobby_button = std::make_shared<gui::Button>(context);
-    lobby_button->setPosition(400, 400);
-    lobby_button->SetText("Lobby");
+    auto lobby_button = std::make_shared<gui::Button>(context);
+    lobby_button->setPosition(550, 450);
+    lobby_button->SetText("Lobby Host");
     lobby_button->SetCallback([this]()
         {
             RequestStackPop();
-            RequestStackPush(StateID::kLobby);
-        });*/
+            RequestStackPush(StateID::kLobbyHost);
+        });
 
+    auto lobby_join_button = std::make_shared<gui::Button>(context);
+    lobby_join_button->setPosition(550, 600);
+    lobby_join_button->SetText("Lobby Join");
+    lobby_join_button->SetCallback([this]()
+        {
+            RequestStackPop();
+            RequestStackPush(StateID::kJoinSettings);
+        });
     auto host_play_button = std::make_shared<gui::Button>(context);
-    host_play_button->setPosition(500, 700);
+    host_play_button->setPosition(850, 450);
     host_play_button->SetText("Host");
     host_play_button->SetCallback([this]()
         {
@@ -38,7 +46,7 @@ MenuState::MenuState(StateStack& stack, Context context)
         });
 
     auto join_play_button = std::make_shared<gui::Button>(context);
-    join_play_button->setPosition(750, 700);
+    join_play_button->setPosition(850, 600);
     join_play_button->SetText("Join");
     join_play_button->SetCallback([this]()
         {
@@ -47,7 +55,7 @@ MenuState::MenuState(StateStack& stack, Context context)
         });
 
     auto settings_button = std::make_shared<gui::Button>(context);
-    settings_button->setPosition(1000, 700);
+    settings_button->setPosition(1150, 450);
     settings_button->SetText("Settings");
     settings_button->SetCallback([this]()
     {
@@ -55,7 +63,7 @@ MenuState::MenuState(StateStack& stack, Context context)
     });
 
     auto exit_button = std::make_shared<gui::Button>(context);
-    exit_button->setPosition(1250, 700);
+    exit_button->setPosition(1150, 600);
     exit_button->SetText("Exit");
     exit_button->SetCallback([this]()
     {
@@ -63,7 +71,8 @@ MenuState::MenuState(StateStack& stack, Context context)
     });
 
     m_gui_container.Pack(play_button);
-   // m_gui_container.Pack(lobby_button);
+    m_gui_container.Pack(lobby_button);
+	m_gui_container.Pack(lobby_join_button);
     m_gui_container.Pack(host_play_button);
     m_gui_container.Pack(join_play_button);
     m_gui_container.Pack(settings_button);

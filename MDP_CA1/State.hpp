@@ -4,6 +4,8 @@
 #include <SFML/System/Time.hpp>
 #include <SFML/Window/Event.hpp>
 #include <memory>
+
+#include "MultiplayerManager.hpp"
 #include "MusicPlayer.hpp"
 #include "SoundPlayer.hpp"
 
@@ -25,7 +27,7 @@ public:
 
 	struct Context
 	{
-		Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, MusicPlayer& music, SoundPlayer& sounds, KeyBinding& keys1, KeyBinding& keys2);
+		Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, MusicPlayer& music, SoundPlayer& sounds, KeyBinding& keys1, KeyBinding& keys2, MultiplayerManager& multiplayer_manager);
 		sf::RenderWindow* window;
 		TextureHolder* textures;
 		FontHolder* fonts;
@@ -33,6 +35,7 @@ public:
 		SoundPlayer* sounds;
 		KeyBinding* keys1;
 		KeyBinding* keys2;
+		MultiplayerManager* multiplayer_manager;
 	};
 
 public:

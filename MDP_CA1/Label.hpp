@@ -12,9 +12,11 @@ namespace gui
 
 	public:
 		Label(const std::string& text, const FontHolder& fonts, const TextureHolder& textures);
+		Label(const std::string& text, const FontHolder& fonts, int fontSize = 16);
 		virtual bool IsSelectable() const override;
 		void SetText(const std::string& text);
 		void HandleEvent(const sf::Event& event) override;
+		sf::Text& GetText();
 
 	private:
 		void draw(sf::RenderTarget& target, sf::RenderStates states) const override;

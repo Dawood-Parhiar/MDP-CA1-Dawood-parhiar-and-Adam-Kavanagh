@@ -47,6 +47,7 @@ public:
 	void CreatePickup(sf::Vector2f position, PickupType type);
 	bool PollGameAction(GameActions::Action& out);
 	std::vector<Ship*>& GetShips();
+	bool HasShip(sf::Int8 ship_id) const;
 
 private:
 	void LoadTextures();
@@ -96,8 +97,7 @@ private:
 
 	float m_scrollspeed;
 	float m_scrollspeed_compensation;
-
-	std::vector<Ship*> m_player_ships;
+	std::vector<Ship*> m_ships;
 	CommandQueue m_command_queue;
 
 	std::vector<SpawnPoint> m_enemy_spawn_points;
@@ -107,5 +107,9 @@ private:
 	//WaterEffects m_water_effect;
 	bool m_networked_world;
 	NetworkNode* m_network_node;
+
+	//std::map<sf::Int8, std::unique_ptr<Ship>> m_ships;
+	sf::Int8 m_next_ship_id = 1; // Auto-incrementing ship ID
+
 };
 

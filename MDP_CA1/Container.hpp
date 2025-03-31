@@ -1,5 +1,6 @@
 #pragma once
 #include "Component.hpp"
+#include "Label.hpp"
 
 namespace gui
 {
@@ -13,6 +14,7 @@ namespace gui
 		void Pack(Component::Ptr component);
 		virtual bool IsSelectable() const override;
 		virtual void HandleEvent(const sf::Event& event) override;
+		void Pull(const Component::Ptr& component);
 
 	private:
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;

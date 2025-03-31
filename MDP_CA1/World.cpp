@@ -1,5 +1,7 @@
 #include "World.hpp"
 
+#include <iostream>
+
 #include "Obstacle.hpp"
 #include "Pickup.hpp"
 #include "Projectile.hpp"
@@ -16,11 +18,11 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_scene_layers()
 	,m_world_bounds(0.f,0.f, m_camera.getSize().x, 4000.f)
 	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.height - m_camera.getSize().y/2.f)//
-	,m_scrollspeed(-50.f)
+	,m_scrollspeed(-20.f)
 	,m_scrollspeed_compensation(1.f)
-	,m_player_ships()
 	,m_networked_world(networked)
 	,m_network_node(nullptr)
+	,m_ships()
 	
 {
 	m_scene_texture.create(m_target.getSize().x, m_target.getSize().y);
@@ -40,9 +42,8 @@ void World::Update(sf::Time dt)
 	//Scroll the world  
 	m_camera.move(0, m_scrollspeed * dt.asSeconds());
 
-	for (Ship* player: m_player_ships)
-	{
-		player->SetVelocity(0.f, 0.f);
+	for (auto& ship : m_ships) {
+		ship->SetVelocity(0.f, 0.f);
 	}
 
 	DestroyEntitiesOutsideView();
@@ -59,8 +60,12 @@ void World::Update(sf::Time dt)
 	HandleCollisions();
 
 
-	auto first_to_remove = std::remove_if(m_player_ships.begin(), m_player_ships.end(), std::mem_fn(&Ship::IsMarkedForRemoval));
-	m_player_ships.erase(first_to_remove, m_player_ships.end());
+	auto first_to_remove = std::remove_if(m_ships.begin(), m_ships.end(), std::mem_fn(&Ship::IsMarkedForRemoval));
+	m_ships.erase(first_to_remove, m_ships.end());
+
+
+
+
 
 	m_scenegraph.RemoveWrecks();
 	SpawnEnemies();
@@ -101,30 +106,36 @@ CommandQueue& World::GetCommandQueue()
 }
 
 Ship* World::AddShip(int id)
-{//Code changes from Dawood Parhiar D00248313
-	std::unique_ptr<Ship> player(new Ship(ShipType::kPirateShip, m_textures, m_fonts));
-	player->setPosition(m_camera.getCenter());
-	player->SetId(id);
-	
+{
+	if (id == -1)  // If no ID is provided, generate a new one
+		id = m_next_ship_id++;
 
-	m_player_ships.emplace_back(player.get());
-	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(player));
-	return m_player_ships.back();
+	auto new_ship = std::make_unique<Ship>(ShipType::kPirateShip, m_textures, m_fonts);
+	new_ship->setPosition(m_camera.getCenter());
+	new_ship->SetId(id);
+
+
+	m_ships.emplace_back(new_ship.get());
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(new_ship));
+	
+	return m_ships.back();
 }
 
+
 void World::RemoveShip(int id)
-{//Code changes from Dawood Parhiar D00248313
+{
 	Ship* ship = GetShip(id);
 	if (ship)
 	{
 		ship->Destroy();
-		m_player_ships.erase(std::find(m_player_ships.begin(), m_player_ships.end(), ship));
+		m_ships.erase(std::find(m_ships.begin(), m_ships.end(), ship));
 	}
 }
 
+
 Ship* World::GetShip(int id) const
 {//Code changes from Dawood Parhiar D00248313
-	for (Ship* s : m_player_ships)
+	for (Ship* s : m_ships)
 	{
 		if (s->GetIdentifier() == id)
 		{
@@ -150,8 +161,18 @@ bool World::PollGameAction(GameActions::Action& out)
 
 std::vector<Ship*>& World::GetShips()
 {
-	return m_player_ships;
+	return m_ships;
 }
+
+bool World::HasShip(sf::Int8 ship_id) const
+{
+	if (GetShip(ship_id))
+	{
+		return true;
+	}
+	return false;
+}
+
 
 void World::SetCurrentBattleFieldPosition(float lineY)
 {
@@ -165,13 +186,14 @@ void World::SetWorldHeight(float height)
 }
 
 bool World::HasAlivePlayer() const
-{//Code changes from Dawood Parhiar D00248313
-	if (!m_player_ships.empty())
+{// Code changes from Dawood Parhiar D00248313
+	if (!m_ships.empty())
 	{
-			return true;
+		return true;
 	}
 	return false;
 }
+
 
 bool World::HasPlayerReachedEnd() const
 {//Code changes from Dawood Parhiar D00248313
@@ -265,7 +287,7 @@ void World::BuildScene()
 		m_scene_layers[i] = layer.get();
 		m_scenegraph.AttachChild(std::move(layer));
 	}
-
+	
 	//Prepare the background
 	sf::Texture& texture = m_textures.Get(TextureID::kWater);
 	texture.setRepeated(true);
@@ -333,20 +355,21 @@ void World::AdaptPlayerPosition()
 	sf::FloatRect view_bounds = GetViewBounds();
 	const float border_distance = 40.f;
 
-	for (Ship* player : m_player_ships)
+	for ( auto& ship : m_ships)
 	{
-		sf::Vector2f position = player->getPosition();
+		
+		sf::Vector2f position = ship->getPosition();
 		position.x = std::max(position.x, view_bounds.left + border_distance);
 		position.x = std::min(position.x, view_bounds.left + view_bounds.width - border_distance);
 		position.y = std::max(position.y, view_bounds.top + border_distance);
 		position.y = std::min(position.y, view_bounds.top + view_bounds.height - border_distance);
-		player->setPosition(position);
+		ship->setPosition(position);
 	}
 }
 
 void World::AdaptPlayerVelocity()
 {//Code changes from Dawood Parhiar D00248313
-	for (Ship* player : m_player_ships)
+	for (Ship* player : m_ships)
 	{
 		sf::Vector2f velocity = player->GetVelocity();
 
@@ -595,20 +618,19 @@ void World::HandleCollisions()
 
 void World::UpdateSounds()
 {
-	sf::Vector2f listener_position;
-	if (m_player_ships.empty())
+	if (m_ships.empty())
 	{
-		listener_position = m_camera.getCenter();
+		return;
 	}
-	else
-	{
-		for (Ship* ship : m_player_ships)
-		{
-			listener_position += ship->GetWorldPosition();
-		}
 
-		listener_position /= static_cast<float>(m_player_ships.size());
+	sf::Vector2f listener_position(0.f, 0.f);
+
+	for ( auto& it : m_ships)
+	{
+		listener_position += it->GetWorldPosition();
 	}
+
+	listener_position /= static_cast<float>(m_ships.size());
 	m_sounds.SetListenerPosition(listener_position);
 	// Remove unused sounds
 	m_sounds.RemoveStoppedSounds();

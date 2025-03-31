@@ -1,4 +1,5 @@
 #pragma once
+#include <SFML/System/Vector2.hpp>
 const unsigned short SERVER_PORT = 50000; // Greater than 49151, the dynamic port range
 
 namespace Server
@@ -21,7 +22,12 @@ namespace Server
 
 		kPlayerReady, //This is sent when the player is ready to play
 		kLobbyUpdate,
-		kGameStart
+		kGameStart,
+		kPlayerUpdate,
+		kTeamSelection,
+		kStartGameCountdown,
+		kStartNetworkGameCountdown,
+		kLobbyStateUpdate
 	};
 }
 
@@ -34,7 +40,14 @@ namespace Client
 		kRequestCoopPartner, //No parameters. It is sent when the user presses Return to request a local partner. The server will AcceptCoopPartner 
 		kStateUpdate, //sf::Int32 with number of local aircraft, for each aircraft send sf::Int32 identifier, two floats for position, health and ammo 
 		kGameEvent, //This is for explosions
-		kQuit, kPlayerReady, kGameStart
+		kQuit,
+		kPlayerReady,
+		kGameStart,
+		kTeamChange,
+		kPlayerUpdate,
+		kStartNetworkGameCountdown,
+		kStartNetworkGame,
+		kNameChange
 	};
 }
 
