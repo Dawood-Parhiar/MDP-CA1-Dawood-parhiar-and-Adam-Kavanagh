@@ -106,5 +106,7 @@ private:
 
 	sf::Int32 m_pilot = -1;
 	sf::Int32 m_gunner = -1;
+
+	sf::Time m_player_cannon_cooldown; // Adam
 };
 
