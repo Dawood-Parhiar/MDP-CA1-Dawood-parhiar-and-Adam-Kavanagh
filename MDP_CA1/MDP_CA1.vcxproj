@@ -166,6 +166,7 @@
     <ClCompile Include="MultiplayerGameState.cpp" />
     <ClCompile Include="MultiplayerManager.cpp" />
     <ClCompile Include="NetworkNode.cpp" />
+    <ClCompile Include="NewMultiplayerGameState.cpp" />
     <ClCompile Include="Obstacle.cpp" />
     <ClCompile Include="Ship.cpp" />
     <ClCompile Include="Animation.cpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="MultiplayerManager.hpp" />
     <ClInclude Include="NetworkNode.hpp" />
     <ClInclude Include="NetworkProtocol.hpp" />
+    <ClInclude Include="NewMultiplayerGameState.hpp" />
     <ClInclude Include="Obstacle.hpp" />
     <ClInclude Include="Ship.hpp" />
     <ClInclude Include="ShipType.hpp" />

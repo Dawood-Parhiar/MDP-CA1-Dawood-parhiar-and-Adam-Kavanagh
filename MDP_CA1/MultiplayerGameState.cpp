@@ -30,7 +30,10 @@ sf::IpAddress GetAddressFromFile()
 
 }
 
-MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context, bool is_host)
+//Debuging help Chatgpt
+//https://chatgpt.com/share/67eb1d07-0914-800c-b587-17327464c1a9
+
+MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context , bool is_host)
 	:State(stack, context)
 	, m_world(*context.window, *context.fonts, *context.sounds, true)
 	, m_window(*context.window)
@@ -43,17 +46,12 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context, b
 	, m_game_started(false)
 	, m_client_timeout(sf::seconds(5.f))
 	, m_time_since_last_packet(sf::seconds(0.f))
+	, m_local_player_id(1)
+    
 {
 	m_broadcast_text.setFont(context.fonts->Get(Font::kMain));
 	m_broadcast_text.setPosition(1024.f / 2, 100.f);
 
-	
-	/*m_player_invitation_text.setFont(context.fonts->Get(Font::kMain));
-	m_player_invitation_text.setCharacterSize(20);
-	m_player_invitation_text.setFillColor(sf::Color::White);
-	m_player_invitation_text.setString("Press Enter to spawn player 2");
-	m_player_invitation_text.setPosition(1000 - m_player_invitation_text.getLocalBounds().width, 760 - m_player_invitation_text.getLocalBounds().height);*/
-	
 
 	//Use this for "Attempt to connect" and "Failed to connect" messages
 	m_failed_connection_text.setFont(context.fonts->Get(Font::kMain));
@@ -97,64 +95,15 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context, b
 	//Set socket to non-blocking
 	m_socket.setBlocking(false);
 
-	//if (m_connected && !m_game_started)
-	//{
-	//	m_window.clear(sf::Color::Cyan);
-	//	m_window.setView(m_window.getDefaultView());
-	//	// Draw lobby UI
-	//	sf::RectangleShape lobby_container(sf::Vector2f(600.f, 400.f));
-	//	lobby_container.setFillColor(sf::Color(50, 50, 50, 200));
-	//	lobby_container.setOutlineColor(sf::Color::White);
-	//	lobby_container.setOutlineThickness(3.f);
-	//	lobby_container.setPosition((m_window.getSize().x - 600.f) / 2, (m_window.getSize().y - 400.f) / 2);
-
-	//	m_window.draw(lobby_container);
-
-	//	// Draw title
-	//	sf::Text title("Multiplayer Lobby", *m_failed_connection_text.getFont(), 30);
-	//	title.setFillColor(sf::Color::White);
-	//	Utility::CentreOrigin(title);
-	//	title.setPosition(m_window.getSize().x / 2, (m_window.getSize().y / 2) - 160.f);
-	//	m_window.draw(title);
-
-	//	// Display player list
-	//	float y_offset = (m_window.getSize().y / 2) - 100.f;
-	//	for (const auto& player : m_players)
-	//	{
-	//		sf::Text player_text("Player " + std::to_string(player.first) + " - " + (m_ready_players[player.first] ? "Ready" : "Not Ready"),
-	//			*m_failed_connection_text.getFont(), 20);
-	//		player_text.setFillColor(m_ready_players[player.first] ? sf::Color::Green : sf::Color::Red);
-	//		Utility::CentreOrigin(player_text);
-	//		player_text.setPosition(m_window.getSize().x / 2, y_offset);
-	//		y_offset += 40.f;
-	//		m_window.draw(player_text);
-	//	}
-
-	//	// Show "Press Enter to Start" only for host
-	//	if (m_host)
-	//	{
-	//		sf::Text start_text("Press G to Start", *m_failed_connection_text.getFont(), 25);
-	//		start_text.setFillColor(sf::Color::White);
-	//		Utility::CentreOrigin(start_text);
-	//		start_text.setPosition(m_window.getSize().x / 2, y_offset + 50.f);
-	//		m_window.draw(start_text);
-	//	}
-
-	//	m_window.display();
-	//}
-
-	//Play the game music
 	context.music->Play(MusicThemes::kMissionTheme);
 }
-
 void MultiplayerGameState::Draw()
 {
-
 	if (m_connected)
 	{
 		m_world.Draw();
 
-		//Show the broadcast message in default view
+		// Show the broadcast message in the default view.
 		m_window.setView(m_window.getDefaultView());
 
 		if (!m_broadcasts.empty())
@@ -162,10 +111,6 @@ void MultiplayerGameState::Draw()
 			m_window.draw(m_broadcast_text);
 		}
 
-		if (m_local_player_identifiers.size() < 2 && m_player_invitation_time < sf::seconds(0.5f))
-		{
-			m_window.draw(m_player_invitation_text);
-		}
 	}
 	else
 	{
@@ -173,94 +118,36 @@ void MultiplayerGameState::Draw()
 	}
 }
 
-//void MultiplayerGameState::Draw()
-//{
-//	if (!m_game_started)
-//	{
-//		m_window.clear();
-//		m_window.setView(m_window.getDefaultView());
-//
-//		// Draw lobby UI
-//		sf::RectangleShape lobby_container(sf::Vector2f(600.f, 400.f));
-//		lobby_container.setFillColor(sf::Color(50, 50, 50, 200));
-//		lobby_container.setOutlineColor(sf::Color::White);
-//		lobby_container.setOutlineThickness(3.f);
-//		lobby_container.setPosition((m_window.getSize().x - 600.f) / 2, (m_window.getSize().y - 400.f) / 2);
-//
-//		m_window.draw(lobby_container);
-//
-//		// Draw title
-//		sf::Text title("Multiplayer Lobby", *m_failed_connection_text.getFont(),30);
-//		title.setFillColor(sf::Color::White);
-//		Utility::CentreOrigin(title);
-//		title.setPosition(m_window.getSize().x / 2, (m_window.getSize().y / 2) - 160.f);
-//		m_window.draw(title);
-//
-//		// Display player list
-//		float y_offset = (m_window.getSize().y / 2) - 100.f;
-//		for (const auto& player : m_players)
-//		{
-//			sf::Text player_text("Player " + std::to_string(player.first) + " - " + (m_ready_players[player.first] ? "Ready" : "Not Ready"),
-//				*m_failed_connection_text.getFont(), 20);
-//			player_text.setFillColor(m_ready_players[player.first] ? sf::Color::Green : sf::Color::Red);
-//			Utility::CentreOrigin(player_text);
-//			player_text.setPosition(m_window.getSize().x / 2, y_offset);
-//			y_offset += 40.f;
-//			m_window.draw(player_text);
-//		}
-//
-//		// Show "Press Enter to Start" only for host
-//		if (m_host)
-//		{
-//			sf::Text start_text("Press G to Start", *m_failed_connection_text.getFont(), 25);
-//			start_text.setFillColor(sf::Color::White);
-//			Utility::CentreOrigin(start_text);
-//			start_text.setPosition(m_window.getSize().x / 2, y_offset + 50.f);
-//			m_window.draw(start_text);
-//		}
-//
-//		m_window.display();
-//	}
-//	else
-//	{
-//		// Draw the game world when game starts
-//		m_world.Draw();
-//		m_window.setView(m_window.getDefaultView());
-//
-//		if (!m_broadcasts.empty())
-//		{
-//			m_window.draw(m_broadcast_text);
-//		}
-//
-//		if (m_local_player_identifiers.size() < 2 && m_player_invitation_time < sf::seconds(0.5f))
-//		{
-//			m_window.draw(m_player_invitation_text);
-//		}
-//	}
-//}
 
 bool MultiplayerGameState::Update(sf::Time dt)
 {
-	//Connected to the Server: Handle all the network logic
 	if (m_connected)
 	{
 		m_world.Update(dt);
 
-		//Remove players whose aircraft were destroyed
-		bool found_local_ship = false;
-		for (auto itr = m_players.begin(); itr != m_players.end();)
+		bool found_local_ship = (m_local_player_id != -1);
+		// Iterate over all players.
+		for (auto itr = m_players.begin(); itr != m_players.end(); )
 		{
-			//Check if there are no more local planes for remote clients
-			if (std::find(m_local_player_identifiers.begin(), m_local_player_identifiers.end(), itr->first) != m_local_player_identifiers.end())
+			sf::Int8 player_id = itr->first;
+			// Look up the ship id for this player.
+			auto mapIt = m_playerShip.find(player_id);
+			Ship* ship = nullptr;
+			if (mapIt != m_playerShip.end())
 			{
-				found_local_ship = true;
+				ship = m_world.GetShip(mapIt->second);
 			}
 
-			if (!m_world.GetShip(itr->first))
+			// Check if this is our local player.
+			/*if (m_local_player_id && !m_playerShip.empty())
+			{
+				found_local_ship = true;
+			}*/
+
+			// If the ship no longer exists, remove this player.
+			if (!ship)
 			{
 				itr = m_players.erase(itr);
-
-				//No more players left : Mission failed
 				if (m_players.empty())
 				{
 					RequestStackPush(StateID::kGameOver);
@@ -274,10 +161,11 @@ bool MultiplayerGameState::Update(sf::Time dt)
 
 		if (!found_local_ship && m_game_started)
 		{
+			Utility::Debug("No Ships found in the game");
 			RequestStackPush(StateID::kGameOver);
 		}
 
-		//Only handle the realtime input if the window has focus and the game is unpaused
+		// Handle real-time input if active and the window has focus.
 		if (m_active_state && m_has_focus)
 		{
 			CommandQueue& commands = m_world.GetCommandQueue();
@@ -287,14 +175,14 @@ bool MultiplayerGameState::Update(sf::Time dt)
 			}
 		}
 
-		//Always handle the network input
+		// Always handle network input.
 		CommandQueue& commands = m_world.GetCommandQueue();
 		for (auto& pair : m_players)
 		{
 			pair.second->HandleRealtimeNetworkInput(commands);
 		}
 
-		//Handle messages from the server that may have arrived
+		// Process incoming packets.
 		sf::Packet packet;
 		if (m_socket.receive(packet) == sf::Socket::Done)
 		{
@@ -305,60 +193,65 @@ bool MultiplayerGameState::Update(sf::Time dt)
 		}
 		else
 		{
-			//Check for timeout with the server
+			// Check for timeout.
 			if (m_time_since_last_packet > m_client_timeout)
 			{
 				m_connected = false;
 				m_failed_connection_text.setString("Lost connection to the server");
 				Utility::CentreOrigin(m_failed_connection_text);
-
 				m_failed_connection_clock.restart();
 			}
 		}
 
 		UpdateBroadcastMessage(dt);
 
-		//Time counter fro blinking second player text
-		m_player_invitation_time += dt;
+		// Blink the invitation text.
+		/*m_player_invitation_time += dt;
 		if (m_player_invitation_time > sf::seconds(1.f))
 		{
 			m_player_invitation_time = sf::Time::Zero;
-		}
+		}*/
 
-		//Events occurring in the game
+		// Process game events.
 		GameActions::Action game_action;
 		while (m_world.PollGameAction(game_action))
 		{
 			sf::Packet packet;
-			packet << static_cast<sf::Int32>(Client::PacketType::kGameEvent);
-			packet << static_cast<sf::Int32>(game_action.type);
-			packet << game_action.position.x;
-			packet << game_action.position.y;
-
+			packet << static_cast<sf::Int32>(Client::PacketType::kGameEvent)
+				<< static_cast<sf::Int32>(game_action.type)
+				<< game_action.position.x
+				<< game_action.position.y;
 			m_socket.send(packet);
 		}
 
-		//Regular position updates
+		// Regular position updates.
 		if (m_tick_clock.getElapsedTime() > sf::seconds(1.f / 20.f))
 		{
 			sf::Packet position_update_packet;
 			position_update_packet << static_cast<sf::Int32>(Client::PacketType::kStateUpdate);
-			position_update_packet << static_cast<sf::Int32>(m_local_player_identifiers.size());
-
-			for (sf::Int32 identifier : m_local_player_identifiers)
+			if (m_local_player_id != -1)
 			{
-				if (Ship* ship = m_world.GetShip(identifier))
+				position_update_packet << static_cast<sf::Int32>(1);
+				// Use the mapping to get the ship for the local player.
+				Ship* ship = m_world.GetShip(m_playerShip[m_local_player_id]);
+				if (ship)
 				{
-					position_update_packet << identifier << ship->getPosition().x << ship->getPosition().y << static_cast<sf::Int32>(ship->GetHitPoints()) << static_cast<sf::Int32>(ship->GetMissileAmmo());
+					position_update_packet << m_local_player_id
+						<< ship->getPosition().x
+						<< ship->getPosition().y
+						<< static_cast<sf::Int32>(ship->GetHitPoints())
+						<< static_cast<sf::Int32>(ship->GetMissileAmmo());
 				}
+			}
+			else
+			{
+				position_update_packet << static_cast<sf::Int32>(0);
 			}
 			m_socket.send(position_update_packet);
 			m_tick_clock.restart();
 		}
 		m_time_since_last_packet += dt;
 	}
-
-	//Failed to connect and waited for more than 5 seconds: Back to menu
 	else if (m_failed_connection_clock.getElapsedTime() >= sf::seconds(5.f))
 	{
 		RequestStackClear();
@@ -366,6 +259,7 @@ bool MultiplayerGameState::Update(sf::Time dt)
 	}
 	return true;
 }
+
 
 bool MultiplayerGameState::HandleEvent(const sf::Event& event)
 {
@@ -380,14 +274,7 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
 
 	if (event.type == sf::Event::KeyPressed)
 	{
-		//If enter pressed, add second player co-op only if there is only 1 player
-		/*if (event.key.code == sf::Keyboard::Space  && m_local_player_identifiers.size() == 1)
-		{
-			sf::Packet packet;
-			packet << static_cast<sf::Int32>(Client::PacketType::kRequestCoopPartner);
-			m_socket.send(packet);
-		}*/
-		//If escape is pressed, show the pause screen
+		
 		if (event.key.code == sf::Keyboard::Escape)
 		{
 			DisableAllRealtimeActions();
@@ -404,71 +291,7 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
 	}
 	return true;
 }
-//
-//bool MultiplayerGameState::HandleEvent(const sf::Event& event)
-//{
-//	// Game input handling
-//	CommandQueue& commands = m_world.GetCommandQueue();
-//
-//	// Forward events to all players
-//	for (auto& pair : m_players)
-//	{
-//		pair.second->HandleEvent(event, commands);
-//	}
-//
-//	if (!m_game_started)
-//	{
-//		// Lobby-related event handling
-//
-//		if (event.type == sf::Event::KeyPressed)
-//		{
-//			// Players toggle ready status
-//			if (event.key.code == sf::Keyboard::R)
-//			{
-//				m_ready_players[m_local_player_identifiers[0]] = !m_ready_players[m_local_player_identifiers[0]];
-//
-//				// Send a "Ready" update to the server
-//				sf::Packet packet;
-//				packet << static_cast<sf::Int32>(Client::PacketType::kPlayerReady);
-//				packet << static_cast<sf::Int32>(m_local_player_identifiers[0]) << m_ready_players[m_local_player_identifiers[0]];
-//				m_socket.send(packet);
-//			}
-//
-//			// Host can start the game if all are ready
-//			else if (m_host && event.key.code == sf::Keyboard::G)
-//			{
-//				bool all_ready = std::all_of(m_ready_players.begin(), m_ready_players.end(), [](const auto& pair) {
-//					return pair.second;
-//					});
-//
-//				if (all_ready)
-//				{
-//					sf::Packet start_packet;
-//					start_packet << static_cast<sf::Int32>(Client::PacketType::kGameStart);
-//					m_socket.send(start_packet);
-//					
-//				}
-//			}
-//
-//		}
-//	}// If escape is pressed, show the pause screen
-//	else if (event.key.code == sf::Keyboard::Escape)
-//	{
-//		DisableAllRealtimeActions();
-//		RequestStackPush(StateID::kNetworkPause);
-//	}
-//	// Focus handling
-//	else if (event.type == sf::Event::GainedFocus)
-//	{
-//		m_has_focus = true;
-//	}
-//	else if (event.type == sf::Event::LostFocus)
-//	{
-//		m_has_focus = false;
-//	}
-//
-//	return true;  // Event handled in lobby state
-//}
+
 
 void MultiplayerGameState::OnActivate()
 {
@@ -489,9 +312,9 @@ void MultiplayerGameState::OnDestroy()
 void MultiplayerGameState::DisableAllRealtimeActions()
 {
 	m_active_state = false;
-	for (sf::Int32 identifier : m_local_player_identifiers)
+	if (m_local_player_id != -1 && m_players.find(m_local_player_id) != m_players.end())
 	{
-		m_players[identifier]->DisableAllRealtimeActions();
+		m_players[m_local_player_id]->DisableAllRealtimeActions();
 	}
 }
 
@@ -515,6 +338,252 @@ void MultiplayerGameState::UpdateBroadcastMessage(sf::Time elapsed_time)
 			m_broadcast_text.setString(m_broadcasts.front());
 			Utility::CentreOrigin(m_broadcast_text);
 			m_broadcast_elapsed_time = sf::Time::Zero;
+		}
+	}
+}
+
+void MultiplayerGameState::HandleBroadcastMessage(sf::Packet& packet)
+{
+	std::string message;
+	packet >> message;
+	m_broadcasts.push_back(message);
+
+	//Just added the first message, display immediately
+	if (m_broadcasts.size() == 1)
+	{
+		m_broadcast_text.setString(m_broadcasts.front());
+		Utility::CentreOrigin(m_broadcast_text);
+		m_broadcast_elapsed_time = sf::Time::Zero;
+	}
+}
+void MultiplayerGameState::HandleSpawnSelf(sf::Packet& packet)
+{
+	sf::Int8 player_id, ship_id, role;
+	sf::Vector2f ship_position;
+	packet >> player_id >> ship_id >> role >> ship_position.x >> ship_position.y;
+
+	Ship* existingShip = m_world.GetShip(ship_id);
+	if (!existingShip)
+	{
+		Ship* ship = m_world.AddShip(ship_id);
+		ship->setPosition(ship_position);
+	}
+
+
+	// Create local player with controls based on role
+	if (role == static_cast<sf::Int8>(Role::Pilot))
+	{
+		m_players[player_id] = std::make_unique<Player>(&m_socket, player_id, GetContext().keys1);
+	}
+	else if (role == static_cast<sf::Int8>(Role::Gunner))
+	{
+		m_players[player_id] = std::make_unique<Player>(&m_socket, player_id, GetContext().keys2);
+	}
+	else
+	{
+		m_players[player_id] = std::make_unique<Player>(&m_socket, player_id, nullptr);
+	}
+
+	m_local_player_id = player_id;
+	m_playerShip[player_id] = ship_id;
+	m_game_started = true;
+}
+
+
+
+void MultiplayerGameState::HandlePlayerConnect(sf::Packet& packet)
+{
+	sf::Int8 player_id, ship_id, role;
+	sf::Vector2f ship_position;
+	packet >> player_id >> ship_id >> role >> ship_position.x >> ship_position.y;
+
+	Ship* existingShip = m_world.GetShip(ship_id);
+	if (!existingShip)
+	{
+		Ship* ship = m_world.AddShip(ship_id);
+		ship->setPosition(ship_position);
+	}
+
+
+	if (role == static_cast<sf::Int8>(Role::Pilot))
+	{
+		m_players[player_id] = std::make_unique<Player>(&m_socket, player_id, GetContext().keys1);
+	}
+	else if (role == static_cast<sf::Int8>(Role::Gunner))
+	{
+		m_players[player_id] = std::make_unique<Player>(&m_socket, player_id, GetContext().keys2);
+	}
+	else
+	{
+		m_players[player_id] = std::make_unique<Player>(&m_socket, player_id, nullptr);
+	}
+
+	m_playerShip[player_id] = ship_id;
+}
+
+
+void MultiplayerGameState::HandlePlayerDisconnect(sf::Packet& packet)
+{
+	sf::Int8 player_id;
+	packet >> player_id;
+
+	std::cerr << "Player " << player_id << " Disconnected" << std::endl;
+
+	// Check if player exists before removing
+	auto player_it = m_players.find(player_id);
+	if (player_it == m_players.end())
+	{
+		std::cerr << "Error: Player " << player_id << " not found in game." << std::endl;
+		return;
+	}
+
+	// Remove from assigned ship
+	for (auto& ship : m_world.GetShips())
+	{
+		if (ship->GetPilot() == player_id)
+		{
+			std::cerr << "Pilot " << player_id << " removed from ship " << ship->GetIdentifier() << std::endl;
+			ship->SetPilot(-1);
+		}
+		else if (ship->HasGunner() == player_id)
+		{
+			std::cerr << "Gunner " << player_id << " removed from ship " << ship->GetIdentifier() << std::endl;
+			ship->SetGunner(-1);
+		}
+
+		// If ship is now empty, delete it
+		if (ship->GetPilot() == -1 && ship->HasGunner() == -1)
+		{
+			std::cerr << "Ship " << ship->GetIdentifier() << " removed (empty)." << std::endl;
+			m_world.RemoveShip(ship->GetIdentifier());
+		}
+	}
+
+	// Remove player from tracking
+	m_players.erase(player_id);
+}
+
+
+void MultiplayerGameState::HandleInitialState(sf::Packet& packet)
+{
+	// World settings
+	float world_height, current_scroll;
+	packet >> world_height >> current_scroll;
+	m_world.SetWorldHeight(world_height);
+	m_world.SetCurrentBattleFieldPosition(current_scroll);
+
+	// Number of ships
+	sf::Int32 ship_count;
+	packet >> ship_count;
+
+	for (sf::Int32 i = 0; i < ship_count; ++i)
+	{
+		sf::Int8 ship_id;
+		sf::Vector2f ship_position;
+		sf::Int8 hitpoints, missile_ammo;
+		sf::Int8 pilot_id, gunner_id;
+
+		packet >> ship_id
+			>> ship_position.x >> ship_position.y
+			>> hitpoints >> missile_ammo
+			>> pilot_id >> gunner_id;
+
+		// Check if the ship already exists before adding it
+		Ship* ship = m_world.GetShip(ship_id);
+		if (!ship)
+		{
+			ship = m_world.AddShip(ship_id);
+			ship->setPosition(ship_position);
+		}
+		ship->SetHitpoints(hitpoints);
+		ship->SetMissileAmmo(missile_ammo);
+		ship->SetPilot(pilot_id);
+		ship->SetGunner(gunner_id);
+
+
+		// Add player objects for roles if assigned
+		if (pilot_id != -1)
+		{
+			m_players[pilot_id] = std::make_unique<Player>(&m_socket, pilot_id, GetContext().keys1);
+			m_playerShip[pilot_id] = ship_id;
+		}
+		if (gunner_id != -1)
+		{
+			m_players[gunner_id] = std::make_unique<Player>(&m_socket, gunner_id, GetContext().keys2);
+			m_playerShip[gunner_id] = ship_id;
+		}
+	}
+
+	m_game_started = true;
+}
+
+
+void MultiplayerGameState::HandlePlayerEvent(sf::Packet& packet)
+{
+	sf::Int32 ship_identifier;
+	sf::Int32 action;
+	packet >> ship_identifier >> action;
+
+	auto itr = m_players.find(ship_identifier);
+	if (itr != m_players.end())
+	{
+		itr->second->HandleNetworkEvent(static_cast<Action>(action), m_world.GetCommandQueue());
+	}
+}
+
+void MultiplayerGameState::HandleRealTimeChange(sf::Packet& packet)
+{
+	sf::Int32 ship_identifier;
+	sf::Int32 action;
+	bool action_enabled;
+	packet >> ship_identifier >> action >> action_enabled;
+
+	auto itr = m_players.find(ship_identifier);
+	if (itr != m_players.end())
+	{
+		itr->second->HandleNetworkRealtimeChange(static_cast<Action>(action), action_enabled);
+	}
+}
+
+void MultiplayerGameState::HandleSpawnEnemy(sf::Packet& packet)
+{
+	float height;
+	sf::Int32 type;
+	float relative_x;
+	packet >> type >> height >> relative_x;
+
+	m_world.AddEnemy(static_cast<ShipType>(type), relative_x, height);
+	m_world.SortEnemies();
+}
+
+void MultiplayerGameState::HandleUpdateClient(sf::Packet& packet)
+{
+	float current_world_position;
+	sf::Int32 ship_count;
+	packet >> current_world_position >> ship_count;
+
+	float current_view_position = m_world.GetViewBounds().top + m_world.GetViewBounds().height;
+
+	//Set the world's scroll compensation according to whether the view is behind or ahead
+	m_world.SetWorldScrollCompensation(current_view_position / current_world_position);
+
+	for (sf::Int32 i = 0; i < ship_count; ++i)
+	{
+		sf::Vector2f ship_position;
+		sf::Int32 ship_identifier;
+		sf::Int32 hitpoints;
+		sf::Int32 ammo;
+		packet >> ship_identifier >> ship_position.x >> ship_position.y >> hitpoints >> ammo;
+
+		Ship* ship = m_world.GetShip(ship_identifier);
+		bool is_local_plane = (ship_identifier == static_cast<sf::Int32>(m_local_player_id));
+
+		if (ship && !is_local_plane)
+		{
+			sf::Vector2f interpolated_position = ship->getPosition() + (ship_position - ship->getPosition()) * 0.1f;
+			ship->setPosition(interpolated_position);
+			ship->SetHitpoints(hitpoints);
+			ship->SetMissileAmmo(ammo);
 		}
 	}
 }
@@ -543,194 +612,34 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 		//Send message to all Clients
 	case Server::PacketType::kBroadcastMessage:
 	{
-		std::string message;
-		packet >> message;
-		m_broadcasts.push_back(message);
-
-		//Just added the first message, display immediately
-		if (m_broadcasts.size() == 1)
-		{
-			m_broadcast_text.setString(m_broadcasts.front());
-			Utility::CentreOrigin(m_broadcast_text);
-			m_broadcast_elapsed_time = sf::Time::Zero;
-		}
+		HandleBroadcastMessage(packet);
 	}
 	break;
 
 	//Sent by the server to spawn player 1 airplane on connect
 	case Server::PacketType::kSpawnSelf:
 	{
-		if (m_host)
-		{
-			sf::Int8 player_id;
-			sf::Vector2f ship_position;
-			packet >> player_id >> ship_position.x >> ship_position.y;
-
-			// Determine ship ID: each ship has 2 players (pilot + gunner)
-			sf::Int8 ship_identifier = player_id / 2; // Every 2 players share a ship
-
-			Ship* ship = nullptr;
-
-			// Check if this ship already exists
-			if (m_world.HasShip(ship_identifier))
-			{
-				ship = m_world.GetShip(ship_identifier);
-			}
-			else
-			{
-				// Create a new ship if needed
-				ship = m_world.AddShip(-1);
-				ship->setPosition(ship_position);
-			}
-
-			// Assign pilot or gunner based on player number
-			if (player_id % 2 == 0)
-			{
-				ship->SetPilot(player_id);
-			}
-			else
-			{
-				ship->SetGunner(player_id);
-			}
-
-			// Bind correct controls: odd players get keys1, even players get keys2
-			if (player_id % 2 == 0)
-			{
-				m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys1));
-			}
-			else
-			{
-				m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys2));
-			}
-
-			m_local_player_identifiers.push_back(player_id);
-			m_game_started = true;
-		}
-		else
-		{
-			// Ensure non-host clients store their identifiers correctly
-			sf::Int32 player_id;
-			packet >> player_id;
-			m_local_player_identifiers.push_back(player_id);
-			m_game_started = true;
-		}
+		HandleSpawnSelf(packet);
 	}
 	break;
 
 
 	case Server::PacketType::kPlayerConnect:
 	{
-		sf::Int32 player_id;
-		sf::Vector2f ship_position;
-		packet >> player_id >> ship_position.x >> ship_position.y;
-
-		std::cerr << "New player connected: " << player_id << std::endl;
-
-		// Find an available ship with a free seat
-		Ship* assigned_ship = nullptr;
-
-		for (auto& ship : m_world.GetShips())
-		{
-			if (!ship->HasGunner())  // If a gunner seat is available
-			{
-				assigned_ship = ship;
-				break;
-			}
-		}
-
-		// No existing ship available → create a new one
-		if (!assigned_ship)
-		{
-			assigned_ship = m_world.AddShip(player_id);
-			assigned_ship->setPosition(ship_position);
-			std::cerr << "Created new ship (ID: " << assigned_ship->GetIdentifier() << ")" << std::endl;
-		}
-
-		// Assign player as pilot or gunner
-		bool is_pilot = (assigned_ship->GetPilot() == -1);
-		if (is_pilot)
-		{
-			assigned_ship->SetPilot(player_id);
-			m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys1));
-			std::cerr << "Player " << player_id << " assigned as pilot of ship " << assigned_ship << std::endl;
-		}
-		else
-		{
-			assigned_ship->SetGunner(player_id);
-			m_players[player_id].reset(new Player(&m_socket, player_id, GetContext().keys2));
-			std::cerr << "Player " << player_id << " assigned as gunner of ship " << assigned_ship << std::endl;
-		}
-
-		m_local_player_identifiers.push_back(player_id);
+		HandlePlayerConnect(packet);
 	}
 	break;
 
 
 	case Server::PacketType::kPlayerDisconnect:
 	{
-		sf::Int8 player_id;
-		packet >> player_id;
-		std::cerr << "Player " << player_id << "Disconnected" << std::endl;
-
-		// Find the ship they were on
-		Ship* ship_to_update = nullptr;
-		for (auto& ship : m_world.GetShips())
-		{
-			if (ship->GetPilot() == player_id)
-			{
-				std::cerr << "Pilot " << player_id << " removed from ship " << ship->GetIdentifier() << std::endl;
-				ship->SetPilot(-1);
-				ship_to_update = ship;
-				break;
-			}
-			else if (ship->HasGunner() == player_id)
-			{
-				std::cerr << "Gunner " << player_id << " removed from ship " << ship->GetIdentifier() << std::endl;
-				ship->SetGunner(-1);
-				ship_to_update = ship;
-				break;
-			}
-		}
-
-		// If the ship is empty, remove it
-		if (ship_to_update && ship_to_update->GetPilot() == -1 && ship_to_update->HasGunner() == -1)
-		{
-			std::cerr << "Ship " << ship_to_update->GetIdentifier() << " is now empty and removed." << std::endl;
-			m_world.RemoveShip(ship_to_update->GetIdentifier());
-		}
-
-		// Remove player from the game
-		m_players.erase(player_id);
+		HandlePlayerDisconnect(packet);
 	}
 	break;
 
 	case Server::PacketType::kInitialState:
 	{
-		sf::Int32 ship_count;
-		float world_height, current_scroll;
-		packet >> world_height >> current_scroll;
-
-		m_world.SetWorldHeight(world_height);
-		m_world.SetCurrentBattleFieldPosition(current_scroll);
-
-		packet >> ship_count;
-		for (sf::Int32 i = 0; i < ship_count; ++i)
-		{
-			sf::Int32 ship_identifier;
-			sf::Int32 hitpoints;
-			sf::Int32 missile_ammo;
-			sf::Vector2f ship_position;
-			packet >> ship_identifier >> ship_position.x >> ship_position.y >> hitpoints >> missile_ammo;
-
-			Ship* ship = m_world.AddShip(ship_identifier);
-			ship->setPosition(ship_position);
-			ship->SetHitpoints(hitpoints);
-			ship->SetMissileAmmo(missile_ammo);
-			if (i%2 == 1)
-			m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, GetContext().keys1));
-			else
-			m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, GetContext().keys2));
-		}
+		HandleInitialState(packet);
 	}
 	break;
 
@@ -748,44 +657,21 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 	//Player event, like missile fired occurs
 	case Server::PacketType::kPlayerEvent:
 	{
-		sf::Int32 ship_identifier;
-		sf::Int32 action;
-		packet >> ship_identifier >> action;
-
-		auto itr = m_players.find(ship_identifier);
-		if (itr != m_players.end())
-		{
-			itr->second->HandleNetworkEvent(static_cast<Action>(action), m_world.GetCommandQueue());
-		}
+		HandlePlayerEvent(packet);
 	}
 	break;
 
 	//Player's movement or fire keyboard state changes
 	case Server::PacketType::kPlayerRealtimeChange:
 	{
-		sf::Int32 ship_identifier;
-		sf::Int32 action;
-		bool action_enabled;
-		packet >> ship_identifier >> action >> action_enabled;
-
-		auto itr = m_players.find(ship_identifier);
-		if (itr != m_players.end())
-		{
-			itr->second->HandleNetworkRealtimeChange(static_cast<Action>(action), action_enabled);
-		}
+		HandleRealTimeChange(packet);
 	}
 	break;
 
 	//New Enemy to be created
 	case Server::PacketType::kSpawnEnemy:
 	{
-		float height;
-		sf::Int32 type;
-		float relative_x;
-		packet >> type >> height >> relative_x;
-
-		m_world.AddEnemy(static_cast<ShipType>(type), relative_x, height);
-		m_world.SortEnemies();
+		HandleSpawnEnemy(packet);
 	}
 	break;
 
@@ -808,33 +694,7 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 
 	case Server::PacketType::kUpdateClientState:
 	{
-		float current_world_position;
-		sf::Int32 ship_count;
-		packet >> current_world_position >> ship_count;
-
-		float current_view_position = m_world.GetViewBounds().top + m_world.GetViewBounds().height;
-
-		//Set the world's scroll compensation according to whether the view is behind or ahead
-		m_world.SetWorldScrollCompensation(current_view_position / current_world_position);
-
-		for (sf::Int32 i = 0; i < ship_count; ++i)
-		{
-			sf::Vector2f ship_position;
-			sf::Int32 ship_identifier;
-			sf::Int32 hitpoints;
-			sf::Int32 ammo;
-			packet >> ship_identifier >> ship_position.x >> ship_position.y >> hitpoints >> ammo;
-
-			Ship* ship = m_world.GetShip(ship_identifier);
-			bool is_local_plane = std::find(m_local_player_identifiers.begin(), m_local_player_identifiers.end(), ship_identifier) != m_local_player_identifiers.end();
-			if (ship && !is_local_plane)
-			{
-				sf::Vector2f interpolated_position = ship->getPosition() + (ship_position - ship->getPosition()) * 0.1f;
-				ship->setPosition(interpolated_position);
-				ship->SetHitpoints(hitpoints);
-				ship->SetMissileAmmo(ammo);
-			}
-		}
+		HandleUpdateClient(packet);
 	}
 	break;
 	}

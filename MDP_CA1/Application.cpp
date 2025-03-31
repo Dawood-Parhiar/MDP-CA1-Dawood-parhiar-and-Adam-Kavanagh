@@ -9,6 +9,7 @@
 #include "JoinServerState.h"
 #include "MultiplayerGameState.hpp"
 #include "LobbyState.hpp"
+#include "NewMultiplayerGameState.hpp"
 
 const sf::Time Application::kTimePerFrame = sf::seconds(1.f/60.f);
 
@@ -93,6 +94,7 @@ void Application::RegisterStates()
 	m_stack.RegisterState<LobbyState>(StateID::kLobbyJoin,false);
 	m_stack.RegisterState<JoinServerState>(StateID::kJoinSettings);
 	m_stack.RegisterState<GameState>(StateID::kGame);
+	m_stack.RegisterState<NewMultiplayerGameState>(StateID::kNetworkGame);
 	m_stack.RegisterState<MultiplayerGameState>(StateID::kHostGame, true);
 	m_stack.RegisterState<MultiplayerGameState>(StateID::kJoinGame, false);
 	m_stack.RegisterState<PauseState>(StateID::kPause);
