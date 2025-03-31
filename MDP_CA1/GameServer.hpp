@@ -11,6 +11,8 @@
 #include <unordered_map>
 #include <SFML/Graphics/Rect.hpp>
 
+enum class Role { Pilot, Gunner };
+
 class GameServer
 {
 public:
@@ -19,10 +21,7 @@ public:
 	void NotifyPlayerSpawn(sf::Int32 ship_identifier);
 	void NotifyPlayerRealtimeChange(sf::Int32 ship_identifier, sf::Int32 action, bool action_enabled);
 	void NotifyPlayerEvent(sf::Int32 ship_identifier, sf::Int32 action);
-	/*void HandlePlayerReady(sf::Packet& packet);
-	void SendLobbyUpdate();
-	bool AllPlayersReady() const;
-	void StartGame();*/
+	
 
 private:
 	struct RemotePeer
@@ -43,12 +42,12 @@ private:
 		std::map<sf::Int32, bool> m_realtime_actions;
 
 		sf::Int8 m_ship_id;
-		sf::Int8 m_pilot_id = 1;  // Default to no pilot
+		sf::Int8 m_pilot_id = -1;  // Default to no pilot
 		sf::Int8 m_gunner_id = -1; // Default to no gunner
 
 		// Check if the ship has an available seat
-		bool HasPilot() const { return m_pilot_id; }
-		bool HasGunner() const { return m_gunner_id; }
+		bool HasPilot() const { return m_pilot_id != -1; }
+		bool HasGunner() const { return m_gunner_id != -1; }
 		bool IsFull() const { return HasPilot() && HasGunner(); }
 	};
 
@@ -56,6 +55,7 @@ private:
 
 private:
 	void SetListening(bool enable);
+	void UpdateLobbyState();
 	void ExecutionThread();
 	void Tick();
 	sf::Time Now() const;
@@ -71,6 +71,7 @@ private:
 	void HandlePlayerUpdate(sf::Packet& packet);
 	void StartGameCountdownStart();
 	void NotifyGameStart();
+	void HanldePlayerNameChange(sf::Packet& packet);
 	void HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving_peer, bool& detected_timeout);
 
 	void GetAndSetID(sf::Int8& int8);
@@ -102,9 +103,13 @@ private:
 	std::vector<PeerPtr> m_peers;
 	sf::Int32 m_ship_identifier_counter;
 	bool m_waiting_thread_end;
+	sf::Int8 m_player_id_counter = 1;
+
 
 	sf::Time m_last_spawn_time;
 	sf::Time m_time_for_next_spawn;
 	bool m_game_started;
+
+	bool m_inLobby = false;
 };
 

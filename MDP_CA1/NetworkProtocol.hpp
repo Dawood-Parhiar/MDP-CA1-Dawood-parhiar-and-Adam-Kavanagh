@@ -1,4 +1,5 @@
 #pragma once
+#include <SFML/System/Vector2.hpp>
 const unsigned short SERVER_PORT = 50000; // Greater than 49151, the dynamic port range
 
 namespace Server
@@ -24,7 +25,9 @@ namespace Server
 		kGameStart,
 		kPlayerUpdate,
 		kTeamSelection,
-		kStartGameCountdown, kStartNetworkGameCountdown
+		kStartGameCountdown,
+		kStartNetworkGameCountdown,
+		kLobbyStateUpdate
 	};
 }
 
@@ -43,7 +46,8 @@ namespace Client
 		kTeamChange,
 		kPlayerUpdate,
 		kStartNetworkGameCountdown,
-		kStartNetworkGame
+		kStartNetworkGame,
+		kNameChange
 	};
 }
 

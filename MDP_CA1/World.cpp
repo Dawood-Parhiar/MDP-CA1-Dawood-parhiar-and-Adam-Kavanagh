@@ -42,15 +42,8 @@ void World::Update(sf::Time dt)
 	//Scroll the world  
 	m_camera.move(0, m_scrollspeed * dt.asSeconds());
 
-	for (auto& pair : m_ships) {
-		Ship* player = pair.second.get(); // Get the raw pointer from unique_ptr
-		if (player) {
-			player->SetVelocity(0.f, 0.f);
-		}
-		else {
-			// Optionally log a warning or handle this case
-			std::cout << "Player ship is null!" << std::endl;
-		}
+	for (auto& ship : m_ships) {
+		ship->SetVelocity(0.f, 0.f);
 	}
 
 	DestroyEntitiesOutsideView();
@@ -67,17 +60,9 @@ void World::Update(sf::Time dt)
 	HandleCollisions();
 
 
-	for (auto it = m_ships.begin(); it != m_ships.end(); ) {
-		if (it->second->IsMarkedForRemoval()) {
+	auto first_to_remove = std::remove_if(m_ships.begin(), m_ships.end(), std::mem_fn(&Ship::IsMarkedForRemoval));
+	m_ships.erase(first_to_remove, m_ships.end());
 
-			std::cout << "Removing ships..." << std::endl;
-			it = m_ships.erase(it); // Erase and update the iterator
-			std::cout << "Finished removing ships." << std::endl;
-		}
-		else {
-			++it; // Move to the next element if not erased
-		}
-	}
 
 
 
@@ -129,35 +114,35 @@ Ship* World::AddShip(int id)
 	new_ship->setPosition(m_camera.getCenter());
 	new_ship->SetId(id);
 
-	// Store the ship
-	Ship* ship_ptr = new_ship.get();
-	m_ships[id] = std::move(new_ship);
 
-	// Attach to the scene graph
-	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(m_ships[id]));
-
-	return ship_ptr;
+	m_ships.emplace_back(new_ship.get());
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(new_ship));
+	
+	return m_ships.back();
 }
 
 
 void World::RemoveShip(int id)
 {
-	auto it = m_ships.find(id);
-	if (it != m_ships.end())
+	Ship* ship = GetShip(id);
+	if (ship)
 	{
-		m_ships.erase(it);
+		ship->Destroy();
+		m_ships.erase(std::find(m_ships.begin(), m_ships.end(), ship));
 	}
 }
 
 
 Ship* World::GetShip(int id) const
 {//Code changes from Dawood Parhiar D00248313
-	auto it = m_ships.find(id);
-	if (it != m_ships.end())
+	for (Ship* s : m_ships)
 	{
-		return it->second.get(); // Get raw pointer from unique_ptr
+		if (s->GetIdentifier() == id)
+		{
+			return s;
+		}
 	}
-	return nullptr; // Ship not found
+	return nullptr;
 }
 
 
@@ -176,15 +161,16 @@ bool World::PollGameAction(GameActions::Action& out)
 
 std::vector<Ship*>& World::GetShips()
 {
-	std::vector<Ship*> ships;
-	for (auto& pair : m_ships)
-		ships.push_back(pair.second.get());
-	return ships;
+	return m_ships;
 }
 
 bool World::HasShip(sf::Int8 ship_id) const
 {
-	return m_ships.find(ship_id) != m_ships.end();
+	if (GetShip(ship_id))
+	{
+		return true;
+	}
+	return false;
 }
 
 
@@ -201,13 +187,9 @@ void World::SetWorldHeight(float height)
 
 bool World::HasAlivePlayer() const
 {// Code changes from Dawood Parhiar D00248313
-	for ( auto& it : m_ships)
+	if (!m_ships.empty())
 	{
-		Ship* ship = it.second.get();
-		if (ship->GetHitPoints() > 0) // Assuming Ship has an IsAlive() method
-		{
-			return true;
-		}
+		return true;
 	}
 	return false;
 }
@@ -305,7 +287,7 @@ void World::BuildScene()
 		m_scene_layers[i] = layer.get();
 		m_scenegraph.AttachChild(std::move(layer));
 	}
-	AddShip(-1);
+	
 	//Prepare the background
 	sf::Texture& texture = m_textures.Get(TextureID::kWater);
 	texture.setRepeated(true);
@@ -373,9 +355,9 @@ void World::AdaptPlayerPosition()
 	sf::FloatRect view_bounds = GetViewBounds();
 	const float border_distance = 40.f;
 
-	for ( auto& it : m_ships)
+	for ( auto& ship : m_ships)
 	{
-		Ship* ship = it.second.get();
+		
 		sf::Vector2f position = ship->getPosition();
 		position.x = std::max(position.x, view_bounds.left + border_distance);
 		position.x = std::min(position.x, view_bounds.left + view_bounds.width - border_distance);
@@ -387,17 +369,17 @@ void World::AdaptPlayerPosition()
 
 void World::AdaptPlayerVelocity()
 {//Code changes from Dawood Parhiar D00248313
-	for ( auto& it : m_ships)
+	for (Ship* player : m_ships)
 	{
-		sf::Vector2f velocity = it.second->GetVelocity();
+		sf::Vector2f velocity = player->GetVelocity();
 
 		//If they are moving diagonally divide by sqrt 2
 		if (velocity.x != 0.f && velocity.y != 0.f)
 		{
-			it.second->SetVelocity(velocity / std::sqrt(2.f));
+			player->SetVelocity(velocity / std::sqrt(2.f));
 		}
 		//Add scrolling velocity
-		it.second->Accelerate(0.f, m_scrollspeed);
+		player->Accelerate(0.f, m_scrollspeed);
 	}
 }
 
@@ -645,7 +627,7 @@ void World::UpdateSounds()
 
 	for ( auto& it : m_ships)
 	{
-		listener_position += it.second->GetWorldPosition();
+		listener_position += it->GetWorldPosition();
 	}
 
 	listener_position /= static_cast<float>(m_ships.size());
