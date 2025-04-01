@@ -21,7 +21,7 @@ KeyBinding::KeyBinding(int control_preconfiguration)
 		// Player 2
 		
 		
-		m_key_map[sf::Keyboard::Return] = Action::kMissileFire;
+		m_key_map[sf::Keyboard::Enter] = Action::kMissileFire;
 		m_key_map[sf::Keyboard::Left] = Action::kRotateCannonLeft;
 		m_key_map[sf::Keyboard::Right] = Action::kRotateCannonRight;
 	}

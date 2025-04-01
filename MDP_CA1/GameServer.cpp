@@ -520,7 +520,7 @@ void GameServer::HandleIncomingConnections()
             newShip.m_position = sf::Vector2f(m_battlefield_rect.width / 2,
                 m_battlefield_rect.top + m_battlefield_rect.height / 2);
             newShip.m_hitpoints = 100;
-            newShip.m_missile_ammo = 2;
+            newShip.m_missile_ammo = 20;
             // Ensure seats are marked as available.
             newShip.m_pilot_id = -1;
             newShip.m_gunner_id = -1;

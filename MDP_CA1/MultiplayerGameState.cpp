@@ -129,7 +129,14 @@ bool MultiplayerGameState::Update(sf::Time dt)
 		// Iterate over all players.
 		for (auto itr = m_players.begin(); itr != m_players.end(); )
 		{
+			// Check if this is our local player.
+			if (m_local_player_id && !m_playerShip.empty())
+			{
+				found_local_ship = true;
+			}
+
 			sf::Int8 player_id = itr->first;
+
 			// Look up the ship id for this player.
 			auto mapIt = m_playerShip.find(player_id);
 			Ship* ship = nullptr;
@@ -137,13 +144,6 @@ bool MultiplayerGameState::Update(sf::Time dt)
 			{
 				ship = m_world.GetShip(mapIt->second);
 			}
-
-			// Check if this is our local player.
-			/*if (m_local_player_id && !m_playerShip.empty())
-			{
-				found_local_ship = true;
-			}*/
-
 			// If the ship no longer exists, remove this player.
 			if (!ship)
 			{
@@ -169,10 +169,12 @@ bool MultiplayerGameState::Update(sf::Time dt)
 		if (m_active_state && m_has_focus)
 		{
 			CommandQueue& commands = m_world.GetCommandQueue();
-			for (auto& pair : m_players)
+			auto it = m_players.find(static_cast<sf::Int8>(m_local_player_id));
+			if (it != m_players.end())
 			{
-				pair.second->HandleRealtimeInput(commands);
+				it->second->HandleRealtimeInput(commands);
 			}
+
 		}
 
 		// Always handle network input.
@@ -193,14 +195,14 @@ bool MultiplayerGameState::Update(sf::Time dt)
 		}
 		else
 		{
-			// Check for timeout.
-			if (m_time_since_last_packet > m_client_timeout)
-			{
-				m_connected = false;
-				m_failed_connection_text.setString("Lost connection to the server");
-				Utility::CentreOrigin(m_failed_connection_text);
-				m_failed_connection_clock.restart();
-			}
+			//// Check for timeout.
+			//if (m_time_since_last_packet > m_client_timeout)
+			//{
+			//	m_connected = false;
+			//	m_failed_connection_text.setString("Lost connection to the server");
+			//	Utility::CentreOrigin(m_failed_connection_text);
+			//	m_failed_connection_clock.restart();
+			//}
 		}
 
 		UpdateBroadcastMessage(dt);
@@ -279,6 +281,13 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
 		{
 			DisableAllRealtimeActions();
 			RequestStackPush(StateID::kNetworkPause);
+		}
+		//fire missile
+		else if (event.key.code == sf::Keyboard::Enter)
+		{
+			sf::Packet packet;
+			packet << static_cast<sf::Int32>(Client::PacketType::kPlayerEvent) << m_local_player_id << static_cast<sf::Int32>(Action::kMissileFire);
+			m_socket.send(packet);
 		}
 	}
 	else if (event.type == sf::Event::GainedFocus)
