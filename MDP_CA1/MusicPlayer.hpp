@@ -18,7 +18,7 @@ public:
 	void Play(MusicThemes theme);
 	void Stop();
 
-	float GetVolume() const;
+	float GetVolume() const; //Adam
 
 	void SetPaused(bool paused);
 	void SetVolume(float volume);
