@@ -26,7 +26,7 @@ PauseState::PauseState(StateStack& stack, Context context, bool lets_update_thro
             RequestStackPop();
         });
 
-    auto volumeUpButton = std::make_shared<gui::Button>(context);
+    auto volumeUpButton = std::make_shared<gui::Button>(context); //Adam
     volumeUpButton->setPosition(0.5f * view_size.x - 100, 0.4f * view_size.y + 175);
     volumeUpButton->SetText("Volume Up");
     volumeUpButton->SetCallback([this]()
@@ -35,7 +35,7 @@ PauseState::PauseState(StateStack& stack, Context context, bool lets_update_thro
             GetContext().music->SetVolume(std::min(volume + 10.f, 100.f));
         });
 
-    auto volumeDownButton = std::make_shared<gui::Button>(context);
+    auto volumeDownButton = std::make_shared<gui::Button>(context); // adam
     volumeDownButton->setPosition(0.5f * view_size.x - 100, 0.4f * view_size.y + 275);
     volumeDownButton->SetText("Volume Down");
     volumeDownButton->SetCallback([this]()
@@ -55,8 +55,8 @@ PauseState::PauseState(StateStack& stack, Context context, bool lets_update_thro
 
 
     m_gui_container.Pack(returnButton);
-    m_gui_container.Pack(volumeUpButton);
-    m_gui_container.Pack(volumeDownButton);
+	m_gui_container.Pack(volumeUpButton); //Adam
+	m_gui_container.Pack(volumeDownButton); //Adam
     m_gui_container.Pack(backToMenuButton);
 
 

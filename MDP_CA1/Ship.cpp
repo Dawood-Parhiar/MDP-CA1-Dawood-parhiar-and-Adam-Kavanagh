@@ -64,7 +64,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	,m_cannon_ptr(nullptr)
 	,m_explosion_began(false)
 	,m_pickups_enabled(true)
-	,m_player_cannon_cooldown(sf::Time::Zero)
+	, m_player_cannon_cooldown(sf::Time::Zero) // Adam
 
 
 {//Code changes from Dawood Parhiar D00248313 in Ship class
@@ -226,7 +226,7 @@ void Ship::Fire()
 }
 
 
-void Ship::LaunchPlayerCannon()
+void Ship::LaunchPlayerCannon() //adam
 {
 	if (m_player_cannon_cooldown <= sf::Time::Zero)
 	{

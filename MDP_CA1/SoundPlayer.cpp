@@ -24,7 +24,7 @@ SoundPlayer::SoundPlayer()
 	m_sound_buffers.Load(SoundEffect::kExplosion1, "Media/Sound/Ship-Ambience/Cannon/Cannon and Shout/Fire 2 & Shout 2.wav");
 		m_sound_buffers.Load(SoundEffect::kExplosion2, "Media/Sound/Ship-Ambience/Cannon/Cannon and Shout/Fire 1 & Shout 1.wav");
 	m_sound_buffers.Load(SoundEffect::kLaunchMissile, "Media/Sound/Ship-Ambience/Cannon/Cannon and Shout/Fire 1 & Shout 1.wav");
-	m_sound_buffers.Load(SoundEffect::kCollectPickup, "Media/Sound/Coin collect.wav");
+	m_sound_buffers.Load(SoundEffect::kCollectPickup, "Media/Sound/Coin collect.wav"); // New Appropriate Sound - Adam 
 	m_sound_buffers.Load(SoundEffect::kButton, "Media/Sound/Bell-Menu.wav");
 	
 	// Listener points towards the screen (default in SFML)

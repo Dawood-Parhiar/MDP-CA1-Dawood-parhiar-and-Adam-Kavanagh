@@ -10,7 +10,7 @@ MenuState::MenuState(StateStack& stack, Context context)
 
     m_background_sprite.setTexture(texture);
 
-    auto play_button = std::make_shared<gui::Button>(context);
+	auto play_button = std::make_shared<gui::Button>(context); // Adam Adjusted menu buttons location
     play_button->setPosition(850, 250);
     play_button->SetText("Play");
     play_button->SetCallback([this]()
