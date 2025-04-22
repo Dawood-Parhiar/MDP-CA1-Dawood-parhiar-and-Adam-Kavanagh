@@ -3,9 +3,13 @@ enum class TextureID
 {
 	kLandscape,
 	kPirateShip,
-	kEnemyShip1,
-	kEnemyShip2,
+
+	kStationaryShip, // Texture for stationary ship
+	kRammingShip,    // Texture for ramming ship
+	kFortress,		// Texture for fortress
+
 	kMissile,
+
 	kTitleScreen,
 	kButtonNormal,
 	kButtonSelected,
@@ -24,8 +28,7 @@ enum class TextureID
 	kWater,
 	kCannonBall,
 	kEnemyCannonBall,
-	kEnemyShip3,
-	kPlayer2Ship,
+	
 	kMountains,
 	kGameWonSprite,
 	kCoin,

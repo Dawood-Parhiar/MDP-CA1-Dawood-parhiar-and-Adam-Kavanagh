@@ -103,7 +103,7 @@ void gui::Container::SelectPrevious()
     int prev = m_selected_child;
     do
     {
-        prev = (prev + m_children.size() - 1) % m_children.size();
+        prev = static_cast<int>((prev + m_children.size() - 1) % m_children.size());
     } while (!m_children[prev]->IsSelectable());
     Select(prev);
 }

@@ -21,7 +21,8 @@ public:
 	void CollectMissile(unsigned int count);
 
 	void UpdateTexts();
-	void UpdateMovementPattern(sf::Time dt);
+
+	void UpdateMovementPattern(sf::Time dt, sf::Vector2f playerPosition);
 
 	float GetMaxSpeed() const;
 	void Fire();
@@ -37,10 +38,10 @@ public:
 	void SetRenderTargets(sf::RenderTarget& target);
 	void MoveShip(sf::Time dt, float speed);
 	void SetId(int id);
-	int GetIdentifier();
+	int GetIdentifier() const;
 	Cannon* GetCannon() const;
 
-	int GetMissileAmmo();
+	int GetMissileAmmo() const;
 	void DisablePickups();
 	void SetMissileAmmo(sf::Int32 missile_ammo);
 

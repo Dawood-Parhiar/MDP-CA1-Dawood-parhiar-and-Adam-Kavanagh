@@ -45,8 +45,8 @@ void GameServer::NotifyPlayerSpawn(sf::Int32 ship_identifier)
     sf::Int8 player_id = (m_connected_players == 0) ? 1 : (m_connected_players + 1);
 
     // Determine the role based on your ShipInfo.
-    sf::Int8 role = (!m_ship_info[ship_identifier].HasPilot()) ?
-        static_cast<sf::Int8>(Role::Pilot) :
+    sf::Int8 role = (!m_ship_info[ship_identifier].HasCaptain()) ?
+        static_cast<sf::Int8>(Role::Captain) :
         static_cast<sf::Int8>(Role::Gunner);
 
     // Build the packet with only the necessary information.
@@ -182,7 +182,7 @@ void GameServer::Tick()
         //Not going to spawn enemies near the end
         if (m_battlefield_rect.top > 600.f)
         {
-            std::size_t enemy_count = 1 + Utility::RandomInt(2);
+            std::size_t enemy_count = static_cast<size_t>(1) + Utility::RandomInt(2);
             float spawn_centre = static_cast<float>(Utility::RandomInt(500) - 250);
 
             //If there is only one enemy it is at spawn_centre
@@ -315,11 +315,11 @@ void GameServer::GameEvent(sf::Packet& packet, GameServer::RemotePeer& receiving
     }
 }
 
-void GameServer::NotifyTeamChange(sf::Int8 id, sf::Int8 ship_id, sf::Int8 gunner_id, sf::Int8 pilot_id)
+void GameServer::NotifyTeamChange(sf::Int8 id, sf::Int8 ship_id, sf::Int8 gunner_id, sf::Int8 Captain_id)
 {
     sf::Packet packet;
     packet << static_cast<sf::Int32>(Server::PacketType::kTeamSelection);
-    packet << id << ship_id << gunner_id << pilot_id;
+    packet << id << ship_id << gunner_id << Captain_id;
     Utility::Debug("Team Change: ");
     SendToAll(packet);
 }
@@ -329,14 +329,14 @@ void GameServer::PlayerTeamChange(sf::Packet& packet)
     sf::Int8 id;
     sf::Int8 ship_id;
     sf::Int8 gunner_id;
-    sf::Int8 pilot_id;
-    packet >> id >> ship_id >> gunner_id >> pilot_id;
+    sf::Int8 Captain_id;
+    packet >> id >> ship_id >> gunner_id >> Captain_id;
 
     m_ship_info[id].m_ship_id = ship_id;
     m_ship_info[id].m_gunner_id = gunner_id;
-    m_ship_info[id].m_pilot_id = pilot_id;
+    m_ship_info[id].m_Captain_id = Captain_id;
 
-    NotifyTeamChange(id, ship_id, gunner_id, pilot_id);
+    NotifyTeamChange(id, ship_id, gunner_id, Captain_id);
 }
 
 void GameServer::HandlePlayerUpdate(sf::Packet& packet)
@@ -344,15 +344,15 @@ void GameServer::HandlePlayerUpdate(sf::Packet& packet)
     sf::Int8 aircraft_identifier;
     sf::Int8 ship_id;
     sf::Int8 gunner_id;
-    sf::Int8 pilot_id;
-    packet >> aircraft_identifier >> ship_id >> gunner_id >> pilot_id;
+    sf::Int8 Captain_id;
+    packet >> aircraft_identifier >> ship_id >> gunner_id >> Captain_id;
 
     m_ship_info[aircraft_identifier].m_ship_id = ship_id;
     m_ship_info[aircraft_identifier].m_gunner_id = gunner_id;
-    m_ship_info[aircraft_identifier].m_pilot_id = pilot_id;
+    m_ship_info[aircraft_identifier].m_Captain_id = Captain_id;
     sf::Packet notify_packet;
     notify_packet << static_cast<sf::Int32>(Server::PacketType::kPlayerUpdate);
-    notify_packet << aircraft_identifier << gunner_id << pilot_id;
+    notify_packet << aircraft_identifier << gunner_id << Captain_id;
 
     SendToAll(notify_packet);
 }
@@ -390,7 +390,7 @@ void GameServer::NotifyGameStart()
             for (const auto& pair : m_ship_info)
             {
                 const ShipInfo& ship = pair.second;
-                if (ship.m_pilot_id == localPlayerId || ship.m_gunner_id == localPlayerId)
+                if (ship.m_Captain_id == localPlayerId || ship.m_gunner_id == localPlayerId)
                 {
                     shipId = pair.first;
                     break;
@@ -403,7 +403,7 @@ void GameServer::NotifyGameStart()
                 // Get ship details.
                 const ShipInfo& ship = m_ship_info[shipId];
                 packet << ship.m_position.x << ship.m_position.y;
-                packet << ship.m_pilot_id << ship.m_gunner_id;
+                packet << ship.m_Captain_id << ship.m_gunner_id;
             }
             else
             {
@@ -522,7 +522,7 @@ void GameServer::HandleIncomingConnections()
             newShip.m_hitpoints = 100;
             newShip.m_missile_ammo = 20;
             // Ensure seats are marked as available.
-            newShip.m_pilot_id = -1;
+            newShip.m_Captain_id = -1;
             newShip.m_gunner_id = -1;
 
             // Insert the new ship into the map.
@@ -533,10 +533,10 @@ void GameServer::HandleIncomingConnections()
 
         // Determine which role to assign: if there is no pilot, assign as pilot; otherwise assign as gunner.
         sf::Int8 role = -1;
-        if (!ship->HasPilot())
+        if (!ship->HasCaptain())
         {
-            ship->m_pilot_id = player_id;
-            role = static_cast<sf::Int8>(Role::Pilot); // e.g., 0
+            ship->m_Captain_id = player_id;
+            role = static_cast<sf::Int8>(Role::Captain); // e.g., 0
         }
         else if (!ship->HasGunner())
         {
@@ -547,7 +547,7 @@ void GameServer::HandleIncomingConnections()
         // Build the spawn packet with the ship's information and the assigned role.
         sf::Packet packet;
         // Use kSpawnSelf for the local (pilot) player and kPlayerConnect for the remote (gunner) player.
-        if (role == static_cast<sf::Int8>(Role::Pilot))
+        if (role == static_cast<sf::Int8>(Role::Captain))
         {
             packet << static_cast<sf::Int32>(Server::PacketType::kSpawnSelf);
         }
@@ -604,9 +604,9 @@ void GameServer::HandleDisconnections()
                 ShipInfo& ship = ship_itr->second;
 
                 bool removed = false;
-                if (ship.m_pilot_id == identifier)
+                if (ship.m_Captain_id == identifier)
                 {
-                    ship.m_pilot_id = -1;
+                    ship.m_Captain_id = -1;
                     removed = true;
                 }
                 if (ship.m_gunner_id == identifier)
@@ -616,7 +616,7 @@ void GameServer::HandleDisconnections()
                 }
 
                 // If the ship is now empty, remove it
-                if (removed && !ship.HasPilot() && !ship.HasGunner())
+                if (removed && !ship.HasCaptain() && !ship.HasGunner())
                 {
                     m_ship_info.erase(ship_itr);
                     m_ship_count--;
@@ -661,7 +661,7 @@ void GameServer::InformWorldState(sf::TcpSocket& socket)
             << ship.m_position.y
             << ship.m_hitpoints
             << ship.m_missile_ammo
-            << ship.m_pilot_id
+            << ship.m_Captain_id
             << ship.m_gunner_id;
     }
 
@@ -709,7 +709,7 @@ void GameServer::UpdateClientState()
             << ship.second.m_position.y
             << ship.second.m_hitpoints
             << ship.second.m_missile_ammo
-            << ship.second.m_pilot_id
+            << ship.second.m_Captain_id
             << ship.second.m_gunner_id;
 
     }

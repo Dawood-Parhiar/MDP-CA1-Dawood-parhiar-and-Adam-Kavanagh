@@ -208,10 +208,15 @@ bool World::HasPlayerReachedEnd() const
 void World::LoadTextures()
 {//Code changes from Dawood Parhiar D00248313
 	m_textures.Load(TextureID::kPirateShip, "Media/Textures/ship.png");
-	m_textures.Load(TextureID::kEnemyShip1, "Media/EnemyShips/EnemyShip1.png");
 	m_textures.Load(TextureID::kMissile, "Media/Textures/cannon_ball.png");
-	m_textures.Load(TextureID::kEnemyShip2, "Media/EnemyShips/EnemyShip2.png");
-	m_textures.Load(TextureID::kEnemyShip3, "Media/EnemyShips/EnemyShip3.png");
+	
+
+	
+	m_textures.Load(TextureID::kStationaryShip, "Media/Textures/StationaryShip.png");
+	m_textures.Load(TextureID::kRammingShip, "Media/Textures/RammingShip.png");
+	m_textures.Load(TextureID::kFortress, "Media/Textures/Fort.jpg");
+
+	
 	m_textures.Load(TextureID::kHealthRefill, "Media/Textures/HealthRefill.png");
 	m_textures.Load(TextureID::kMissileRefill, "Media/Textures/MissileRefill.png");
 	m_textures.Load(TextureID::kFireSpread, "Media/Textures/FireSpread.png");
@@ -222,7 +227,7 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kParticle, "Media/Textures/Particle.png");
 	m_textures.Load(TextureID::kWater, "Media/Textures/Water3.png");
 	m_textures.Load(TextureID::kEnemyCannonBall, "Media/Textures/EnemyBall.png");
-	m_textures.Load(TextureID::kPlayer2Ship, "Media/EnemyShips/ship13.png");
+	
 	m_textures.Load(TextureID::kMountains, "Media/Textures/mountain_area.png");
 	m_textures.Load(TextureID::kCoin, "Media/Textures/coin.png");
 	m_textures.Load(TextureID::kCannon, "Media/Textures/cannon.png");
@@ -404,16 +409,20 @@ void World::SpawnEnemies()
 
 void World::AddEnemies()
 {//Code changes from Dawood Parhiar D00248313
-	AddEnemy(ShipType::kEnemyShip2, 0.f, 500.f);
-	AddEnemy(ShipType::kEnemyShip2, 0.f, 1000.f);
-	AddEnemy(ShipType::kEnemyShip2, 100.f, 1100.f);
-	AddEnemy(ShipType::kEnemyShip2, -100.f, 1100.f);
-	AddEnemy(ShipType::kEnemyShip2, -70.f, 1400.f);
-	AddEnemy(ShipType::kEnemyShip2, 70.f, 1400.f);
-	AddEnemy(ShipType::kEnemyShip2, 70.f, 1600.f);
+ // Add a Stationary Ship
+	AddEnemy(ShipType::kStationaryShip, 0.f, 500.f);
 
-	
+	// Add a Ramming Ship
+	AddEnemy(ShipType::kRammingShip, 100.f, 1000.f);
+	AddEnemy(ShipType::kRammingShip, -100.f, 1100.f);
+
+	// Add a Fort
+	AddEnemy(ShipType::kFortress, -70.f, 1400.f);
+	AddEnemy(ShipType::kFortress, 70.f, 1600.f);
+
+	// Sort enemies by their Y position for proper spawning
 	SortEnemies();
+
 }
 
 void World::SortEnemies()
@@ -525,7 +534,7 @@ void World::GuideMissiles()
 	m_active_enemies.clear();
 }
 
-bool MatchesCategories(SceneNode::Pair& colliders, ReceiverCategories type1, ReceiverCategories type2)
+static bool MatchesCategories(SceneNode::Pair& colliders, ReceiverCategories type1, ReceiverCategories type2)
 {
 	unsigned int category1 = colliders.first->GetCategory();
 	unsigned int category2 = colliders.second->GetCategory();

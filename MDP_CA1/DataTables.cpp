@@ -5,49 +5,42 @@
 #include "Ship.hpp"
 #include "ParticleType.hpp"
 
-std::vector<ShipData> InitializeShipData() //Code changes from Dawood Parhiar D00248313
+std::vector<ShipData> InitializeShipData() //Code updated by Adam Kavanagh 
 {
     std::vector<ShipData> data(static_cast<int>(ShipType::kShipCount));
 
+	// Pirate Ship
     data[static_cast<int>(ShipType::kPirateShip)].m_hitpoints = 200;
     data[static_cast<int>(ShipType::kPirateShip)].m_speed = 100.f;
     data[static_cast<int>(ShipType::kPirateShip)].m_fire_interval = sf::seconds(3);
     data[static_cast<int>(ShipType::kPirateShip)].m_texture = TextureID::kPirateShip;
-    //data[static_cast<int>(ShipType::kPirateShip)].m_texture_rect = sf::IntRect(0, 0, 48, 64);
-    data[static_cast<int>(ShipType::kPirateShip)].m_has_roll_animation = true;
 
-    //Enemy Skeleton Ship
-    
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_hitpoints = 20;
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_speed = 0.f;
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_fire_interval = sf::seconds(5);
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_texture = TextureID::kEnemyShip1;
-    //data[static_cast<int>(ShipType::kEnemyShip1)].m_texture_rect = sf::IntRect(144, 0, 84, 64);
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_has_roll_animation = true;
+    // Stationary Ship
+    data[static_cast<int>(ShipType::kStationaryShip)].m_hitpoints = 200;
+    data[static_cast<int>(ShipType::kStationaryShip)].m_speed = 0.f;
+    data[static_cast<int>(ShipType::kStationaryShip)].m_fire_interval = sf::seconds(3);
+    data[static_cast<int>(ShipType::kStationaryShip)].m_texture = TextureID::kPirateShip;
+    data[static_cast<int>(ShipType::kStationaryShip)].m_has_roll_animation = false;
 
-   
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_directions.emplace_back(Direction(+45.f, 80.f));
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_directions.emplace_back(Direction(-45.f, 160.f));
-    data[static_cast<int>(ShipType::kEnemyShip1)].m_directions.emplace_back(Direction(+45.f, 80.f));
+    // Rammming Ship
 
+    data[static_cast<int>(ShipType::kRammingShip)].m_hitpoints = 20;
+    data[static_cast<int>(ShipType::kRammingShip)].m_speed = 100.f;
+    data[static_cast<int>(ShipType::kRammingShip)].m_fire_interval = sf::seconds(0);
+    data[static_cast<int>(ShipType::kRammingShip)].m_texture = TextureID::kPirateShip;
+    data[static_cast<int>(ShipType::kRammingShip)].m_has_roll_animation = false;
 
-    //Enemy Red Ship
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_hitpoints = 40;
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_speed = 0.f;
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_fire_interval = sf::seconds(5);
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_texture = TextureID::kEnemyShip2;
-    //data[static_cast<int>(ShipType::kEnemyShip2)].m_texture_rect = sf::IntRect(228, 0, 60, 59);
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_has_roll_animation = false;
+    // Fortress
 
+    data[static_cast<int>(ShipType::kFortress)].m_hitpoints = 300;
+    data[static_cast<int>(ShipType::kFortress)].m_speed = 0.f; // No movement
+    data[static_cast<int>(ShipType::kFortress)].m_texture = TextureID::kFortress;
+    data[static_cast<int>(ShipType::kFortress)].m_fire_interval = sf::seconds(1); // Fires at the player
+    data[static_cast<int>(ShipType::kFortress)].m_has_roll_animation = false;
 
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(+45.f, 50.f));
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(0.f, 50.f));
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(-45.f, 100.f));
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(0.f, 50.f));
-    data[static_cast<int>(ShipType::kEnemyShip2)].m_directions.emplace_back(Direction(45.f, 50.f));
-
-    return data;
+	return data;
 }
+
 
 std::vector<ProjectileData> InitializeProjectileData()
 {

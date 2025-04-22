@@ -22,17 +22,21 @@ TextureID ToTextureID(ShipType type)
 	case ShipType::kPirateShip:
 		return TextureID::kPirateShip;
 		break;
-	/*case ShipType::kAlliedShip:
-		return TextureID::kAlliedShip;
-		break;*/
-	case ShipType::kEnemyShip1:
-		return TextureID::kEnemyShip1;
+
+	case ShipType::kStationaryShip:
+		return TextureID::kStationaryShip;
 		break;
-	case ShipType::kEnemyShip2:
-		return TextureID::kEnemyShip2;
+
+	case ShipType::kRammingShip:
+		return TextureID::kRammingShip;
+		break;
+
+	case ShipType::kFortress:
+		return TextureID::kFortress;
 		break;
 	}
 	return TextureID::kPirateShip;
+	
 }
 
 Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts)  
@@ -187,29 +191,28 @@ void Ship::UpdateTexts()
 	}
 }
 
-void Ship::UpdateMovementPattern(sf::Time dt)
-{
-	//Enemy AI
-	const std::vector<Direction>& directions = Table[static_cast<int>(m_type)].m_directions;
-	if (!directions.empty())
-	{
-		//Move along the current direction, then change direction
-		if (m_distance_travelled > directions[m_directions_index].m_distance)
-		{
-			m_directions_index = (m_directions_index + 1) % directions.size();
-			m_distance_travelled = 0.f;
-		}
 
-		//Compute velocity
-		//Add 90 to move down the screen, 0 is right
-
-		double radians = Utility::ToRadians(directions[m_directions_index].m_angle + 90.f);
-		float vx = GetMaxSpeed() * std::cos(radians);
-		float vy = GetMaxSpeed() * std::sin(radians);
-
-		SetVelocity(vx, vy);
-		m_distance_travelled += GetMaxSpeed() * dt.asSeconds();
-	}
+// Add a parameter to the UpdateMovementPattern method to pass the player's position  
+void Ship::UpdateMovementPattern(sf::Time dt, sf::Vector2f playerPosition)  
+{  
+   if (m_type == ShipType::kRammingShip)  
+   {  
+       // Move towards the player  
+       sf::Vector2f direction = playerPosition - getPosition();  
+       float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);  
+       if (length != 0.f)  
+           direction /= length; // Normalize the direction vector  
+       SetVelocity(direction * GetMaxSpeed());  
+   }  
+   else if (m_type == ShipType::kStationaryShip || m_type == ShipType::kFortress)  
+   {  
+       // Stationary entities do not move  
+       SetVelocity(0.f, 0.f);  
+   }  
+   else  
+   {  
+       // Existing movement pattern logic for other ships  
+   }  
 }
 
 float Ship::GetMaxSpeed() const
@@ -371,7 +374,6 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 	Entity::UpdateCurrent(dt, commands);
 	UpdateTexts();
 
-	UpdateMovementPattern(dt);
 
 	UpdateRollAnimation(dt);
 
@@ -387,22 +389,20 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 void Ship::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 {
-	
-	if (!IsAllied())
+	if (m_type == ShipType::kFortress)
 	{
-		Fire();
+		Fire(); // Fort fires at the player
 	}
 
 	if (m_is_firing && m_fire_countdown <= sf::Time::Zero)
 	{
-		PlayLocalSound(commands, IsAllied() ? SoundEffect::kEnemyGunfire : SoundEffect::kAlliedGunfire);
+		PlayLocalSound(commands, SoundEffect::kEnemyGunfire);
 		commands.Push(m_fire_command);
 		m_fire_countdown += Table[static_cast<int>(m_type)].m_fire_interval / (m_fire_rate + 1.f);
 		m_is_firing = false;
 	}
 	else if (m_fire_countdown > sf::Time::Zero)
 	{
-		//Wait, can't fire
 		m_fire_countdown -= dt;
 		m_is_firing = false;
 	}
@@ -473,7 +473,7 @@ Cannon* Ship::GetCannon() const
 	return m_cannon_ptr;
 }
 
-int Ship::GetMissileAmmo()
+int Ship::GetMissileAmmo() const
 {
 	return m_missile_ammo;
 }
@@ -531,7 +531,7 @@ void Ship::SetId(int id)
 	m_identifier = id;
 }
 
-int Ship::GetIdentifier()
+int Ship::GetIdentifier() const
 {
 	return m_identifier;
 }

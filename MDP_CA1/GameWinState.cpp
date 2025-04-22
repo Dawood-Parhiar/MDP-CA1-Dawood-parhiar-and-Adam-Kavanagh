@@ -21,7 +21,7 @@ GameWinState::GameWinState(StateStack& stack, Context context, const std::string
 
     m_game_won_text.setCharacterSize(70);
     Utility::CentreOrigin(m_game_won_text);
-    m_game_won_text.setPosition(0.5f * window_size.x, 0.4 * window_size.y);
+    m_game_won_text.setPosition(0.5f * window_size.x, 0.4f * window_size.y);
 
 }
 

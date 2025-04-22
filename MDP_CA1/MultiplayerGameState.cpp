@@ -380,7 +380,7 @@ void MultiplayerGameState::HandleSpawnSelf(sf::Packet& packet)
 
 
 	// Create local player with controls based on role
-	if (role == static_cast<sf::Int8>(Role::Pilot))
+	if (role == static_cast<sf::Int8>(Role::Captain))
 	{
 		m_players[player_id] = std::make_unique<Player>(&m_socket, player_id, GetContext().keys1);
 	}
@@ -414,7 +414,7 @@ void MultiplayerGameState::HandlePlayerConnect(sf::Packet& packet)
 	}
 
 
-	if (role == static_cast<sf::Int8>(Role::Pilot))
+	if (role == static_cast<sf::Int8>(Role::Captain))
 	{
 		m_players[player_id] = std::make_unique<Player>(&m_socket, player_id, GetContext().keys1);
 	}

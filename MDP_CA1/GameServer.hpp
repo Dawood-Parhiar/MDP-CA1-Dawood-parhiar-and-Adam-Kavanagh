@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <SFML/Graphics/Rect.hpp>
 
-enum class Role { Pilot, Gunner };
+enum class Role { Captain, Gunner };
 
 class GameServer
 {
@@ -42,13 +42,13 @@ private:
 		std::map<sf::Int32, bool> m_realtime_actions;
 
 		sf::Int8 m_ship_id;
-		sf::Int8 m_pilot_id = -1;  // Default to no pilot
+		sf::Int8 m_Captain_id = -1;  // Default to no pilot
 		sf::Int8 m_gunner_id = -1; // Default to no gunner
 
 		// Check if the ship has an available seat
-		bool HasPilot() const { return m_pilot_id != -1; }
+		bool HasCaptain() const { return m_Captain_id != -1; }
 		bool HasGunner() const { return m_gunner_id != -1; }
-		bool IsFull() const { return HasPilot() && HasGunner(); }
+		bool IsFull() const { return HasCaptain() && HasGunner(); }
 	};
 
 	typedef std::unique_ptr<RemotePeer> PeerPtr;
