@@ -41,9 +41,13 @@ public:
 	int GetIdentifier() const;
 	Cannon* GetCannon() const;
 
-	int GetMissileAmmo() const;
+	
 	void DisablePickups();
-	void SetMissileAmmo(sf::Int32 missile_ammo);
+
+	int GetMissileAmmo() const;
+	
+	
+	void SetMissileAmmo(sf::Int32 ammo);
 
 	void SetPilot(sf::Int32 pilot_id) { m_pilot = pilot_id; }
 	void SetGunner(sf::Int32 gunner_id) { m_gunner = gunner_id; }

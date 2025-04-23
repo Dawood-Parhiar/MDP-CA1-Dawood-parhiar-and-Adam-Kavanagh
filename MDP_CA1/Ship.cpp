@@ -117,10 +117,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayerShip))// || Ship::GetCategory() == static_cast<int>(ReceiverCategories::kAlliedShip))
 	{
 		m_missile_ammo = 20;
-		std::string* missile_ammo = new std::string("");
-		std::unique_ptr<TextNode> missile_display(new TextNode(fonts, *missile_ammo));
-		m_missile_display = missile_display.get();
-		AttachChild(std::move(missile_display));
+		
 
 		std::string* coins = new std::string("");
 		std::unique_ptr<TextNode> coins_display(new TextNode(fonts, *coins));
@@ -171,7 +168,7 @@ void Ship::IncreaseFireSpread()
 
 void Ship::CollectMissile(unsigned int count)
 {
-	m_missile_ammo += count;
+	// m_missile_ammo += count;
 }
 
 void Ship::UpdateTexts()
@@ -181,9 +178,7 @@ void Ship::UpdateTexts()
 	
 	if (m_missile_display)
 	{
-		m_missile_display->setPosition(0.f, 90.f);
-		m_missile_display->SetString("M: " + std::to_string(m_missile_ammo));
-		
+	
 		//display coins if missile display is present to a ship
 		m_coins_display->SetString("Coins: " + std::to_string(m_coins));
 		m_coins_display->setPosition(0.f, 110.f);
@@ -211,7 +206,7 @@ void Ship::UpdateMovementPattern(sf::Time dt, sf::Vector2f playerPosition)
    }  
    else  
    {  
-       // Existing movement pattern logic for other ships  
+      
    }  
 }
 
@@ -236,13 +231,9 @@ void Ship::LaunchPlayerCannon() //adam
 		//Dawood Parhiar D00248313
 		ProjectileType type = IsAllied() ? ProjectileType::kAlliedCannonBall : ProjectileType::kEnemyCannonBall;
 
-		if (m_missile_ammo > 0 && Table[static_cast<int>(type)].m_fire_interval != sf::Time::Zero)
-		{
 			m_is_launching_missile = true;
-			--m_missile_ammo;
 
-			m_player_cannon_cooldown = sf::seconds(1.5); //Adam
-		}
+			m_player_cannon_cooldown = sf::seconds(2); //Adam - Reloading of cannon
 	}
 }
 
@@ -475,7 +466,7 @@ Cannon* Ship::GetCannon() const
 
 int Ship::GetMissileAmmo() const
 {
-	return m_missile_ammo;
+	return -1;
 }
 
 void Ship::DisablePickups()
