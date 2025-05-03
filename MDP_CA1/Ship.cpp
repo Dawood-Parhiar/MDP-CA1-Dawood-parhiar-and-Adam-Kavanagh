@@ -1,4 +1,4 @@
-#include "Ship.hpp"
+﻿#include "Ship.hpp"
 #include "TextureID.hpp"
 #include "ResourceHolder.hpp"
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -73,8 +73,10 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	original_y = m_sprite.getPosition().y;
 
 	m_cannon = std::make_unique<Cannon>(textures);
-	m_cannon->setPosition(getPosition());
+	/*float shipHalfHeight = m_sprite.getLocalBounds().height / 2.f;
+	m_cannon->setPosition(0.f, -shipHalfHeight);*/
 
+	m_cannon->setPosition(getPosition());
 	m_cannon_ptr = m_cannon.get();
 	AttachChild(std::move(m_cannon));
 	
@@ -282,21 +284,31 @@ void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset
 	}
 	else
 	{
-		// Get the correct spawn position from the cannon's mouth
-		sf::Vector2f spawnPosition = m_cannon_ptr->GetMouthPosition();
-		projectile->setPosition(spawnPosition);
+		//spawn point
+		sf::Vector2f spawn = m_cannon_ptr->GetMouthPosition();
+		projectile->setPosition(spawn);
 
-		// Get the cannon's rotation to fire in the correct direction
-		float cannonRotation = m_cannon_ptr->getRotation();
-		float angleRad = Utility::ToRadians(cannonRotation); // Convert to radians
+		// build the full transform chain:
+		//    ship world × cannon local × sprite local
+		sf::Transform full =
+			m_cannon_ptr->GetWorldTransform()
+			* m_cannon_ptr->m_sprite.getTransform();  // 
 
-		// Set velocity based on cannon direction
-		sf::Vector2f velocity(std::cos(angleRad) * 300.f, std::sin(angleRad) * 300.f);
+		// measure forward direction in world‐space
+		sf::Vector2f tipWorld = full.transformPoint({ 0.f, 0.f });
+		sf::Vector2f aheadWorld = full.transformPoint({ 1.f, 0.f });
+		sf::Vector2f dir = aheadWorld - tipWorld;
 
-		float sign = -1.f;
-		projectile->SetVelocity(velocity * sign);
-		projectile->SetLaunchPosition(spawnPosition);
+		// normalize
+		float len = std::hypot(dir.x, dir.y);
+		if (len > 0.f) dir /= len;
+
+		// apply your speed
+		const float speed = 300.f;
+		projectile->SetVelocity(-dir * speed);
+		projectile->SetLaunchPosition(spawn);
 		projectile->SetMaxRadius(300.f);
+
 		
 	}
 	node.AttachChild(std::move(projectile));
@@ -367,6 +379,7 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 	if (m_cannon)
 	{
 		m_cannon->UpdateCurrent(dt, commands);
+		//m_cannon_ptr->UpdateCurrent(dt, commands);
 	}
 	Entity::UpdateCurrent(dt, commands);
 	UpdateTexts();

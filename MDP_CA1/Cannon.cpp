@@ -8,7 +8,7 @@ Cannon::Cannon(const TextureHolder& textures)
     m_rotationInput(0.f),
 	Entity(1)
 {
-    Utility::CentreOrigin(m_sprite);
+   Utility::CentreOrigin(m_sprite);
     
 }
 
@@ -17,49 +17,23 @@ void Cannon::SetRotationInput(float rotation)
     m_rotationInput = rotation;
 }
 
-
 sf::Vector2f Cannon::GetMouthPosition() const
 {
-    float angleRad = getRotation() * (3.14159265f / 180.f); 
-    float offsetX = std::cos(angleRad); 
-    float offsetY = std::sin(angleRad);
+    // 1. local bounds of the CANNON TEXTURE
+    sf::FloatRect bounds = m_sprite.getLocalBounds();
 
-    return GetWorldPosition() + sf::Vector2f(offsetX, offsetY);
+    // 2. “mouth” in sprite-local coordinates (unrotated, unscaled):
+    //    bounds.width is the right edge, .height/2 is vertically centered.
+    sf::Vector2f mouthLocal{ 0.f, 15.f};
+
+    // 3. build the full transform: ship→cannon (getWorldTransform())
+    //    then cannon→sprite (m_sprite.getTransform())
+    sf::Transform full = GetWorldTransform() * m_sprite.getTransform();
+
+    // 4. push the mouth point all the way into world space:
+    return full.transformPoint(mouthLocal);
 }
 
-//void Cannon::CreateProjectile(SceneNode& node, ProjectileType type, const TextureHolder& textures) const
-//{
-//    // Create a new projectile
-//    std::unique_ptr<Projectile> projectile = std::make_unique<Projectile>(type, textures);
-//
-//    // Get cannon's world position and rotation
-//    float angleRad = Utility::ToRadians(getRotation()); // Convert angle to radians
-//
-//    float barrelLength = 30.f; // Adjust based on cannon size
-//    sf::Vector2f offset(
-//        std::cos(angleRad) * barrelLength,  // Move forward along rotation
-//        std::sin(angleRad) * barrelLength
-//    );
-//    sf::Vector2f spawnPosition = GetWorldPosition() + offset;
-//    // Calculate velocity based on cannon's rotation
-//    sf::Vector2f velocity(
-//        std::cos(angleRad) * 100.f, // Forward X direction
-//        std::sin(angleRad) * 100.f  // Forward Y direction
-//    );
-//
-//    // Set projectile properties
-//    projectile->setPosition(spawnPosition);
-//    projectile->SetVelocity(velocity);
-//
-//    //if (type == ProjectileType::kMissile)
-//    {
-//        projectile->SetLaunchPosition(spawnPosition);
-//        projectile->SetMaxRadius(300.f);
-//    }
-//
-//    // Attach projectile to the scene
-//    node.AttachChild(std::move(projectile));
-//}
 
 void Cannon::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 {
@@ -72,4 +46,11 @@ void Cannon::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 void Cannon::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 {
     target.draw(m_sprite, states);
+    // inside Cannon::DrawCurrent after drawing m_sprite
+    sf::CircleShape dot(4.f);
+    dot.setOrigin(4.f, 4.f);
+    dot.setPosition(GetMouthPosition());
+    dot.setFillColor(sf::Color::Red);
+    target.draw(dot);
+
 }

@@ -17,11 +17,14 @@ public:
 	sf::Vector2f GetMouthPosition() const;
     //void CreateProjectile(SceneNode& node, ProjectileType type,const TextureHolder& textures) const;
 
+    sf::Sprite m_sprite;
+
+
     virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands) override;
     virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const override;
     
 private:
-    sf::Sprite m_sprite;
+    
     float m_rotationSpeed;
     float m_rotationInput;
 };

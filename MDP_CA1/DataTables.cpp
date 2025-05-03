@@ -63,7 +63,7 @@ std::vector<ProjectileData> InitializeProjectileData()
 
     //Cannon Ball from player's ship
     data[static_cast<int>(ProjectileType::kMissile)].m_damage = 50;
-    data[static_cast<int>(ProjectileType::kMissile)].m_speed = 100;
+    data[static_cast<int>(ProjectileType::kMissile)].m_speed = 200;
     data[static_cast<int>(ProjectileType::kMissile)].m_texture = TextureID::kMissile;
   
 

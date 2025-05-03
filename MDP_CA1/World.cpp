@@ -1,4 +1,4 @@
-#include "World.hpp"
+﻿#include "World.hpp"
 
 #include <iostream>
 
@@ -463,66 +463,28 @@ void World::DestroyEntitiesOutsideView()
 }
 
 void World::GuideMissiles()
-{	//Code changes from Dawood Parhiar D00248313
-	//Target the closest enemy in the radius
-	Command enemyCollector;
-	enemyCollector.category =  static_cast<int>(ReceiverCategories::kEnemyShip);
-	enemyCollector.action = DerivedAction<Ship>([this](Ship& enemy, sf::Time)
-		{
-			if (!enemy.IsDestroyed())
-			{
-				m_active_enemies.emplace_back(&enemy);
-			}
-		});
-
+{
+	// Only destroy missiles when they exceed their max radius —
+	// don’t change their velocity.
 	Command missileGuider;
 	missileGuider.category = static_cast<int>(ReceiverCategories::kAlliedProjectile);
-	missileGuider.action = DerivedAction<Projectile>([this](Projectile& missile, sf::Time dt)
+	missileGuider.action = DerivedAction<Projectile>([this](Projectile& missile, sf::Time)
 		{
+			// If it’s not a guided missile, do nothing anyway.
 			if (!missile.IsGuided())
-			{
 				return;
-			}
 
-			float min_distance = std::numeric_limits<float>::max();
-			Ship* closest_enemy = nullptr;
+			// Range check
+			sf::Vector2f pos = missile.GetWorldPosition();
+			sf::Vector2f launch = missile.GetLaunchPosition();
+			float traveled = std::hypot(pos.x - launch.x,
+				pos.y - launch.y);
 
-			//get missile launch position and current position
-			sf::Vector2f missile_position = missile.GetWorldPosition();
-			sf::Vector2f launch_position = missile.GetLaunchPosition();
-
-			//check if missile has exceeded its range
-			float dist_from_launch = std::hypot
-			(
-				missile_position.x - launch_position.x,
-				missile_position.y - launch_position.y
-			);
-			if (dist_from_launch > missile.GetMaxRadius())
-			{
-				//missile.IsDestroyed();
+			if (traveled > missile.GetMaxRadius())
 				missile.Destroy();
-				return;
-			}
-
-			/*for (Ship* enemy : m_active_enemies)
-			{
-				float enemy_distance = Distance(missile, *enemy);
-				if (enemy_distance < min_distance && enemy_distance <= missile.GetMaxRadius())
-				{
-					closest_enemy = enemy;
-					min_distance = enemy_distance;
-				}
-			}
-
-			if (closest_enemy)
-			{
-				missile.GuideTowards(closest_enemy->GetWorldPosition());
-			}*/
 		});
 
-	m_command_queue.Push(enemyCollector);
 	m_command_queue.Push(missileGuider);
-	m_active_enemies.clear();
 }
 
 bool MatchesCategories(SceneNode::Pair& colliders, ReceiverCategories type1, ReceiverCategories type2)

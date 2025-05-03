@@ -664,9 +664,6 @@ void GameServer::InformWorldState(sf::TcpSocket& socket)
             << ship.m_pilot_id
             << ship.m_gunner_id;
     }
-
-
-
     socket.send(packet);
 }
 
