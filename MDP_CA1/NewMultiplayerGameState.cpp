@@ -10,7 +10,7 @@
 #include "PickupType.hpp"
 #include <iostream>
 
-sf::IpAddress GetAddressFromFile()
+sf::IpAddress GetAddressFromTheFile()
 {
 	{
 		//Try to open existing file
@@ -76,7 +76,7 @@ NewMultiplayerGameState::NewMultiplayerGameState(StateStack& stack, Context cont
 	}
 	else
 	{
-		ip = GetAddressFromFile();
+		ip = GetAddressFromTheFile();
 	}
 
 	if (m_socket.connect(ip, SERVER_PORT, sf::seconds(5.f)) == sf::TcpSocket::Done)

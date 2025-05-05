@@ -14,54 +14,63 @@
 class NewMultiplayerGameState : public State
 {
 public:
-    NewMultiplayerGameState(StateStack& stack, Context context);
-    virtual ~NewMultiplayerGameState();
+	NewMultiplayerGameState(StateStack& stack, Context context, bool is_host);
+	virtual void Draw();
+	virtual bool Update(sf::Time dt);
+	virtual bool HandleEvent(const sf::Event& event);
+	virtual void OnActivate();
+	void OnDestroy();
+	void DisableAllRealtimeActions();
 
-    virtual void Draw();
-    virtual bool Update(sf::Time dt);
-    virtual bool HandleEvent(const sf::Event& event);
-    virtual void OnActivate();
-    virtual void OnDestroy();
-    void DisableAllRealtimeActions();
 
 private:
-    // Packet handling functions.
-    void HandlePacket(sf::Int32 packet_type, sf::Packet& packet);
-    void HandleSpawnSelf(sf::Packet& packet);
-    void HandlePlayerConnect(sf::Packet& packet);
-    void HandlePlayerDisconnect(sf::Packet& packet);
-    void HandleBroadcastMessage(sf::Packet& packet);
-    void HandleInitialState(sf::Packet& packet);
-    void HandlePlayerEvent(sf::Packet& packet);
-    void HandleRealTimeChange(sf::Packet& packet);
-    void HandleSpawnEnemy(sf::Packet& packet);
-    void HandleUpdateClient(sf::Packet& packet);
+	void UpdateBroadcastMessage(sf::Time elpased_time);
+	void HandleBroadcastMessage(sf::Packet& packet);
+	void HandleSpawnSelf(sf::Packet& packet);
+	void HandlePlayerConnect(sf::Packet& packet);
+	void HandlePlayerDisconnect(sf::Packet& packet);
+	void HandleInitialState(sf::Packet& packet);
+	void HandlePlayerEvent(sf::Packet& packet);
+	void HandleRealTimeChange(sf::Packet& packet);
+	void HandleSpawnEnemy(sf::Packet& packet);
+	void HandleUpdateClient(sf::Packet& packet);
+	void HandleSpawnPickup(sf::Packet& packet);
+	void HandlePacket(sf::Int32 packet_type, sf::Packet& packet);
 
-    void UpdateBroadcastMessage(sf::Time elapsed_time);
+private:
+	typedef std::unique_ptr<Player> PlayerPtr;
 
-    // Member variables.
-    sf::RenderWindow& m_window;
-    World m_world;
-    MultiplayerManager* m_multiplayerManager;
+private:
+	World m_world;
+	sf::RenderWindow& m_window;
+	TextureHolder& m_texture_holder;
 
-    bool m_connected;
-    bool m_active_state;
-    bool m_has_focus;
-    bool m_game_started;
-    sf::Time m_client_timeout;
-    sf::Time m_time_since_last_packet;
-    sf::Clock m_tick_clock;
-    sf::Clock m_failed_connection_clock;
-    sf::Text m_broadcast_text;
-    sf::Text m_failed_connection_text;
-    std::vector<std::string> m_broadcasts;
-    sf::Time m_broadcast_elapsed_time;
+	std::map<int, PlayerPtr> m_players;
+	std::vector<sf::Int32> m_local_player_identifiers;
 
-    // Mapping of players and ship IDs.
-    std::map<sf::Int8, std::unique_ptr<Player>> m_players;
-    std::map<sf::Int8, sf::Int8> m_playerShip; // maps player_id to ship_id
-    sf::Int8 m_local_player_id;
+	sf::TcpSocket m_socket;
+	bool m_connected;
+	std::unique_ptr<GameServer> m_game_server;
+	sf::Clock m_tick_clock;
 
-    // For invitation blinking (if used).
-    sf::Time m_player_invitation_time;
+	std::vector<std::string> m_broadcasts;
+	sf::Text m_broadcast_text;
+	sf::Time m_broadcast_elapsed_time;
+
+	sf::Text m_player_invitation_text;
+	sf::Time m_player_invitation_time;
+
+	sf::Text m_failed_connection_text;
+	sf::Clock m_failed_connection_clock;
+
+	bool m_active_state;
+	bool m_has_focus;
+	bool m_host;
+	bool m_game_started;
+
+	sf::Time m_client_timeout;
+	sf::Time m_time_since_last_packet;
+
+	bool m_local_player_spawned = false;
+
 };

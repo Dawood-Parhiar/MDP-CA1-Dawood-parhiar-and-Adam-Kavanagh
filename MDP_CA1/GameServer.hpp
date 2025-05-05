@@ -25,10 +25,6 @@ private:
 		bool m_ready;
 		bool m_timed_out;
 
-		// for lobby ──
-		sf::Int8        player_id = -1;
-		std::string     player_name = "Default";
-		bool            lobby_ready = false;
 	};
 
 	struct ShipInfo
@@ -48,7 +44,7 @@ public:
 	void NotifyPlayerSpawn(sf::Int32 ship_identifier);
 	void NotifyPlayerRealtimeChange(sf::Int32 ship_identifier, sf::Int32 action, bool action_enabled);
 	void NotifyPlayerEvent(sf::Int32 ship_identifier, sf::Int32 action);
-	//void BrodcastLobby();
+	
 
 private:
 	void SetListening(bool enable);
@@ -99,13 +95,9 @@ private:
 	std::vector<PeerPtr> m_peers;
 	sf::Int32 m_ship_identifier_counter;
 	bool m_waiting_thread_end;
-	sf::Int32 m_player_id_counter = 1;
-
 
 	sf::Time m_last_spawn_time;
 	sf::Time m_time_for_next_spawn;
-	bool m_game_started;
-
-	bool m_inLobby = false;
+	
 };
 

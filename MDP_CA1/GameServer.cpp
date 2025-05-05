@@ -21,8 +21,6 @@ GameServer::GameServer(sf::Vector2f battlefield_size)
     , m_waiting_thread_end(false)
     , m_last_spawn_time(sf::Time::Zero)
     , m_time_for_next_spawn(sf::seconds(5.f))
-    //, m_game_started(false)
-    
 {
     m_listener_socket.setBlocking(false);
     m_peers[0].reset(new RemotePeer());
