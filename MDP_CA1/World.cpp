@@ -482,6 +482,7 @@ void World::GuideMissiles()
 
 			if (traveled > missile.GetMaxRadius())
 				missile.Destroy();
+
 		});
 
 	m_command_queue.Push(missileGuider);

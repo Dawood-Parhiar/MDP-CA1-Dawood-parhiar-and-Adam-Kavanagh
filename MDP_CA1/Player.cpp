@@ -121,7 +121,10 @@ void Player::HandleNetworkEvent(Action action, CommandQueue& commands)
 
 void Player::HandleNetworkRealtimeChange(Action action, bool action_enabled)
 {
-    m_action_proxies[action] = action_enabled;
+    if (!IsLocal())
+    {
+        m_action_proxies[action] = action_enabled;
+    }
 }
 
 void Player::DisableAllRealtimeActions()

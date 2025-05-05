@@ -5,6 +5,7 @@
 #include "Projectile.hpp"
 #include "ResourceHolder.hpp"
 #include "ResourceIdentifiers.hpp"
+#include "TextNode.hpp"
 
 
 //Dawood Parhiar D00248313
@@ -15,17 +16,20 @@ public:
 
     void SetRotationInput(float rotation);
 	sf::Vector2f GetMouthPosition() const;
-    //void CreateProjectile(SceneNode& node, ProjectileType type,const TextureHolder& textures) const;
-
-    sf::Sprite m_sprite;
+    sf::Transform GetPosition() const { return m_sprite.getTransform(); }
+    
 
 
     virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands) override;
     virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const override;
-    
+    void SetPlayerName(std::string& name, const FontHolder& fonts);
+
+
 private:
     
     float m_rotationSpeed;
     float m_rotationInput;
+    sf::Sprite m_sprite;
+    TextNode* m_name_display = nullptr;;
 };
 

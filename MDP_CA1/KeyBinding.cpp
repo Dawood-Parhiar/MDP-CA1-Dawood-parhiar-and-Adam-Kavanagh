@@ -15,7 +15,7 @@ KeyBinding::KeyBinding(int control_preconfiguration)
 		m_key_map[sf::Keyboard::S] = Action::kMoveDown;
 		m_key_map[sf::Keyboard::A] = Action::kRotateLeft;
 		m_key_map[sf::Keyboard::D] = Action::kRotateRight;
-		m_key_map[sf::Keyboard::Enter] = Action::kMissileFire;
+		m_key_map[sf::Keyboard::Space] = Action::kMissileFire;
 		m_key_map[sf::Keyboard::Left] = Action::kRotateCannonLeft;
 		m_key_map[sf::Keyboard::Right] = Action::kRotateCannonRight;
 	}

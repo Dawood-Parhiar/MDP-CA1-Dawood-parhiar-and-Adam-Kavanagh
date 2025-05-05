@@ -19,18 +19,9 @@ void Cannon::SetRotationInput(float rotation)
 
 sf::Vector2f Cannon::GetMouthPosition() const
 {
-    // 1. local bounds of the CANNON TEXTURE
     sf::FloatRect bounds = m_sprite.getLocalBounds();
-
-    // 2. “mouth” in sprite-local coordinates (unrotated, unscaled):
-    //    bounds.width is the right edge, .height/2 is vertically centered.
     sf::Vector2f mouthLocal{ 0.f, 15.f};
-
-    // 3. build the full transform: ship→cannon (getWorldTransform())
-    //    then cannon→sprite (m_sprite.getTransform())
     sf::Transform full = GetWorldTransform() * m_sprite.getTransform();
-
-    // 4. push the mouth point all the way into world space:
     return full.transformPoint(mouthLocal);
 }
 
@@ -42,6 +33,21 @@ void Cannon::UpdateCurrent(sf::Time dt, CommandQueue& commands)
     m_rotationInput = 0;
     GetMouthPosition();
 }
+
+void Cannon::SetPlayerName(std::string& name, const FontHolder& fonts)
+{
+    auto nameNode = std::make_unique<TextNode>(fonts, name);
+    m_name_display = nameNode.get();
+    sf::FloatRect bounds = m_sprite.getLocalBounds();
+    float xOffset = getPosition().x - 40.f;
+    float yOffset = getPosition().y - 13.f;
+    
+    nameNode->setPosition(xOffset,yOffset);
+
+    // Add it as a child so it inherits all transforms
+    AttachChild(std::move(nameNode));
+}
+
 
 void Cannon::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 {

@@ -30,9 +30,6 @@ sf::IpAddress GetAddressFromFile()
 
 }
 
-//Debuging help Chatgpt
-//https://chatgpt.com/share/67eb1d07-0914-800c-b587-17327464c1a9
-
 MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context , bool is_host)
 	:State(stack, context)
 	, m_world(*context.window, *context.fonts, *context.sounds, true)
@@ -46,7 +43,6 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context , 
 	, m_game_started(false)
 	, m_client_timeout(sf::seconds(5.f))
 	, m_time_since_last_packet(sf::seconds(0.f))
-	, m_local_player_id(1)
     
 {
 	m_broadcast_text.setFont(context.fonts->Get(Font::kMain));
@@ -125,32 +121,23 @@ bool MultiplayerGameState::Update(sf::Time dt)
 	{
 		m_world.Update(dt);
 
-		bool found_local_ship = (m_local_player_id != -1);
+		bool found_local_ship = false; 
+		
 		// Iterate over all players.
 		for (auto itr = m_players.begin(); itr != m_players.end(); )
 		{
-			// Check if this is our local player.
-			if (m_local_player_id && !m_playerShip.empty())
+			if (std::find(m_local_player_identifiers.begin(), m_local_player_identifiers.end(), itr->first) != m_local_player_identifiers.end())
 			{
 				found_local_ship = true;
 			}
 
-			sf::Int8 player_id = itr->first;
-
-			// Look up the ship id for this player.
-			auto mapIt = m_playerShip.find(player_id);
-			Ship* ship = nullptr;
-			if (mapIt != m_playerShip.end())
-			{
-				ship = m_world.GetShip(mapIt->second);
-			}
-			// If the ship no longer exists, remove this player.
-			if (!ship)
+			if (!m_world.GetShip(itr->first))
 			{
 				itr = m_players.erase(itr);
 				if (m_players.empty())
 				{
 					RequestStackPush(StateID::kGameOver);
+					return true;
 				}
 			}
 			else
@@ -159,7 +146,7 @@ bool MultiplayerGameState::Update(sf::Time dt)
 			}
 		}
 
-		if (!found_local_ship && m_game_started)
+		if (!found_local_ship && m_game_started && m_local_player_spawned)
 		{
 			Utility::Debug("No Ships found in the game");
 			RequestStackPush(StateID::kGameOver);
@@ -169,12 +156,10 @@ bool MultiplayerGameState::Update(sf::Time dt)
 		if (m_active_state && m_has_focus)
 		{
 			CommandQueue& commands = m_world.GetCommandQueue();
-			auto it = m_players.find(static_cast<sf::Int8>(m_local_player_id));
-			if (it != m_players.end())
+			for (auto& pair: m_players)
 			{
-				it->second->HandleRealtimeInput(commands);
+				pair.second->HandleRealtimeInput(commands);
 			}
-
 		}
 
 		// Always handle network input.
@@ -195,24 +180,17 @@ bool MultiplayerGameState::Update(sf::Time dt)
 		}
 		else
 		{
-			//// Check for timeout.
-			//if (m_time_since_last_packet > m_client_timeout)
-			//{
-			//	m_connected = false;
-			//	m_failed_connection_text.setString("Lost connection to the server");
-			//	Utility::CentreOrigin(m_failed_connection_text);
-			//	m_failed_connection_clock.restart();
-			//}
+			// Check for timeout.
+			if (m_time_since_last_packet > m_client_timeout)
+			{
+				m_connected = false;
+				m_failed_connection_text.setString("Lost connection to the server");
+				Utility::CentreOrigin(m_failed_connection_text);
+				m_failed_connection_clock.restart();
+			}
 		}
 
 		UpdateBroadcastMessage(dt);
-
-		// Blink the invitation text.
-		/*m_player_invitation_time += dt;
-		if (m_player_invitation_time > sf::seconds(1.f))
-		{
-			m_player_invitation_time = sf::Time::Zero;
-		}*/
 
 		// Process game events.
 		GameActions::Action game_action;
@@ -230,25 +208,18 @@ bool MultiplayerGameState::Update(sf::Time dt)
 		if (m_tick_clock.getElapsedTime() > sf::seconds(1.f / 20.f))
 		{
 			sf::Packet position_update_packet;
+
 			position_update_packet << static_cast<sf::Int32>(Client::PacketType::kStateUpdate);
-			if (m_local_player_id != -1)
+
+			position_update_packet << static_cast<sf::Int32>(m_local_player_identifiers.size());
+			for (auto& id : m_local_player_identifiers)
 			{
-				position_update_packet << static_cast<sf::Int32>(1);
-				// Use the mapping to get the ship for the local player.
-				Ship* ship = m_world.GetShip(m_playerShip[m_local_player_id]);
-				if (ship)
+				if (Ship* ship = m_world.GetShip(id))
 				{
-					position_update_packet << m_local_player_id
-						<< ship->getPosition().x
-						<< ship->getPosition().y
-						<< static_cast<sf::Int32>(ship->GetHitPoints())
-						<< static_cast<sf::Int32>(ship->GetMissileAmmo());
+				position_update_packet << id << ship->getPosition().x << ship->getPosition().y << static_cast<sf::Int32>(ship->GetHitPoints()) << static_cast<sf::Int32>(ship->GetMissileAmmo());
 				}
 			}
-			else
-			{
-				position_update_packet << static_cast<sf::Int32>(0);
-			}
+
 			m_socket.send(position_update_packet);
 			m_tick_clock.restart();
 		}
@@ -282,13 +253,7 @@ bool MultiplayerGameState::HandleEvent(const sf::Event& event)
 			DisableAllRealtimeActions();
 			RequestStackPush(StateID::kNetworkPause);
 		}
-		//fire missile
-		else if (event.key.code == sf::Keyboard::Enter)
-		{
-			sf::Packet packet;
-			packet << static_cast<sf::Int32>(Client::PacketType::kPlayerEvent) << m_local_player_id << static_cast<sf::Int32>(Action::kMissileFire);
-			m_socket.send(packet);
-		}
+		
 	}
 	else if (event.type == sf::Event::GainedFocus)
 	{
@@ -321,10 +286,11 @@ void MultiplayerGameState::OnDestroy()
 void MultiplayerGameState::DisableAllRealtimeActions()
 {
 	m_active_state = false;
-	if (m_local_player_id != -1 && m_players.find(m_local_player_id) != m_players.end())
+	for (sf::Int32 identifier : m_local_player_identifiers)
 	{
-		m_players[m_local_player_id]->DisableAllRealtimeActions();
+		m_players[identifier]->DisableAllRealtimeActions();
 	}
+	
 }
 
 void MultiplayerGameState::UpdateBroadcastMessage(sf::Time elapsed_time)
@@ -367,109 +333,35 @@ void MultiplayerGameState::HandleBroadcastMessage(sf::Packet& packet)
 }
 void MultiplayerGameState::HandleSpawnSelf(sf::Packet& packet)
 {
-	sf::Int8 player_id, ship_id, role;
+	sf::Int32 ship_id;
 	sf::Vector2f ship_position;
-	packet >> player_id >> ship_id >> role >> ship_position.x >> ship_position.y;
+	packet >>  ship_id >> ship_position.x >> ship_position.y;
 
-	Ship* existingShip = m_world.GetShip(ship_id);
-	if (!existingShip)
-	{
-		Ship* ship = m_world.AddShip(ship_id);
-		ship->setPosition(ship_position);
-	}
-
-
-	// Create local player with controls based on role
-	if (role == static_cast<sf::Int8>(Role::Pilot))
-	{
-		m_players[player_id] = std::make_unique<Player>(&m_socket, player_id, GetContext().keys1);
-	}
-	else if (role == static_cast<sf::Int8>(Role::Gunner))
-	{
-		m_players[player_id] = std::make_unique<Player>(&m_socket, player_id, GetContext().keys2);
-	}
-	else
-	{
-		m_players[player_id] = std::make_unique<Player>(&m_socket, player_id, nullptr);
-	}
-
-	m_local_player_id = player_id;
-	m_playerShip[player_id] = ship_id;
+	Ship* ship = m_world.AddShip(ship_id);
+	ship->setPosition(ship_position);
+	m_players[ship_id].reset(new Player(&m_socket, ship_id, GetContext().keys1));
+	m_local_player_identifiers.push_back(ship_id);
 	m_game_started = true;
+	m_local_player_spawned = true;
 }
-
-
 
 void MultiplayerGameState::HandlePlayerConnect(sf::Packet& packet)
 {
-	sf::Int8 player_id, ship_id, role;
+	sf::Int32 ship_id;
 	sf::Vector2f ship_position;
-	packet >> player_id >> ship_id >> role >> ship_position.x >> ship_position.y;
+	packet >> ship_id >> ship_position.x >> ship_position.y;
 
-	Ship* existingShip = m_world.GetShip(ship_id);
-	if (!existingShip)
-	{
-		Ship* ship = m_world.AddShip(ship_id);
-		ship->setPosition(ship_position);
-	}
-
-
-	if (role == static_cast<sf::Int8>(Role::Pilot))
-	{
-		m_players[player_id] = std::make_unique<Player>(&m_socket, player_id, GetContext().keys1);
-	}
-	else if (role == static_cast<sf::Int8>(Role::Gunner))
-	{
-		m_players[player_id] = std::make_unique<Player>(&m_socket, player_id, GetContext().keys2);
-	}
-	else
-	{
-		m_players[player_id] = std::make_unique<Player>(&m_socket, player_id, nullptr);
-	}
-
-	m_playerShip[player_id] = ship_id;
+	Ship* aircraft = m_world.AddShip(ship_id);
+	aircraft->setPosition(ship_position);
+	m_players[ship_id].reset(new Player(&m_socket, ship_id, nullptr));
 }
-
 
 void MultiplayerGameState::HandlePlayerDisconnect(sf::Packet& packet)
 {
-	sf::Int8 player_id;
-	packet >> player_id;
-
-	std::cerr << "Player " << player_id << " Disconnected" << std::endl;
-
-	// Check if player exists before removing
-	auto player_it = m_players.find(player_id);
-	if (player_it == m_players.end())
-	{
-		std::cerr << "Error: Player " << player_id << " not found in game." << std::endl;
-		return;
-	}
-
-	// Remove from assigned ship
-	for (auto& ship : m_world.GetShips())
-	{
-		if (ship->GetPilot() == player_id)
-		{
-			std::cerr << "Pilot " << player_id << " removed from ship " << ship->GetIdentifier() << std::endl;
-			ship->SetPilot(-1);
-		}
-		else if (ship->HasGunner() == player_id)
-		{
-			std::cerr << "Gunner " << player_id << " removed from ship " << ship->GetIdentifier() << std::endl;
-			ship->SetGunner(-1);
-		}
-
-		// If ship is now empty, delete it
-		if (ship->GetPilot() == -1 && ship->HasGunner() == -1)
-		{
-			std::cerr << "Ship " << ship->GetIdentifier() << " removed (empty)." << std::endl;
-			m_world.RemoveShip(ship->GetIdentifier());
-		}
-	}
-
-	// Remove player from tracking
-	m_players.erase(player_id);
+	sf::Int32 ship_id;
+	packet >> ship_id;
+	m_world.RemoveShip(ship_id);
+	m_players.erase(ship_id);
 }
 
 
@@ -487,43 +379,24 @@ void MultiplayerGameState::HandleInitialState(sf::Packet& packet)
 
 	for (sf::Int32 i = 0; i < ship_count; ++i)
 	{
-		sf::Int8 ship_id;
+		sf::Int32 ship_id;
+		sf::Int32 hitpoints;
+		sf::Int32 missile_ammo;
 		sf::Vector2f ship_position;
-		sf::Int8 hitpoints, missile_ammo;
-		sf::Int8 pilot_id, gunner_id;
 
 		packet >> ship_id
 			>> ship_position.x >> ship_position.y
-			>> hitpoints >> missile_ammo
-			>> pilot_id >> gunner_id;
+			>> hitpoints >> missile_ammo;
 
 		// Check if the ship already exists before adding it
-		Ship* ship = m_world.GetShip(ship_id);
-		if (!ship)
-		{
-			ship = m_world.AddShip(ship_id);
-			ship->setPosition(ship_position);
-		}
+		Ship* ship = m_world.AddShip(ship_id);
+		ship->setPosition(ship_position);
 		ship->SetHitpoints(hitpoints);
 		ship->SetMissileAmmo(missile_ammo);
-		ship->SetPilot(pilot_id);
-		ship->SetGunner(gunner_id);
 
-
-		// Add player objects for roles if assigned
-		if (pilot_id != -1)
-		{
-			m_players[pilot_id] = std::make_unique<Player>(&m_socket, pilot_id, GetContext().keys1);
-			m_playerShip[pilot_id] = ship_id;
-		}
-		if (gunner_id != -1)
-		{
-			m_players[gunner_id] = std::make_unique<Player>(&m_socket, gunner_id, GetContext().keys2);
-			m_playerShip[gunner_id] = ship_id;
-		}
+		m_players[ship_id].reset(new Player(&m_socket, ship_id, nullptr));
 	}
-
-	m_game_started = true;
+	
 }
 
 
@@ -585,7 +458,7 @@ void MultiplayerGameState::HandleUpdateClient(sf::Packet& packet)
 		packet >> ship_identifier >> ship_position.x >> ship_position.y >> hitpoints >> ammo;
 
 		Ship* ship = m_world.GetShip(ship_identifier);
-		bool is_local_plane = (ship_identifier == static_cast<sf::Int32>(m_local_player_id));
+		bool is_local_plane = std::find(m_local_player_identifiers.begin(), m_local_player_identifiers.end(), ship_identifier) != m_local_player_identifiers.end();
 
 		if (ship && !is_local_plane)
 		{
@@ -597,27 +470,18 @@ void MultiplayerGameState::HandleUpdateClient(sf::Packet& packet)
 	}
 }
 
+void MultiplayerGameState::HandleSpawnPickup(sf::Packet& packet)
+{
+	sf::Int32 type;
+	sf::Vector2f position;
+	packet >> type >> position.x >> position.y;
+	m_world.CreatePickup(position, static_cast<PickupType>(type));
+}
+
 void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packet)
 {
 	switch (static_cast<Server::PacketType>(packet_type))
 	{
-		// Player readied up
-	/*case Server::PacketType::kPlayerReady:
-	{
-		sf::Int32 player_id;
-		bool is_ready;
-		packet >> player_id >> is_ready;
-		m_ready_players[player_id] = is_ready;
-	}
-	break;*/
-
-	// Server starts the game
-	/*case Server::PacketType::kGameStart:
-	{
-		m_game_started = true;
-	}
-	break;*/
-
 		//Send message to all Clients
 	case Server::PacketType::kBroadcastMessage:
 	{
@@ -652,17 +516,6 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 	}
 	break;
 
-	case Server::PacketType::kAcceptCoopPartner:
-	{
-		/*sf::Int32 ship_identifier;
-		packet >> ship_identifier;*/
-
-		//m_world.AddShip(ship_identifier);
-		//m_players[ship_identifier].reset(new Player(&m_socket, ship_identifier, GetContext().keys2));
-		//m_local_player_identifiers.emplace_back(ship_identifier);
-	}
-	break;
-
 	//Player event, like missile fired occurs
 	case Server::PacketType::kPlayerEvent:
 	{
@@ -694,10 +547,7 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 	//Pickup created
 	case Server::PacketType::kSpawnPickup:
 	{
-		sf::Int32 type;
-		sf::Vector2f position;
-		packet >> type >> position.x >> position.y;
-		m_world.CreatePickup(position, static_cast<PickupType>(type));
+		HandleSpawnPickup(packet);
 	}
 	break;
 

@@ -73,13 +73,17 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	original_y = m_sprite.getPosition().y;
 
 	m_cannon = std::make_unique<Cannon>(textures);
-	/*float shipHalfHeight = m_sprite.getLocalBounds().height / 2.f;
-	m_cannon->setPosition(0.f, -shipHalfHeight);*/
 
 	m_cannon->setPosition(getPosition());
 	m_cannon_ptr = m_cannon.get();
 	AttachChild(std::move(m_cannon));
-	
+
+	if (IsAllied())
+	{
+		std::string playerName = "Player";
+		m_cannon_ptr->SetPlayerName(playerName, fonts);
+	}
+
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
 	m_explosion.SetNumFrames(16);
 	m_explosion.SetDuration(sf::seconds(1));
@@ -112,7 +116,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 
 	
 
-	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayerShip))// || Ship::GetCategory() == static_cast<int>(ReceiverCategories::kAlliedShip))
+	if (Ship::GetCategory() == static_cast<int>(ReceiverCategories::kPlayerShip))
 	{
 		m_missile_ammo = 20;
 		std::string* missile_ammo = new std::string("");
@@ -292,7 +296,7 @@ void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset
 		//    ship world × cannon local × sprite local
 		sf::Transform full =
 			m_cannon_ptr->GetWorldTransform()
-			* m_cannon_ptr->m_sprite.getTransform();  // 
+			* m_cannon_ptr->GetPosition();  // 
 
 		// measure forward direction in world‐space
 		sf::Vector2f tipWorld = full.transformPoint({ 0.f, 0.f });

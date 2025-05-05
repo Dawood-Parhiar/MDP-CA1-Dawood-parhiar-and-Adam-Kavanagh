@@ -29,6 +29,7 @@ private:
 	void HandleRealTimeChange(sf::Packet& packet);
 	void HandleSpawnEnemy(sf::Packet& packet);
 	void HandleUpdateClient(sf::Packet& packet);
+	void HandleSpawnPickup(sf::Packet& packet);
 	void HandlePacket(sf::Int32 packet_type, sf::Packet& packet);
 
 private:
@@ -40,11 +41,8 @@ private:
 	TextureHolder& m_texture_holder;
 
 	std::map<int, PlayerPtr> m_players;
-	//std::map<int, bool> m_ready_players;
-	std::unordered_map<sf::Int8, sf::Int8> m_playerShip;
+	std::vector<sf::Int32> m_local_player_identifiers;
 
-
-	sf::Int8 m_local_player_id = -1;
 	sf::TcpSocket m_socket;
 	bool m_connected;
 	std::unique_ptr<GameServer> m_game_server;
@@ -67,6 +65,8 @@ private:
 
 	sf::Time m_client_timeout;
 	sf::Time m_time_since_last_packet;
+
+	bool m_local_player_spawned = false;
 
 };
 

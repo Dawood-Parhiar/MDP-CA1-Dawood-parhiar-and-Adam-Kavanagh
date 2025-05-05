@@ -11,7 +11,6 @@
 #include <unordered_map>
 #include <SFML/Graphics/Rect.hpp>
 
-enum class Role { Pilot, Gunner };
 
 class GameServer
 {
@@ -29,7 +28,8 @@ private:
 		RemotePeer();
 		sf::TcpSocket m_socket;
 		sf::Time m_last_packet_time;
-		sf::Int8 m_identifier{};
+		std::vector<sf::Int32> m_ship_identifiers;
+
 		bool m_ready;
 		bool m_timed_out;
 	};
@@ -40,15 +40,6 @@ private:
 		sf::Int8 m_hitpoints;
 		sf::Int8 m_missile_ammo;
 		std::map<sf::Int32, bool> m_realtime_actions;
-
-		sf::Int8 m_ship_id;
-		sf::Int8 m_pilot_id = -1;  // Default to no pilot
-		sf::Int8 m_gunner_id = -1; // Default to no gunner
-
-		// Check if the ship has an available seat
-		bool HasPilot() const { return m_pilot_id != -1; }
-		bool HasGunner() const { return m_gunner_id != -1; }
-		bool IsFull() const { return HasPilot() && HasGunner(); }
 	};
 
 	typedef std::unique_ptr<RemotePeer> PeerPtr;
@@ -67,7 +58,6 @@ private:
 	void StateUpdate(sf::Packet& packet);
 	void GameEvent(sf::Packet& packet, RemotePeer& receiving_peer);
 	void NotifyTeamChange(sf::Int8 id, sf::Int8 ship_id, sf::Int8 gunner_id, sf::Int8 pilot_id);
-	void PlayerTeamChange(sf::Packet& packet);
 	void HandlePlayerUpdate(sf::Packet& packet);
 	void StartGameCountdownStart();
 	void NotifyGameStart();
