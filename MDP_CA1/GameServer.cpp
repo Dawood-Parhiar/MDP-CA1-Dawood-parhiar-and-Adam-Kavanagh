@@ -487,8 +487,9 @@ void GameServer::HandleDisconnections()
 
 void GameServer::InformWorldState(sf::TcpSocket& socket)
 {
-    sf::Packet packet;
+    /*sf::Packet packet;
     packet << static_cast<sf::Int32>(Server::PacketType::kInitialState);
+
     packet << m_world_height << m_battlefield_rect.top + m_battlefield_rect.height;
     packet << static_cast<sf::Int32>(m_ship_count);
 
@@ -502,7 +503,43 @@ void GameServer::InformWorldState(sf::TcpSocket& socket)
             }
         }
     }
-    socket.send(packet);
+    socket.send(packet);*/
+
+        sf::Packet packet;
+        // 1) Packet type
+        packet << static_cast<sf::Int32>(Server::PacketType::kInitialState);
+
+        // 2) World geometry
+        packet << m_world_height
+            << (m_battlefield_rect.top + m_battlefield_rect.height);
+
+        // 3) How many ships are we actually going to send?
+        sf::Int32 shipsToSend = 0;
+        for (std::size_t i = 0; i < m_connected_players; ++i)
+            if (m_peers[i]->m_ready)
+                shipsToSend += static_cast<sf::Int32>(m_peers[i]->m_ship_identifiers.size());
+
+        packet << shipsToSend;
+
+        // 4) Now serialize exactly that many
+        for (std::size_t i = 0; i < m_connected_players; ++i)
+        {
+            if (!m_peers[i]->m_ready)
+                continue;
+
+            for (sf::Int32 id : m_peers[i]->m_ship_identifiers)
+            {
+                const auto& info = m_ship_info[id];
+                packet << id
+                    << info.m_position.x
+                    << info.m_position.y
+                    << info.m_hitpoints
+                    << info.m_missile_ammo;
+            }
+        }
+
+        socket.send(packet);
+
 }
 
 void GameServer::BroadcastMessage(const std::string& message)
@@ -533,7 +570,9 @@ void GameServer::SendToAll(sf::Packet& packet)
 void GameServer::UpdateClientState()
 {
     sf::Packet update_client_state_packet;
+
     update_client_state_packet << static_cast<sf::Int32>(Server::PacketType::kUpdateClientState);
+
     update_client_state_packet << static_cast<float>(m_battlefield_rect.top + m_battlefield_rect.height);
     update_client_state_packet << static_cast<sf::Int32>(m_ship_count);
 

@@ -211,14 +211,32 @@ bool MultiplayerGameState::Update(sf::Time dt)
 
 			position_update_packet << static_cast<sf::Int32>(Client::PacketType::kStateUpdate);
 
-			position_update_packet << static_cast<sf::Int32>(m_local_player_identifiers.size());
+			/*position_update_packet << static_cast<sf::Int32>(m_local_player_identifiers.size());
 			for (auto& id : m_local_player_identifiers)
 			{
 				if (Ship* ship = m_world.GetShip(id))
 				{
 				position_update_packet << id << ship->getPosition().x << ship->getPosition().y << static_cast<sf::Int32>(ship->GetHitPoints()) << static_cast<sf::Int32>(ship->GetMissileAmmo());
 				}
+			}*/
+
+			std::vector<sf::Int32> validIds;
+			for (auto id : m_local_player_identifiers)
+				if (m_world.GetShip(id))
+					validIds.push_back(id);
+
+			// now emit the true count
+			position_update_packet << (sf::Int32)validIds.size();
+			for (auto id : validIds)
+			{
+				auto* ship = m_world.GetShip(id);
+				position_update_packet
+					<< id
+					<< ship->getPosition().x << ship->getPosition().y
+					<< ship->GetHitPoints()
+					<< ship->GetMissileAmmo();
 			}
+
 
 			m_socket.send(position_update_packet);
 			m_tick_clock.restart();
@@ -364,39 +382,97 @@ void MultiplayerGameState::HandlePlayerDisconnect(sf::Packet& packet)
 	m_players.erase(ship_id);
 }
 
+//
+//void MultiplayerGameState::HandleInitialState(sf::Packet& packet)
+//{
+//	// World settings
+//	float world_height, current_scroll;
+//	packet >> world_height >> current_scroll;
+//	m_world.SetWorldHeight(world_height);
+//	m_world.SetCurrentBattleFieldPosition(current_scroll);
+//
+//	// Number of ships
+//	sf::Int32 ship_count;
+//	packet >> ship_count;
+//
+//	for (sf::Int32 i = 0; i < ship_count; ++i)
+//	{
+//		sf::Int32 ship_id;
+//		sf::Int32 hitpoints;
+//		sf::Int32 missile_ammo;
+//		sf::Vector2f ship_position;
+//
+//		packet >> ship_id
+//			>> ship_position.x >> ship_position.y
+//			>> hitpoints >> missile_ammo;
+//
+//		// Check if the ship already exists before adding it
+//		Ship* ship = m_world.AddShip(ship_id);
+//		ship->setPosition(ship_position);
+//		ship->SetHitpoints(hitpoints);
+//		ship->SetMissileAmmo(missile_ammo);
+//
+//		m_players[ship_id].reset(new Player(&m_socket, ship_id, nullptr));
+//	}
+//	
+//}
 
 void MultiplayerGameState::HandleInitialState(sf::Packet& packet)
 {
-	// World settings
+	// 0) Read & verify the packet type
+	sf::Int32 packetType;
+	if (!(packet >> packetType)
+		|| packetType != static_cast<sf::Int32>(Server::PacketType::kInitialState))
+	{
+		// Wrong kind of packet, or it was too short
+		std::cerr << "HandleInitialState: bad packet type or truncated\n";
+		return;
+	}
+
+	// 1) World settings
 	float world_height, current_scroll;
-	packet >> world_height >> current_scroll;
+	if (!(packet >> world_height >> current_scroll))
+	{
+		std::cerr << "HandleInitialState: truncated world data\n";
+		return;
+	}
 	m_world.SetWorldHeight(world_height);
 	m_world.SetCurrentBattleFieldPosition(current_scroll);
 
-	// Number of ships
+	// 2) Number of ships
 	sf::Int32 ship_count;
-	packet >> ship_count;
+	if (!(packet >> ship_count))
+	{
+		std::cerr << "HandleInitialState: missing ship count\n";
+		return;
+	}
 
+	// 3) Wipe out any old ships before adding the new ones
+	m_world.GetShips().clear();
+	m_players.clear();
+
+	// 4) Deserialize each ship
 	for (sf::Int32 i = 0; i < ship_count; ++i)
 	{
 		sf::Int32 ship_id;
-		sf::Int32 hitpoints;
-		sf::Int32 missile_ammo;
 		sf::Vector2f ship_position;
+		sf::Int32 hitpoints, missile_ammo;
 
-		packet >> ship_id
+		if (!(packet >> ship_id
 			>> ship_position.x >> ship_position.y
-			>> hitpoints >> missile_ammo;
+			>> hitpoints >> missile_ammo))
+		{
+			std::cerr << "HandleInitialState: truncated ship entry at index " << i << "\n";
+			return;
+		}
 
-		// Check if the ship already exists before adding it
 		Ship* ship = m_world.AddShip(ship_id);
 		ship->setPosition(ship_position);
 		ship->SetHitpoints(hitpoints);
 		ship->SetMissileAmmo(missile_ammo);
 
-		m_players[ship_id].reset(new Player(&m_socket, ship_id, nullptr));
+		m_players[ship_id] = std::make_unique<Player>(&m_socket, ship_id, nullptr);
 	}
-	
 }
 
 
@@ -483,6 +559,7 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 	switch (static_cast<Server::PacketType>(packet_type))
 	{
 		//Send message to all Clients
+
 	case Server::PacketType::kBroadcastMessage:
 	{
 		HandleBroadcastMessage(packet);
@@ -556,6 +633,7 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 		HandleUpdateClient(packet);
 	}
 	break;
+
 	}
 }
 
