@@ -14,14 +14,6 @@
 
 class GameServer
 {
-public:
-	explicit GameServer(sf::Vector2f battlefield_size);
-	~GameServer();
-	void NotifyPlayerSpawn(sf::Int32 ship_identifier);
-	void NotifyPlayerRealtimeChange(sf::Int32 ship_identifier, sf::Int32 action, bool action_enabled);
-	void NotifyPlayerEvent(sf::Int32 ship_identifier, sf::Int32 action);
-	
-
 private:
 	struct RemotePeer
 	{
@@ -43,6 +35,14 @@ private:
 	};
 
 	typedef std::unique_ptr<RemotePeer> PeerPtr;
+
+
+public:
+	explicit GameServer(sf::Vector2f battlefield_size);
+	~GameServer();
+	void NotifyPlayerSpawn(sf::Int32 ship_identifier);
+	void NotifyPlayerRealtimeChange(sf::Int32 ship_identifier, sf::Int32 action, bool action_enabled);
+	void NotifyPlayerEvent(sf::Int32 ship_identifier, sf::Int32 action);
 
 private:
 	void SetListening(bool enable);

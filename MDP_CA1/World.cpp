@@ -107,9 +107,6 @@ CommandQueue& World::GetCommandQueue()
 
 Ship* World::AddShip(int id)
 {
-	if (id == -1)  // If no ID is provided, generate a new one
-		id = m_next_ship_id++;
-
 	auto new_ship = std::make_unique<Ship>(ShipType::kPirateShip, m_textures, m_fonts);
 	new_ship->setPosition(m_camera.getCenter());
 	new_ship->SetId(id);

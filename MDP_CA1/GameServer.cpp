@@ -418,6 +418,7 @@ void GameServer::HandleIncomingConnections()
         m_ship_info[m_ship_identifier_counter].m_hitpoints = 100;
         m_ship_info[m_ship_identifier_counter].m_missile_ammo = 20;
 
+
         // Build the spawn packet with the ship's information 
         sf::Packet packet;
     	packet << static_cast<sf::Int32>(Server::PacketType::kSpawnSelf);
@@ -436,8 +437,6 @@ void GameServer::HandleIncomingConnections()
         m_peers[m_connected_players]->m_ready = true;
         m_peers[m_connected_players]->m_last_packet_time = Now();
         
-
-        // Increment the connected player count.
         m_ship_count++;
         m_connected_players++;
 
