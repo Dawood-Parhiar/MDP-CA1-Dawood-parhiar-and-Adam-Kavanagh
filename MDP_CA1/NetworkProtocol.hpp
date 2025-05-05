@@ -27,7 +27,10 @@ namespace Server
 		kTeamSelection,
 		kStartGameCountdown,
 		kStartNetworkGameCountdown,
-		kLobbyStateUpdate
+		kLobbyStateUpdate,
+
+		//new lobby
+		kLobbyPlayers
 	};
 }
 
@@ -47,7 +50,10 @@ namespace Client
 		kPlayerUpdate,
 		kStartNetworkGameCountdown,
 		kStartNetworkGame,
-		kNameChange
+		kNameChange,
+
+		//new lobby
+		kLobbyReady, kStartGameCountdown
 	};
 }
 

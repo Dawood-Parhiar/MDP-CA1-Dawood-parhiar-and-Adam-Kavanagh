@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Config.hpp>
 #include <SFML/Network/TcpSocket.hpp>
@@ -24,13 +24,18 @@ private:
 
 		bool m_ready;
 		bool m_timed_out;
+
+		// for lobby ──
+		sf::Int8        player_id = -1;
+		std::string     player_name = "Default";
+		bool            lobby_ready = false;
 	};
 
 	struct ShipInfo
 	{
 		sf::Vector2f m_position;
-		sf::Int8 m_hitpoints;
-		sf::Int8 m_missile_ammo;
+		sf::Int32 m_hitpoints;
+		sf::Int32 m_missile_ammo;
 		std::map<sf::Int32, bool> m_realtime_actions;
 	};
 
@@ -43,6 +48,7 @@ public:
 	void NotifyPlayerSpawn(sf::Int32 ship_identifier);
 	void NotifyPlayerRealtimeChange(sf::Int32 ship_identifier, sf::Int32 action, bool action_enabled);
 	void NotifyPlayerEvent(sf::Int32 ship_identifier, sf::Int32 action);
+	//void BrodcastLobby();
 
 private:
 	void SetListening(bool enable);
@@ -88,12 +94,12 @@ private:
 	float m_battlefield_scrollspeed;
 
 	std::size_t m_ship_count;
-	std::map<sf::Int8, ShipInfo> m_ship_info;
+	std::map<sf::Int32, ShipInfo> m_ship_info;
 
 	std::vector<PeerPtr> m_peers;
 	sf::Int32 m_ship_identifier_counter;
 	bool m_waiting_thread_end;
-	sf::Int8 m_player_id_counter = 1;
+	sf::Int32 m_player_id_counter = 1;
 
 
 	sf::Time m_last_spawn_time;
