@@ -187,7 +187,7 @@ bool MultiplayerGameState::Update(sf::Time dt)
 		// Iterate over all players.
 		for (auto itr = m_players.begin(); itr != m_players.end(); )
 		{
-			if (std::find(m_local_player_identifiers.begin(), m_local_player_identifiers.end(), itr->first) != m_local_player_identifiers.end())
+			if (std::find(m_local_player_identifiers.begin(), m_local_player_identifiers.end(), itr->first) != m_local_player_identifiers.end() && m_world.GetShip(itr->first) != nullptr)
 			{
 				found_local_ship = true;
 			}
@@ -209,8 +209,18 @@ bool MultiplayerGameState::Update(sf::Time dt)
 
 		if (!found_local_ship && m_game_started && m_local_player_spawned)
 		{
-			Utility::Debug("No Ships found in the game");
-			RequestStackPush(StateID::kGameOver);
+			if (!m_host)
+			{
+				// Non-hosts die as before…
+				RequestStackPush(StateID::kGameOver);
+				return true;
+			}
+			else
+			{
+				// Host died: clear local-player ID so we become spectator
+				m_local_player_identifiers.clear();
+				//Utility::Debug("Host ship destroyed — switching to spectator mode");
+			}
 		}
 
 		InterpolateRemoteShips();
@@ -249,10 +259,9 @@ bool MultiplayerGameState::Update(sf::Time dt)
 					<< id
 					<< ship->getPosition().x << ship->getPosition().y
 					<< ship->GetHitPoints()
-					<< ship->GetMissileAmmo();
+					<< ship->GetMissileAmmo()
+				    << ship->GetCannon()->GetRotation();
 			}
-
-
 			//m_socket.send(position_update_packet);
 			QueueOutgoingPacket(position_update_packet);
 
@@ -483,10 +492,11 @@ void MultiplayerGameState::HandleInitialState(sf::Packet& packet)
 		sf::Int32 ship_id;
 		sf::Vector2f ship_position;
 		sf::Int32 hitpoints, missile_ammo;
+		float cannon_angle = 0.f;
 
 		if (!(packet >> ship_id
 			>> ship_position.x >> ship_position.y
-			>> hitpoints >> missile_ammo))
+			>> hitpoints >> missile_ammo >> cannon_angle))
 		{
 			std::cerr << "HandleInitialState: truncated ship entry at index " << i << "\n";
 			return;
@@ -496,6 +506,7 @@ void MultiplayerGameState::HandleInitialState(sf::Packet& packet)
 		ship->setPosition(ship_position);
 		ship->SetHitpoints(hitpoints);
 		ship->SetMissileAmmo(missile_ammo);
+		ship->GetCannon()->SetRotation(cannon_angle);
 
 		m_players[ship_id] = std::make_unique<Player>(&m_socket, ship_id, nullptr);
 	}
@@ -565,12 +576,14 @@ void MultiplayerGameState::HandleUpdateClient(sf::Packet& packet)
 		sf::Int32    id;
 		sf::Vector2f pos;
 		sf::Int32    hp, ammo, serverAck;
+		float cannon_angle;
 
 		packet >> id
 			>> pos.x >> pos.y
 			>> hp
 			>> ammo
-			>> serverAck;      // ← newly read
+			>> serverAck
+			>> cannon_angle;
 
 		// 3a) Local‐player reconciliation
 		bool isLocal = std::find(
@@ -578,34 +591,6 @@ void MultiplayerGameState::HandleUpdateClient(sf::Packet& packet)
 			m_local_player_identifiers.end(),
 			id) != m_local_player_identifiers.end();
 
-		if (isLocal)
-		{
-			// 1) Snap your Ship to the authoritative state
-			Ship* ship = m_world.GetShip(id);
-			Player* player = m_players[id].get();
-			if (ship && player)
-			{
-				ship->setPosition(pos);
-				ship->SetHitpoints(hp);
-				ship->SetMissileAmmo(ammo);
-
-				// 2) Drop ACKed inputs
-				m_lastServerAck = serverAck;
-				while (!m_pendingInputs.empty()
-					&& m_pendingInputs.front().seq <= m_lastServerAck)
-				{
-					m_pendingInputs.pop_front();
-				}
-
-				// 3) Re-apply the rest, this time on the Player
-				for (auto& inp : m_pendingInputs)
-				{
-					player->HandleNetworkRealtimeChange(inp.action, inp.enabled);
-				}
-			}
-		}
-		else
-		{
 			// 3b) Remote ships → buffer for interpolation
 			auto& st = m_networkStates[id];
 			st.lastPos = st.currPos;
@@ -614,7 +599,7 @@ void MultiplayerGameState::HandleUpdateClient(sf::Packet& packet)
 			st.currTime = serverTime;
 			st.hitpoints = hp;
 			st.ammo = ammo;
-		}
+			st.cannon_angle = cannon_angle;
 	}
 }
 
@@ -682,7 +667,8 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 	//New Enemy to be created
 	case Server::PacketType::kSpawnEnemy:
 	{
-		HandleSpawnEnemy(packet);
+		//HandleSpawnEnemy(packet);
+		Utility::Debug("No AI enemies");
 	}
 	break;
 
@@ -777,6 +763,7 @@ void MultiplayerGameState::InterpolateRemoteShips()
 
 		ship->SetHitpoints(st.hitpoints);
 		ship->SetMissileAmmo(st.ammo);
+		ship->GetCannon()->SetRotation(st.cannon_angle);
 	}
 }
 

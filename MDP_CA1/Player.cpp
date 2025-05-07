@@ -171,11 +171,7 @@ void Player::InitialiseActions()
             
 	    });
 
-    m_action_binding[Action::kMissileFire].action = DerivedAction<Ship>([id](Ship& s, sf::Time dt)
-        {
-            if (s.GetIdentifier() == id)
-            s.LaunchPlayerCannon();
-        }
+    m_action_binding[Action::kMissileFire].action = DerivedAction<Ship>(ShipMissileTrigger(m_identifier)
     );
     m_action_binding[Action::kRotateCannonLeft].action = DerivedAction<Ship>([this, id](Ship& s, sf::Time dt)
     {

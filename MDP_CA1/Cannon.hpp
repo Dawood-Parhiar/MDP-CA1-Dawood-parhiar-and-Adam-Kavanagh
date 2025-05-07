@@ -17,7 +17,9 @@ public:
     void SetRotationInput(float rotation);
 	sf::Vector2f GetMouthPosition() const;
     sf::Transform GetPosition() const { return m_sprite.getTransform(); }
-    
+
+    float GetRotation() const;
+    void  SetRotation(float angle);
 
 
     virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands) override;

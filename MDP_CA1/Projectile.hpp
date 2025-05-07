@@ -21,6 +21,9 @@ public:
 	void SetMaxRadius(float radius);
 	float GetMaxRadius() const;
 
+	void     SetOwnerId(sf::Int32 owner) { m_id = owner; }
+	sf::Int32 GetOwnerId() const { return m_id; }
+
 private:
 	virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands) override;
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const override;
@@ -32,6 +35,8 @@ private:
 
 	sf::Vector2f m_launch_position;
 	float m_max_radius = 0.f;
+
+	sf::Int32 m_id = -1;
 };
 
 

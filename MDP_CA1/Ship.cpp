@@ -257,11 +257,12 @@ void Ship::LaunchEnemyCannon(SceneNode& node, const TextureHolder& textures) con
 
 void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
 {
-	//Debug and code help from Chatgpt https://chatgpt.com/share/67c3b95b-234c-800c-895c-f4a224fcee05 
+	
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
-
+	
 	if (!IsAllied())
 	{
+
 		sf::Vector2f enemyOffset(
 			x_offset * std::cos(Utility::ToRadians(getRotation())),
 			y_offset * std::sin(Utility::ToRadians(getRotation()))
@@ -285,6 +286,7 @@ void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset
 			projectile->SetLaunchPosition(GetWorldPosition() + enemyOffset);
 			projectile->SetMaxRadius(300.f);
 		}
+		projectile->SetOwnerId(this->GetIdentifier());
 	}
 	else
 	{
@@ -312,8 +314,7 @@ void Ship::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset
 		projectile->SetVelocity(-dir * speed);
 		projectile->SetLaunchPosition(spawn);
 		projectile->SetMaxRadius(300.f);
-
-		
+		projectile->SetOwnerId(this->GetIdentifier());
 	}
 	node.AttachChild(std::move(projectile));
 
@@ -548,7 +549,7 @@ void Ship::SetId(int id)
 	m_identifier = id;
 }
 
-int Ship::GetIdentifier()
+int Ship::GetIdentifier() const
 {
 	return m_identifier;
 }

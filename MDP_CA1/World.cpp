@@ -68,7 +68,7 @@ void World::Update(sf::Time dt)
 
 
 	m_scenegraph.RemoveWrecks();
-	SpawnEnemies();
+	//SpawnEnemies();
 	m_scenegraph.Update(dt, m_command_queue);
 	AdaptPlayerPosition();
 	UpdateSounds();
@@ -520,7 +520,7 @@ void World::HandleCollisions()
 			missile.Destroy();
 		}
 		
-		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyShip))
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kPlayerShip))
 		{
 			auto& player = static_cast<Ship&>(*pair.first);
 			auto& enemy = static_cast<Ship&>(*pair.second);
@@ -537,22 +537,34 @@ void World::HandleCollisions()
 			pickup.Destroy();
 			player.PlayLocalSound(m_command_queue, SoundEffect::kCollectPickup);
 		}
-		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kEnemyProjectile))
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerShip, ReceiverCategories::kAlliedProjectile))
 		{
 			auto& ship = static_cast<Ship&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
+
+			if (projectile.GetOwnerId() == ship.GetIdentifier())
+				continue;
+			sf::Int32 ownerId = projectile.GetOwnerId();
 			//Collision response
 			ship.Damage(projectile.GetDamage());
 			projectile.Destroy();
+			projectile.SetOwnerId(ownerId);
 		}
 
 		else if (MatchesCategories(pair, ReceiverCategories::kEnemyShip, ReceiverCategories::kAlliedProjectile))
 		{
 			auto& ship = static_cast<Ship&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
+
+			if (projectile.GetOwnerId() == ship.GetIdentifier())
+				continue;
+
+			sf::Int32 ownerId = projectile.GetOwnerId();
+
 			//Collision response
 			ship.Damage(projectile.GetDamage());
 			projectile.Destroy();
+			projectile.SetOwnerId(ownerId);
 		}
 
 		//if hits the mountain

@@ -14,7 +14,8 @@ struct NetworkState
 	float         lastTime,  // server timestamp of lastPos
 		currTime;  // server timestamp of currPos
 	int           hitpoints,
-		ammo;
+	ammo;
+	float cannon_angle;
 };
 
 class MultiplayerGameState : public State

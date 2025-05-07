@@ -37,7 +37,7 @@ public:
 	void SetRenderTargets(sf::RenderTarget& target);
 	void MoveShip(sf::Time dt, float speed);
 	void SetId(int id);
-	int GetIdentifier();
+	int GetIdentifier() const;
 	Cannon* GetCannon() const;
 
 	int GetMissileAmmo();

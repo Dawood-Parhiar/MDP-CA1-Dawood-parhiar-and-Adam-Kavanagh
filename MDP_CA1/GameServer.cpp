@@ -170,7 +170,7 @@ void GameServer::Tick()
 
 
 
-    //Check if it is time to spawn enemies
+    /*Check if it is time to spawn enemies
     if (Now() >= m_time_for_next_spawn + m_last_spawn_time)
     {
         //Not going to spawn enemies near the end
@@ -206,7 +206,7 @@ void GameServer::Tick()
             m_last_spawn_time = Now();
             m_time_for_next_spawn = sf::milliseconds(2000 + Utility::RandomInt(6000));
         }
-    }
+    }*/
 }
 
 sf::Time GameServer::Now() const
@@ -290,10 +290,12 @@ void GameServer::StateUpdate(sf::Packet& packet)
         sf::Int32 ship_hitpoints;
         sf::Int32 missile_ammo;
         sf::Vector2f ship_position;
-        packet >> ship_identifier >> ship_position.x >> ship_position.y >> ship_hitpoints >> missile_ammo;
+        float cannon_angle;
+        packet >> ship_identifier >> ship_position.x >> ship_position.y >> ship_hitpoints >> missile_ammo >> cannon_angle;
         m_ship_info[ship_identifier].m_position = ship_position;
         m_ship_info[ship_identifier].m_hitpoints = ship_hitpoints;
         m_ship_info[ship_identifier].m_missile_ammo = missile_ammo;
+        m_ship_info[ship_identifier].m_cannon_angle = cannon_angle;
     }
 }
 
@@ -426,8 +428,20 @@ void GameServer::HandleIncomingConnections()
     // Try to accept a new connection into the next available RemotePeer.
     if (m_listener_socket.accept(m_peers[m_connected_players]->m_socket) == sf::TcpListener::Done)
     {
+
+        // --- compute a non-colliding spawn position ---
+        // total slots including this new player
+        int total = m_connected_players + 1;
+        // this player’s “index” == the current count before adding
+        int idx = m_connected_players;
+        // evenly spaced across [0 .. battlefield width], with 1/(total+1) margins
+        float laneX = (idx + 1) * m_battlefield_rect.width / (total + 1);
+        float laneY = m_battlefield_rect.top + m_battlefield_rect.height / 2.f;
+        sf::Vector2f spawnPos(laneX, laneY);
+
+
         //Order the new client to spawn its player 1
-        m_ship_info[m_ship_identifier_counter].m_position = sf::Vector2f(m_battlefield_rect.width / 2, m_battlefield_rect.top + m_battlefield_rect.height / 2);
+        m_ship_info[m_ship_identifier_counter].m_position = spawnPos;
         m_ship_info[m_ship_identifier_counter].m_hitpoints = 100;
         m_ship_info[m_ship_identifier_counter].m_missile_ammo = 20;
 
@@ -552,7 +566,8 @@ void GameServer::InformWorldState(sf::TcpSocket& socket)
                     << info.m_position.x
                     << info.m_position.y
                     << info.m_hitpoints
-                    << info.m_missile_ammo;
+                    << info.m_missile_ammo
+            		<< info.m_cannon_angle;
             }
         }
 
@@ -608,7 +623,8 @@ void GameServer::UpdateClientState()
                << s.m_position.y
                << s.m_hitpoints
                << s.m_missile_ammo
-               << s.m_lastProcessedInput;
+               << s.m_lastProcessedInput
+			   << s.m_cannon_angle;
     }
 
     // 4) Broadcast
