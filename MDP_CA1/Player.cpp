@@ -143,46 +143,51 @@ void Player::DisableAllRealtimeActions()
 void Player::InitialiseActions()
 {
     const float kPlayerSpeed = 200.f;
+    sf::Int32 id = m_identifier;
 
-    m_action_binding[Action::kMoveUp].action = DerivedAction<Ship>([kPlayerSpeed](Ship& s, sf::Time dt){
-        //Move the ship up
-        s.MoveShip(dt, -kPlayerSpeed);
+    m_action_binding[Action::kMoveUp].action = DerivedAction<Ship>([id, kPlayerSpeed](Ship& s, sf::Time dt){
+        if (s.GetIdentifier() == id)
+			s.MoveShip(dt, -kPlayerSpeed);
     });
-    m_action_binding[Action::kMoveDown].action = DerivedAction<Ship>([kPlayerSpeed](Ship& s, sf::Time dt) {
+    m_action_binding[Action::kMoveDown].action = DerivedAction<Ship>([id, kPlayerSpeed](Ship& s, sf::Time dt) {
 
         //Move the ship down
-        s.MoveShip(dt, kPlayerSpeed);
+        if (s.GetIdentifier() == id)
+			s.MoveShip(dt, kPlayerSpeed);
         });
-    m_action_binding[Action::kRotateLeft].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
+    m_action_binding[Action::kRotateLeft].action = DerivedAction<Ship>([id](Ship& s ,sf::Time dt)
 	    {
         //rotate the ship left
-    	a.rotate(-0.5f);
+            if (s.GetIdentifier() == id)
+    			s.rotate(-0.5f);
             
 	    });
 
-    m_action_binding[Action::kRotateRight].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
+    m_action_binding[Action::kRotateRight].action = DerivedAction<Ship>([id](Ship& s, sf::Time dt)
 	    {
 	    //rotate the ship right
-    	a.rotate(0.5f);
+            if (s.GetIdentifier() == id)
+    			s.rotate(0.5f);
             
 	    });
 
-    m_action_binding[Action::kMissileFire].action = DerivedAction<Ship>([](Ship& a, sf::Time dt)
+    m_action_binding[Action::kMissileFire].action = DerivedAction<Ship>([id](Ship& s, sf::Time dt)
         {
-            a.LaunchPlayerCannon();
+            if (s.GetIdentifier() == id)
+            s.LaunchPlayerCannon();
         }
     );
-    m_action_binding[Action::kRotateCannonLeft].action = DerivedAction<Ship>([this](Ship& s, sf::Time dt)
+    m_action_binding[Action::kRotateCannonLeft].action = DerivedAction<Ship>([this, id](Ship& s, sf::Time dt)
     {
-            if (s.GetCannon())
+            if (s.GetCannon() && (s.GetIdentifier() == id))
             {
                 s.GetCannon()->SetRotationInput(-0.5);
             }
         
     });
-    m_action_binding[Action::kRotateCannonRight].action = DerivedAction<Ship>([this](Ship& s, sf::Time dt)
+    m_action_binding[Action::kRotateCannonRight].action = DerivedAction<Ship>([this, id](Ship& s, sf::Time dt)
         {
-            if (s.GetCannon())
+            if (s.GetCannon() &&  (s.GetIdentifier() == id))
             {
                 s.GetCannon()->SetRotationInput(0.5);
             }
