@@ -361,12 +361,20 @@ void GameServer::NotifyGameStart()
     //SetListening(false);
 }
 
-void GameServer::HanldePlayerNameChange(sf::Packet& packet)
+void GameServer::HandlePlayerNameChange(sf::Packet& packet)
 {
-    /*sf::Int8 id;
+    sf::Int32 shipId;
     std::string name;
-    packet >> id >> name;
-    name = name.substr(0, 20);*/
+    packet >> shipId >> name;
+
+    // Store it on the server if you want:
+    m_ship_names[shipId] = name;
+    // Now broadcast to everyone
+    sf::Packet out;
+    out << static_cast<sf::Int32>(Server::PacketType::kPlayerName)
+        << shipId
+        << name;
+    SendToAll(out);
 }
 
 
@@ -402,8 +410,8 @@ void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving
         Utility::Debug("Void");
         break;
     case Client::PacketType::kNameChange:
-        //HanldePlayerNameChange(packet);
-        Utility::Debug("Void");
+        HandlePlayerNameChange(packet);
+        
         break;
     case Client::PacketType::kStartNetworkGame:
         //NotifyGameStart();
@@ -458,6 +466,20 @@ void GameServer::HandleIncomingConnections()
 
         BroadcastMessage("New player");
         InformWorldState(m_peers[m_connected_players]->m_socket);
+
+        // Send every stored name to the newcomer
+        for (auto it = m_ship_names.begin(); it != m_ship_names.end(); ++it)
+        {
+            sf::Int32 id = it->first;
+            const std::string& name = it->second;
+
+            sf::Packet namePkt;
+            namePkt << static_cast<sf::Int32>(Server::PacketType::kPlayerName)
+                << id
+                << name;
+            m_peers[m_connected_players]->m_socket.send(namePkt);
+        }
+
         NotifyPlayerSpawn(m_ship_identifier_counter++);
 
         m_peers[m_connected_players]->m_socket.send(packet);
@@ -568,6 +590,10 @@ void GameServer::InformWorldState(sf::TcpSocket& socket)
                     << info.m_hitpoints
                     << info.m_missile_ammo
             		<< info.m_cannon_angle;
+
+                // Look up the name (or empty string)
+                const auto it = m_ship_names.find(id);
+                packet << (it != m_ship_names.end() ? it->second : std::string{});
             }
         }
 

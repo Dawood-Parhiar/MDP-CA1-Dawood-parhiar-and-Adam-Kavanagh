@@ -32,6 +32,6 @@ private:
     float m_rotationSpeed;
     float m_rotationInput;
     sf::Sprite m_sprite;
-    TextNode* m_name_display = nullptr;;
+    TextNode* m_name_display = nullptr;
 };
 

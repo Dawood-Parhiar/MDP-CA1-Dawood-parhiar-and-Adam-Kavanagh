@@ -78,12 +78,6 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	m_cannon_ptr = m_cannon.get();
 	AttachChild(std::move(m_cannon));
 
-	if (IsAllied())
-	{
-		std::string playerName = "Player";
-		m_cannon_ptr->SetPlayerName(playerName, fonts);
-	}
-
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
 	m_explosion.SetNumFrames(16);
 	m_explosion.SetDuration(sf::seconds(1));

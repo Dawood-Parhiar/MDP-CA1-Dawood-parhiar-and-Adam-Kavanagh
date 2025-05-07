@@ -71,7 +71,7 @@ private:
 	void HandlePlayerUpdate(sf::Packet& packet);
 	void StartGameCountdownStart();
 	void NotifyGameStart();
-	void HanldePlayerNameChange(sf::Packet& packet);
+	void HandlePlayerNameChange(sf::Packet& packet);
 	void HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving_peer, bool& detected_timeout);
 
 	void GetAndSetID(sf::Int8& int8);
@@ -108,6 +108,6 @@ private:
 	sf::Time m_time_for_next_spawn;
 
 	sf::Int32 m_packet_sequence = 0;
-	
+	std::unordered_map<sf::Int32, std::string> m_ship_names;
 };
 

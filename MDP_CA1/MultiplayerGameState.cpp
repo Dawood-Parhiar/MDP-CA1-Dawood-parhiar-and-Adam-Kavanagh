@@ -10,24 +10,23 @@
 #include "PickupType.hpp"
 #include <iostream>
 
-sf::IpAddress GetAddressFromFile()
+
+static std::pair<std::string, sf::IpAddress>
+LoadNameAndAddress()
 {
+	std::ifstream in("ip.txt");
+	std::string name, ip;
+	if (in >> name >> ip)
 	{
-		//Try to open existing file
-		std::ifstream input_file("ip.txt");
-		std::string ip_address;
-		if (input_file >> ip_address)
-		{
-			return ip_address;
-		}
+		return { name, sf::IpAddress(ip) };
 	}
-
-	//If the open/read failed, create a new file
-	std::ofstream output_file("ip.txt");
-	std::string local_address = "127.0.0.1";
-	output_file << local_address;
-	return local_address;
-
+	// fallback defaults
+	std::string defaultName = "Player";
+	sf::IpAddress defaultIp("127.0.0.1");
+	// write them out
+	std::ofstream out("ip.txt");
+	out << defaultName << " " << defaultIp.toString();
+	return { defaultName, defaultIp };
 }
 
 MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context , bool is_host)
@@ -65,20 +64,21 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context , 
 	m_failed_connection_text.setString("Failed to connect to server");
 	Utility::CentreOrigin(m_failed_connection_text);
 
-	
+	// 1) Call the loader
+	auto result = LoadNameAndAddress();
 
-	//If this is the host, create a server
-	sf::IpAddress ip;
+	// 2) Extract the two elements
+	std::string name = result.first;
+	sf::IpAddress ip = result.second;
+
+	m_local_playerName = name;
 
 	if (m_host)
 	{
 		m_game_server.reset(new GameServer(sf::Vector2f(m_window.getSize())));
 		ip = "127.0.0.1";
 	}
-	else
-	{
-		ip = GetAddressFromFile();
-	}
+	
 
 	if (m_socket.connect(ip, SERVER_PORT, sf::seconds(5.f)) == sf::TcpSocket::Done)
 	{
@@ -389,6 +389,14 @@ void MultiplayerGameState::HandleSpawnSelf(sf::Packet& packet)
 	m_local_player_identifiers.push_back(ship_id);
 	m_game_started = true;
 	m_local_player_spawned = true;
+	ship->GetCannon()->SetPlayerName(m_local_playerName, *GetContext().fonts);
+
+	// Tell the name to server
+	sf::Packet namePkt;
+	namePkt << static_cast<sf::Int32>(Client::PacketType::kNameChange)
+		<< ship_id
+		<< m_local_playerName;
+	QueueOutgoingPacket(namePkt);
 }
 
 void MultiplayerGameState::HandlePlayerConnect(sf::Packet& packet)
@@ -493,10 +501,11 @@ void MultiplayerGameState::HandleInitialState(sf::Packet& packet)
 		sf::Vector2f ship_position;
 		sf::Int32 hitpoints, missile_ammo;
 		float cannon_angle = 0.f;
+		std::string name;
 
 		if (!(packet >> ship_id
 			>> ship_position.x >> ship_position.y
-			>> hitpoints >> missile_ammo >> cannon_angle))
+			>> hitpoints >> missile_ammo >> cannon_angle >> name))
 		{
 			std::cerr << "HandleInitialState: truncated ship entry at index " << i << "\n";
 			return;
@@ -507,6 +516,7 @@ void MultiplayerGameState::HandleInitialState(sf::Packet& packet)
 		ship->SetHitpoints(hitpoints);
 		ship->SetMissileAmmo(missile_ammo);
 		ship->GetCannon()->SetRotation(cannon_angle);
+		ship->GetCannon()->SetPlayerName(name, *GetContext().fonts);
 
 		m_players[ship_id] = std::make_unique<Player>(&m_socket, ship_id, nullptr);
 	}
@@ -611,86 +621,103 @@ void MultiplayerGameState::HandleSpawnPickup(sf::Packet& packet)
 	m_world.CreatePickup(position, static_cast<PickupType>(type));
 }
 
+void MultiplayerGameState::HandlePlayerName(sf::Packet& packet)
+{
+	sf::Int32 shipId;
+	std::string name;
+	packet >> shipId >> name;
+
+	// Find that ship’s cannon and set its name
+	if (Ship* ship = m_world.GetShip(shipId))
+		if (auto cannon = ship->GetCannon())
+			cannon->SetPlayerName(name, *GetContext().fonts);
+}
+
 void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packet)
 {
 	switch (static_cast<Server::PacketType>(packet_type))
 	{
 		//Send message to all Clients
 
-	case Server::PacketType::kBroadcastMessage:
-	{
-		HandleBroadcastMessage(packet);
-	}
-	break;
+		case Server::PacketType::kBroadcastMessage:
+		{
+			HandleBroadcastMessage(packet);
+		}
+		break;
 
-	//Sent by the server to spawn player 1 airplane on connect
-	case Server::PacketType::kSpawnSelf:
-	{
-		HandleSpawnSelf(packet);
-	}
-	break;
-
-
-	case Server::PacketType::kPlayerConnect:
-	{
-		HandlePlayerConnect(packet);
-	}
-	break;
+		//Sent by the server to spawn player 1 airplane on connect
+		case Server::PacketType::kSpawnSelf:
+		{
+			HandleSpawnSelf(packet);
+		}
+		break;
 
 
-	case Server::PacketType::kPlayerDisconnect:
-	{
-		HandlePlayerDisconnect(packet);
-	}
-	break;
+		case Server::PacketType::kPlayerConnect:
+		{
+			HandlePlayerConnect(packet);
+		}
+		break;
 
-	case Server::PacketType::kInitialState:
-	{
-		HandleInitialState(packet);
-	}
-	break;
 
-	//Player event, like missile fired occurs
-	case Server::PacketType::kPlayerEvent:
-	{
-		HandlePlayerEvent(packet);
-	}
-	break;
+		case Server::PacketType::kPlayerDisconnect:
+		{
+			HandlePlayerDisconnect(packet);
+		}
+		break;
 
-	//Player's movement or fire keyboard state changes
-	case Server::PacketType::kPlayerRealtimeChange:
-	{
-		HandleRealTimeChange(packet);
-	}
-	break;
+		case Server::PacketType::kInitialState:
+		{
+			HandleInitialState(packet);
+		}
+		break;
 
-	//New Enemy to be created
-	case Server::PacketType::kSpawnEnemy:
-	{
-		//HandleSpawnEnemy(packet);
-		Utility::Debug("No AI enemies");
-	}
-	break;
+		//Player event, like missile fired occurs
+		case Server::PacketType::kPlayerEvent:
+		{
+			HandlePlayerEvent(packet);
+		}
+		break;
 
-	//Mission Successfully completed
-	case Server::PacketType::kMissionSuccess:
-	{
-		RequestStackPush(StateID::kMissionSuccess);
-	}
-	break;
+		//Player's movement or fire keyboard state changes
+		case Server::PacketType::kPlayerRealtimeChange:
+		{
+			HandleRealTimeChange(packet);
+		}
+		break;
 
-	//Pickup created
-	case Server::PacketType::kSpawnPickup:
-	{
-		HandleSpawnPickup(packet);
-	}
-	break;
+		//New Enemy to be created
+		case Server::PacketType::kSpawnEnemy:
+		{
+			//HandleSpawnEnemy(packet);
+			Utility::Debug("No AI enemies");
+		}
+		break;
 
-	case Server::PacketType::kUpdateClientState:
-	{
-		HandleUpdateClient(packet);
-	}
-	break;
+		//Mission Successfully completed
+		case Server::PacketType::kMissionSuccess:
+		{
+			RequestStackPush(StateID::kMissionSuccess);
+		}
+		break;
+
+		//Pickup created
+		case Server::PacketType::kSpawnPickup:
+		{
+			HandleSpawnPickup(packet);
+		}
+		break;
+
+		case Server::PacketType::kUpdateClientState:
+		{
+			HandleUpdateClient(packet);
+		}
+		break;
+		case Server::PacketType::kPlayerName:
+		{
+			HandlePlayerName(packet);
+		}
+		break;
 
 	}
 }

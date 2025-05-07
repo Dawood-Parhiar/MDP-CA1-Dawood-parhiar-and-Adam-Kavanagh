@@ -24,7 +24,7 @@ constexpr int TEAM_COL_2_POS_X = 950;
 constexpr int TEAM_BUTTON_GAP = 135;
 constexpr int FOOTER_POS_Y = 850;
 
-static sf::IpAddress GetAddressFromFile()
+static sf::IpAddress GetNameIPFromFile()
 {
 	{
 		//Try to open existing file
@@ -69,7 +69,7 @@ LobbyState::LobbyState(StateStack& stack, Context& context, const bool is_host)
 	}
 	else
 	{
-		ip = GetAddressFromFile();
+		ip = GetNameIPFromFile();
 	}
 
 	m_socket = context.multiplayer_manager->ConnectToServer(ip);

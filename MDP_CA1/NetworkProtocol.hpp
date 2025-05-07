@@ -28,6 +28,7 @@ namespace Server
 		kStartGameCountdown,
 		kStartNetworkGameCountdown,
 		kLobbyStateUpdate,
+		kPlayerName,
 
 		//new lobby
 		kLobbyPlayers

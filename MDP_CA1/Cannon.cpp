@@ -36,7 +36,8 @@ void Cannon::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 void Cannon::SetPlayerName(std::string& name, const FontHolder& fonts)
 {
-    auto nameNode = std::make_unique<TextNode>(fonts, name);
+    std::string shortName = name.substr(0, std::min<size_t>(5, name.size()));
+    auto nameNode = std::make_unique<TextNode>(fonts, shortName);
     m_name_display = nameNode.get();
     sf::FloatRect bounds = m_sprite.getLocalBounds();
     float xOffset = getPosition().x - 40.f;

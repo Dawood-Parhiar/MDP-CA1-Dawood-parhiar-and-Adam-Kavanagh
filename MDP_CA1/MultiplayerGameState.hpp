@@ -42,6 +42,7 @@ private:
 	void HandleSpawnEnemy(sf::Packet& packet);
 	void HandleUpdateClient(sf::Packet& packet);
 	void HandleSpawnPickup(sf::Packet& packet);
+	void HandlePlayerName(sf::Packet& packet);
 	void HandlePacket(sf::Int32 packet_type, sf::Packet& packet);
 	void QueueOutgoingPacket(const sf::Packet& packet);
 	void FlushSendQueue();
@@ -82,6 +83,8 @@ private:
 	sf::Time m_time_since_last_packet;
 
 	bool m_local_player_spawned = false;
+
+	std::string m_local_playerName;
 
 	//chatgpt
 

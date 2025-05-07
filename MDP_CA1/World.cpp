@@ -556,15 +556,10 @@ void World::HandleCollisions()
 			auto& ship = static_cast<Ship&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
 
-			if (projectile.GetOwnerId() == ship.GetIdentifier())
-				continue;
-
-			sf::Int32 ownerId = projectile.GetOwnerId();
-
 			//Collision response
 			ship.Damage(projectile.GetDamage());
 			projectile.Destroy();
-			projectile.SetOwnerId(ownerId);
+			
 		}
 
 		//if hits the mountain
