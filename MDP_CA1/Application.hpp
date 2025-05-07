@@ -36,5 +36,8 @@ private:
 	KeyBinding m_player_2_keys;
 
 	MultiplayerManager m_multiplayer_manager;
+
+	std::string player_name;
+	std::string server_ip;
 };
 

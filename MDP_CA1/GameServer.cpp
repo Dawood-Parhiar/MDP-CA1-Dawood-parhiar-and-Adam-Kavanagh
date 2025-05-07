@@ -253,6 +253,7 @@ void GameServer::PlayerEvent(sf::Packet& packet)
     sf::Int32 action;
     packet >> ship_identifier >> action;
     NotifyPlayerEvent(ship_identifier, action);
+    
 }
 
 // In GameServer.cpp, replace your old RealTimeChange with this:

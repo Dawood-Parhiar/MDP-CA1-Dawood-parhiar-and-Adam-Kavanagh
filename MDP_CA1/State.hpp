@@ -27,7 +27,7 @@ public:
 
 	struct Context
 	{
-		Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, MusicPlayer& music, SoundPlayer& sounds, KeyBinding& keys1, KeyBinding& keys2, MultiplayerManager& multiplayer_manager);
+		Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, MusicPlayer& music, SoundPlayer& sounds, KeyBinding& keys1, KeyBinding& keys2, MultiplayerManager& multiplayer_manager, std::string& player_name, std::string& server_ip);
 		sf::RenderWindow* window;
 		TextureHolder* textures;
 		FontHolder* fonts;
@@ -36,6 +36,8 @@ public:
 		KeyBinding* keys1;
 		KeyBinding* keys2;
 		MultiplayerManager* multiplayer_manager;
+		std::string       player_name;
+		std::string       server_ip;
 	};
 
 public:

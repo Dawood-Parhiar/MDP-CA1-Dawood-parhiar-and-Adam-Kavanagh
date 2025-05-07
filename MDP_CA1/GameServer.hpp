@@ -11,6 +11,8 @@
 #include <string>
 #include <unordered_map>
 #include <SFML/Graphics/Rect.hpp>
+
+#include "Projectile.hpp"
 #include "SFML/Network/Packet.hpp"
 
 
@@ -41,6 +43,7 @@ private:
 		sf::Int32    m_lastProcessedInput = -1;
 		sf::Int32 m_cannon_angle = 0.f;
 	};
+
 
 	typedef std::unique_ptr<RemotePeer> PeerPtr;
 	
@@ -109,5 +112,7 @@ private:
 
 	sf::Int32 m_packet_sequence = 0;
 	std::unordered_map<sf::Int32, std::string> m_ship_names;
+
+
 };
 

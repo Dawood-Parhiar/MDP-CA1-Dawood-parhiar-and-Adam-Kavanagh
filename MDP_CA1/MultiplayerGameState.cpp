@@ -11,22 +11,22 @@
 #include <iostream>
 
 
-static std::pair<std::string, sf::IpAddress>
-LoadNameAndAddress()
+
+std::string LoadName()
 {
-	std::ifstream in("ip.txt");
-	std::string name, ip;
-	if (in >> name >> ip)
+	std::ifstream in("name.txt");
+	std::string name;
+	if (in >> name)
 	{
-		return { name, sf::IpAddress(ip) };
+		return { name };
 	}
 	// fallback defaults
 	std::string defaultName = "Player";
-	sf::IpAddress defaultIp("127.0.0.1");
+	
 	// write them out
-	std::ofstream out("ip.txt");
-	out << defaultName << " " << defaultIp.toString();
-	return { defaultName, defaultIp };
+	std::ofstream out("name.txt");
+	out << defaultName << " ";
+	return { defaultName};
 }
 
 MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context , bool is_host)
@@ -42,6 +42,7 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context , 
 	, m_game_started(false)
 	, m_client_timeout(sf::seconds(5.f))
 	, m_time_since_last_packet(sf::seconds(0.f))
+	, m_local_playerName(GetContext().player_name)
     
 {
 	m_broadcast_text.setFont(context.fonts->Get(Font::kMain));
@@ -64,15 +65,11 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context , 
 	m_failed_connection_text.setString("Failed to connect to server");
 	Utility::CentreOrigin(m_failed_connection_text);
 
-	// 1) Call the loader
-	auto result = LoadNameAndAddress();
+	
 
-	// 2) Extract the two elements
-	std::string name = result.first;
-	sf::IpAddress ip = result.second;
-
-	m_local_playerName = name;
-
+	
+	sf::IpAddress ip = GetContext().server_ip;
+	m_local_playerName = LoadName();
 	if (m_host)
 	{
 		m_game_server.reset(new GameServer(sf::Vector2f(m_window.getSize())));

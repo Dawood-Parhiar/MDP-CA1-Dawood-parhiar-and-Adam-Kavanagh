@@ -25,5 +25,9 @@ private:
 	gui::Button::Ptr m_change_ip_button;
 	gui::Label::Ptr m_current_ip_label;
 	std::string m_player_input_ip;
+
+	gui::Button::Ptr m_change_name_button;
+	gui::Label::Ptr m_current_name_label;
+	std::string m_player_input_name;
 };
 
