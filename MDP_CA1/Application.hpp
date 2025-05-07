@@ -39,5 +39,6 @@ private:
 
 	std::string player_name;
 	std::string server_ip;
+	std::string winner_name = " ";
 };
 

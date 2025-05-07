@@ -43,6 +43,7 @@ private:
 	void HandleUpdateClient(sf::Packet& packet);
 	void HandleSpawnPickup(sf::Packet& packet);
 	void HandlePlayerName(sf::Packet& packet);
+	void HandleMissionSuccess(sf::Packet& packet);
 	void HandlePacket(sf::Int32 packet_type, sf::Packet& packet);
 	void QueueOutgoingPacket(const sf::Packet& packet);
 	void FlushSendQueue();
@@ -84,16 +85,15 @@ private:
 
 	bool m_local_player_spawned = false;
 
-	std::string m_local_playerName;
-
-	//chatgpt
+	std::string m_local_player_name;
+	std::unordered_map<sf::Int32, std::string> m_ship_names;
 
 	sf::Int32 m_last_server_sequence = -1;
 	std::deque<sf::Packet> m_send_queue;
 
-	std::unordered_map<sf::Int32, NetworkState> m_networkStates;
-	sf::Clock                                   m_clientClock;        // local clock
-	const float                                 m_interpolationDelay = 0.1f;  // 100 ms buffer
+	std::unordered_map<sf::Int32, NetworkState> m_network_states;
+	sf::Clock                                   m_client_clock;        // local clock
+	const float                                 m_interpolation_delay = 0.1f;  // 100 ms buffer
 
 	struct PendingInput {
 		sf::Int32 seq;
@@ -101,8 +101,8 @@ private:
 		bool      enabled;
 	};
 
-	std::deque<PendingInput> m_pendingInputs;
-	sf::Int32                m_nextInputSeq = 0;     // starts at 0
-	sf::Int32                m_lastServerAck = -1;
+	std::deque<PendingInput> m_pending_inputs;
+	sf::Int32                m_next_input_seq = 0;     // starts at 0
+	sf::Int32                m_last_server_ack = -1;
 };
 

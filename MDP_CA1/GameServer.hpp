@@ -113,6 +113,10 @@ private:
 	sf::Int32 m_packet_sequence = 0;
 	std::unordered_map<sf::Int32, std::string> m_ship_names;
 
+	sf::Int32 m_initialShipCount = 0;
+	// Whether we've begun the “match”
+	bool m_matchStarted = false;
+	bool m_missionSuccessSent = false;
 
 };
 

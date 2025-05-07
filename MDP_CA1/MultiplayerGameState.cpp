@@ -42,7 +42,7 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context , 
 	, m_game_started(false)
 	, m_client_timeout(sf::seconds(5.f))
 	, m_time_since_last_packet(sf::seconds(0.f))
-	, m_local_playerName(GetContext().player_name)
+	, m_local_player_name(GetContext().player_name)
     
 {
 	m_broadcast_text.setFont(context.fonts->Get(Font::kMain));
@@ -65,11 +65,9 @@ MultiplayerGameState::MultiplayerGameState(StateStack& stack, Context context , 
 	m_failed_connection_text.setString("Failed to connect to server");
 	Utility::CentreOrigin(m_failed_connection_text);
 
-	
 
-	
 	sf::IpAddress ip = GetContext().server_ip;
-	m_local_playerName = LoadName();
+	m_local_player_name = LoadName();
 	if (m_host)
 	{
 		m_game_server.reset(new GameServer(sf::Vector2f(m_window.getSize())));
@@ -386,13 +384,13 @@ void MultiplayerGameState::HandleSpawnSelf(sf::Packet& packet)
 	m_local_player_identifiers.push_back(ship_id);
 	m_game_started = true;
 	m_local_player_spawned = true;
-	ship->GetCannon()->SetPlayerName(m_local_playerName, *GetContext().fonts);
+	ship->GetCannon()->SetPlayerName(m_local_player_name, *GetContext().fonts);
 
 	// Tell the name to server
 	sf::Packet namePkt;
 	namePkt << static_cast<sf::Int32>(Client::PacketType::kNameChange)
 		<< ship_id
-		<< m_local_playerName;
+		<< m_local_player_name;
 	QueueOutgoingPacket(namePkt);
 }
 
@@ -452,23 +450,6 @@ void MultiplayerGameState::HandlePlayerDisconnect(sf::Packet& packet)
 
 void MultiplayerGameState::HandleInitialState(sf::Packet& packet)
 {
-
-	////read sequence
-	//sf::Int32 sequence;
-	//float server_time;
-	//packet >> sequence >> server_time;
-
-	//if (sequence <= m_last_server_sequence)
-	//	return;
-	//m_last_server_sequence = sequence;
-
-	////compute network latency
-	//float now = m_tick_clock.getElapsedTime().asSeconds();
-	//float latency = now - server_time;
-
-	//Utility::Debug("Network latency: " + std::to_string(latency));
-
-
 	// World settings
 	float world_height, current_scroll;
 	if (!(packet >> world_height >> current_scroll))
@@ -490,6 +471,7 @@ void MultiplayerGameState::HandleInitialState(sf::Packet& packet)
 	//Wipe out any old ships before adding the new ones
 	m_world.GetShips().clear();
 	m_players.clear();
+	m_ship_names.clear();
 
 	//Deserialize each ship
 	for (sf::Int32 i = 0; i < ship_count; ++i)
@@ -499,6 +481,10 @@ void MultiplayerGameState::HandleInitialState(sf::Packet& packet)
 		sf::Int32 hitpoints, missile_ammo;
 		float cannon_angle = 0.f;
 		std::string name;
+
+
+		m_ship_names[ship_id] = name;
+
 
 		if (!(packet >> ship_id
 			>> ship_position.x >> ship_position.y
@@ -589,8 +575,9 @@ void MultiplayerGameState::HandleUpdateClient(sf::Packet& packet)
 			>> pos.x >> pos.y
 			>> hp
 			>> ammo
-			>> serverAck
-			>> cannon_angle;
+			>> cannon_angle
+			>> serverAck;
+			
 
 		// 3a) Local‐player reconciliation
 		bool isLocal = std::find(
@@ -599,7 +586,7 @@ void MultiplayerGameState::HandleUpdateClient(sf::Packet& packet)
 			id) != m_local_player_identifiers.end();
 
 			// 3b) Remote ships → buffer for interpolation
-			auto& st = m_networkStates[id];
+			auto& st = m_network_states[id];
 			st.lastPos = st.currPos;
 			st.lastTime = st.currTime;
 			st.currPos = pos;
@@ -624,10 +611,27 @@ void MultiplayerGameState::HandlePlayerName(sf::Packet& packet)
 	std::string name;
 	packet >> shipId >> name;
 
+	m_ship_names[shipId] = name;
 	// Find that ship’s cannon and set its name
 	if (Ship* ship = m_world.GetShip(shipId))
 		if (auto cannon = ship->GetCannon())
 			cannon->SetPlayerName(name, *GetContext().fonts);
+}
+
+void MultiplayerGameState::HandleMissionSuccess(sf::Packet& packet)
+{
+	sf::Int32 winnerId;
+	packet >> winnerId;
+
+	// lookup winner name 
+	auto it = m_ship_names.find(winnerId);
+	if (it != m_ship_names.end())
+		GetContext().winner_name = it->second;
+	else
+		GetContext().winner_name = "??";
+
+	//push the win‐state
+	RequestStackPush(StateID::kMissionSuccess);
 }
 
 void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packet)
@@ -694,7 +698,7 @@ void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packe
 		//Mission Successfully completed
 		case Server::PacketType::kMissionSuccess:
 		{
-			RequestStackPush(StateID::kMissionSuccess);
+			HandleMissionSuccess(packet);
 		}
 		break;
 
@@ -750,10 +754,10 @@ void MultiplayerGameState::FlushSendQueue()
 }
 void MultiplayerGameState::InterpolateRemoteShips()
 {
-	float renderTime = m_clientClock.getElapsedTime().asSeconds()
-		- m_interpolationDelay;
+	float renderTime = m_client_clock.getElapsedTime().asSeconds()
+		- m_interpolation_delay;
 
-	for (auto it = m_networkStates.begin(); it != m_networkStates.end(); ++it)
+	for (auto it = m_network_states.begin(); it != m_network_states.end(); ++it)
 	{
 		sf::Int32 id = it->first;
 		NetworkState& st = it->second;

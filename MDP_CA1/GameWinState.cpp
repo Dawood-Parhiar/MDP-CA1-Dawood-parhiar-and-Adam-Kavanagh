@@ -5,7 +5,7 @@
 #include "Utility.hpp"
 
 
-GameWinState::GameWinState(StateStack& stack, Context context, const std::string& text)
+GameWinState::GameWinState(StateStack& stack, Context context)
     : State(stack, context)
     , m_game_won_text()
     , m_elapsed_time(sf::Time::Zero)
@@ -16,8 +16,10 @@ GameWinState::GameWinState(StateStack& stack, Context context, const std::string
     sf::Font& font = context.fonts->Get(Font::kMain);
     sf::Vector2f window_size(context.window->getSize());
 
+    std::string winner = GetContext().winner_name;
+
     m_game_won_text.setFont(font);
-    m_game_won_text.setString(text);
+    m_game_won_text.setString(" Congratulations "+ winner);
 
     m_game_won_text.setCharacterSize(70);
     Utility::CentreOrigin(m_game_won_text);

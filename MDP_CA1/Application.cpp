@@ -16,7 +16,7 @@ const sf::Time Application::kTimePerFrame = sf::seconds(1.f/60.f);
 Application::Application() : m_window(sf::VideoMode(1920, 1080), "Networked Game", sf::Style::Close),
 	m_player_1_keys(1),
 	m_player_2_keys(2),
-	m_stack(State::Context(m_window, m_textures, m_fonts, m_music, m_sound, m_player_1_keys, m_player_2_keys,m_multiplayer_manager, player_name, server_ip))
+	m_stack(State::Context(m_window, m_textures, m_fonts, m_music, m_sound, m_player_1_keys, m_player_2_keys,m_multiplayer_manager, player_name, server_ip, winner_name))
                              
 {
 	m_window.setKeyRepeatEnabled(false);
@@ -101,5 +101,5 @@ void Application::RegisterStates()
 	m_stack.RegisterState<PauseState>(StateID::kNetworkPause, true);
 	m_stack.RegisterState<SettingsState>(StateID::kSettings);
 	m_stack.RegisterState<GameOverState>(StateID::kGameOver,"Game Over!");
-	m_stack.RegisterState<GameWinState>(StateID::kMissionSuccess, "!Congratulations!*You*Won!");
+	m_stack.RegisterState<GameWinState>(StateID::kMissionSuccess);
 }

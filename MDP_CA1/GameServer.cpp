@@ -2,6 +2,8 @@
 #include <SFML/Network/Packet.hpp>
 #include "NetworkProtocol.hpp"
 #include <SFML/System/Sleep.hpp>
+
+#include "Action.hpp"
 #include "Utility.hpp"
 #include "PickupType.hpp"
 #include "ShipType.hpp"
@@ -133,7 +135,7 @@ void GameServer::Tick()
 {
     UpdateClientState();
 
-    //Check if the game is over = all planes postion.y < offset
+    /*Check if the game is over = all planes postion.y < offset
     if (!m_ship_info.empty())
     {
         bool all_aircraft_done = true;
@@ -153,9 +155,9 @@ void GameServer::Tick()
             mission_success_packet << static_cast<sf::Int32>(Server::PacketType::kMissionSuccess);
             SendToAll(mission_success_packet);
         }
-    }
+    }*/
 
-    //Remove aircraft that have been destroyed
+    //Remove ships that have been destroyed
     for (auto itr = m_ship_info.begin(); itr != m_ship_info.end();)
     {
         if (itr->second.m_hitpoints <= 0)
@@ -168,45 +170,23 @@ void GameServer::Tick()
         }
     }
 
-
-
-    /*Check if it is time to spawn enemies
-    if (Now() >= m_time_for_next_spawn + m_last_spawn_time)
+    // 2) Only check for last‐man‐standing if the match has started
+    if (m_matchStarted && !m_missionSuccessSent)
     {
-        //Not going to spawn enemies near the end
-        if (m_battlefield_rect.top > 600.f)
+        std::size_t aliveCount = m_ship_info.size();
+
+        // Only declare success if we began with 2+ players, and now only 1 or 0 remain
+        if (m_initialShipCount >= 2 && aliveCount <= 1)
         {
-            std::size_t enemy_count = 1 + Utility::RandomInt(2);
-            float spawn_centre = static_cast<float>(Utility::RandomInt(500) - 250);
+            sf::Int32 winnerId = aliveCount;
+            sf::Packet packet;
+            packet << static_cast<sf::Int32>(Server::PacketType::kMissionSuccess)
+        	<< winnerId;
+            SendToAll(packet);
 
-            //If there is only one enemy it is at spawn_centre
-            float plane_distance = 0.f;
-            float next_spawn_position = spawn_centre;
-
-            //If there are two enemies they should be centred on the spawn centre
-            if (enemy_count == 2)
-            {
-                plane_distance = static_cast<float>(150 + Utility::RandomInt(250));
-                next_spawn_position = spawn_centre - plane_distance / 2.f;
-            }
-
-            //Send the spawn packets to the clients
-            for (std::size_t i = 0; i < enemy_count; ++i)
-            {
-                sf::Packet packet;
-                packet << static_cast<sf::Int32>(Server::PacketType::kSpawnEnemy);
-                packet << static_cast<sf::Int32>(1 + Utility::RandomInt(static_cast<int>(ShipType::kShipCount) - 1));
-
-                packet << m_world_height - m_battlefield_rect.top + 500;
-                packet << next_spawn_position;
-
-                next_spawn_position += plane_distance / 2.f;
-                SendToAll(packet);
-            }
-            m_last_spawn_time = Now();
-            m_time_for_next_spawn = sf::milliseconds(2000 + Utility::RandomInt(6000));
+            m_missionSuccessSent = true;
         }
-    }*/
+    }
 }
 
 sf::Time GameServer::Now() const
@@ -276,6 +256,20 @@ void GameServer::RealTimeChange(sf::Packet& packet)
 
     // 3) Broadcast the game action unchanged to all clients
     NotifyPlayerRealtimeChange(ship_identifier, action, action_enabled);
+
+    // 3) **Apply** rotation to the server’s ShipData
+    auto& data = m_ship_info[ship_identifier];
+    const float rotationSpeed = 0.5f;      
+    const float tickSec = 1.f / 20.f; 
+
+    if (action == static_cast<sf::Int32>(Action::kRotateLeft) && action_enabled)
+        data.m_cannon_angle -= rotationSpeed * tickSec;
+    else if (action == static_cast<sf::Int32>(Action::kRotateRight) && action_enabled)
+        data.m_cannon_angle += rotationSpeed * tickSec;
+
+    if (data.m_cannon_angle < 0.f)   data.m_cannon_angle += 360.f;
+    if (data.m_cannon_angle >= 360.f) data.m_cannon_angle -= 360.f;
+
 }
 
 
@@ -438,21 +432,38 @@ void GameServer::HandleIncomingConnections()
     if (m_listener_socket.accept(m_peers[m_connected_players]->m_socket) == sf::TcpListener::Done)
     {
 
-        // --- compute a non-colliding spawn position ---
-        // total slots including this new player
-        int total = m_connected_players + 1;
-        // this player’s “index” == the current count before adding
-        int idx = m_connected_players;
-        // evenly spaced across [0 .. battlefield width], with 1/(total+1) margins
-        float laneX = (idx + 1) * m_battlefield_rect.width / (total + 1);
-        float laneY = m_battlefield_rect.top + m_battlefield_rect.height / 2.f;
-        sf::Vector2f spawnPos(laneX, laneY);
+        // 1) Figure out our grid dimensions
+   //    E.g. 5 columns per row, up to 3 rows → 15 slots total
+        const int maxPerRow = 5;
+        int index = m_connected_players;     // 0 for first, 1 for second, etc
+        int col = index % maxPerRow;       // x slot
+        int row = index / maxPerRow;       // y slot
+
+        // 2) Compute your battlefield extents
+        float left = m_battlefield_rect.left;
+        //float top = m_battlefield_rect.top;
+        float width = m_battlefield_rect.width;
+        float height = m_battlefield_rect.height;
+
+        float scrollBottom = m_battlefield_rect.top + height;
+
+        // 3) Determine how many rows are actually in use so far
+        int totalPlayers = m_connected_players + 1;
+        int rowsInUse = (totalPlayers + maxPerRow - 1) / maxPerRow; // ceil
+
+        // 4) Compute spawnX and spawnY with equal margins
+        float segmentX = width / (maxPerRow + 1);
+        float segmentY = height / (rowsInUse + 1);
+
+        float spawnX = left + segmentX * (col + 1);
+        float spawnY = scrollBottom - segmentY * (row + 1);
 
 
-        //Order the new client to spawn its player 1
-        m_ship_info[m_ship_identifier_counter].m_position = spawnPos;
-        m_ship_info[m_ship_identifier_counter].m_hitpoints = 100;
-        m_ship_info[m_ship_identifier_counter].m_missile_ammo = 20;
+        //Order the new client to spawn its player 
+        sf::Int32 newId = m_ship_identifier_counter;
+        m_ship_info[newId].m_position = {spawnX,spawnY};
+        m_ship_info[newId].m_hitpoints = 100;
+        m_ship_info[newId].m_missile_ammo = 20;
 
 
         // Build the spawn packet with the ship's information 
@@ -489,6 +500,11 @@ void GameServer::HandleIncomingConnections()
         
         m_ship_count++;
         m_connected_players++;
+
+        
+        m_initialShipCount = static_cast<sf::Int32>(m_ship_info.size());
+        m_matchStarted = true;
+        m_missionSuccessSent = false;
 
         // Prepare a new RemotePeer if there is still capacity.
         if (m_connected_players >= m_max_connected_players)
@@ -537,68 +553,50 @@ void GameServer::HandleDisconnections()
 
 void GameServer::InformWorldState(sf::TcpSocket& socket)
 {
-    /*sf::Packet packet;
-    packet << static_cast<sf::Int32>(Server::PacketType::kInitialState);
+    sf::Packet packet;
+    // 1) Packet type
+    packet << static_cast<sf::Int32>(Server::PacketType::kInitialState)
 
-    packet << m_world_height << m_battlefield_rect.top + m_battlefield_rect.height;
-    packet << static_cast<sf::Int32>(m_ship_count);
+    
+        //<< m_packet_sequence++           // sequence #
+        //<< Now().asSeconds()          // server timestamp
 
+
+    // 2) World geometry
+    << m_world_height
+        << (m_battlefield_rect.top + m_battlefield_rect.height);
+
+    // 3) How many ships are we actually going to send?
+    sf::Int32 shipsToSend = 0;
+    for (std::size_t i = 0; i < m_connected_players; ++i)
+        if (m_peers[i]->m_ready)
+            shipsToSend += static_cast<sf::Int32>(m_peers[i]->m_ship_identifiers.size());
+
+    packet << shipsToSend;
+
+    // 4) Now serialize exactly that many
     for (std::size_t i = 0; i < m_connected_players; ++i)
     {
-        if (m_peers[i]->m_ready)
+        if (!m_peers[i]->m_ready)
+            continue;
+
+        for (sf::Int32 id : m_peers[i]->m_ship_identifiers)
         {
-            for (sf::Int32 identifier : m_peers[i]->m_ship_identifiers)
-            {
-                packet << identifier << m_ship_info[identifier].m_position.x << m_ship_info[identifier].m_position.y << m_ship_info[identifier].m_hitpoints << m_ship_info[identifier].m_missile_ammo;
-            }
+            const auto& info = m_ship_info[id];
+            packet << id
+                << info.m_position.x
+                << info.m_position.y
+                << info.m_hitpoints
+                << info.m_missile_ammo
+            	<< info.m_cannon_angle;
+
+            // Look up the name (or empty string)
+            const auto it = m_ship_names.find(id);
+            packet << (it != m_ship_names.end() ? it->second : std::string{});
         }
     }
-    socket.send(packet);*/
 
-        sf::Packet packet;
-        // 1) Packet type
-        packet << static_cast<sf::Int32>(Server::PacketType::kInitialState)
-
-        
-            //<< m_packet_sequence++           // sequence #
-            //<< Now().asSeconds()          // server timestamp
-
-
-        // 2) World geometry
-        << m_world_height
-            << (m_battlefield_rect.top + m_battlefield_rect.height);
-
-        // 3) How many ships are we actually going to send?
-        sf::Int32 shipsToSend = 0;
-        for (std::size_t i = 0; i < m_connected_players; ++i)
-            if (m_peers[i]->m_ready)
-                shipsToSend += static_cast<sf::Int32>(m_peers[i]->m_ship_identifiers.size());
-
-        packet << shipsToSend;
-
-        // 4) Now serialize exactly that many
-        for (std::size_t i = 0; i < m_connected_players; ++i)
-        {
-            if (!m_peers[i]->m_ready)
-                continue;
-
-            for (sf::Int32 id : m_peers[i]->m_ship_identifiers)
-            {
-                const auto& info = m_ship_info[id];
-                packet << id
-                    << info.m_position.x
-                    << info.m_position.y
-                    << info.m_hitpoints
-                    << info.m_missile_ammo
-            		<< info.m_cannon_angle;
-
-                // Look up the name (or empty string)
-                const auto it = m_ship_names.find(id);
-                packet << (it != m_ship_names.end() ? it->second : std::string{});
-            }
-        }
-
-        socket.send(packet);
+    socket.send(packet);
 
 }
 
@@ -629,17 +627,17 @@ void GameServer::UpdateClientState()
 {
     sf::Packet packet;
 
-    // 1) Header
+    // Header
     packet << static_cast<sf::Int32>(Server::PacketType::kUpdateClientState)
            << m_packet_sequence++           // sequence #
            << Now().asSeconds();            // server timestamp
 
-    // 2) Scroll + ship count
+    // Scroll + ship count
     float scrollBottom = m_battlefield_rect.top + m_battlefield_rect.height;
     packet << scrollBottom
            << static_cast<sf::Int32>(m_ship_info.size());
 
-    // 3) Per‐ship state + ack
+    //Per‐ship state + ack
     for (const auto& kv : m_ship_info)
     {
         sf::Int32 id   = static_cast<sf::Int32>(kv.first);
@@ -650,8 +648,8 @@ void GameServer::UpdateClientState()
                << s.m_position.y
                << s.m_hitpoints
                << s.m_missile_ammo
-               << s.m_lastProcessedInput
-			   << s.m_cannon_angle;
+               << s.m_cannon_angle
+               << s.m_lastProcessedInput;
     }
 
     // 4) Broadcast
