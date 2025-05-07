@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <deque>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Config.hpp>
 #include <SFML/Network/TcpSocket.hpp>
@@ -10,6 +11,7 @@
 #include <string>
 #include <unordered_map>
 #include <SFML/Graphics/Rect.hpp>
+#include "SFML/Network/Packet.hpp"
 
 
 class GameServer
@@ -24,7 +26,10 @@ private:
 
 		bool m_ready;
 		bool m_timed_out;
+		std::deque<sf::Packet> m_send_queue;
 
+		void QueuePacket(const sf::Packet& packet);
+		void FlushSendQueue();
 	};
 
 	struct ShipInfo
@@ -33,9 +38,11 @@ private:
 		sf::Int32 m_hitpoints;
 		sf::Int32 m_missile_ammo;
 		std::map<sf::Int32, bool> m_realtime_actions;
+		sf::Int32    m_lastProcessedInput = -1; 
 	};
 
 	typedef std::unique_ptr<RemotePeer> PeerPtr;
+	
 
 
 public:
@@ -98,6 +105,8 @@ private:
 
 	sf::Time m_last_spawn_time;
 	sf::Time m_time_for_next_spawn;
+
+	sf::Int32 m_packet_sequence = 0;
 	
 };
 

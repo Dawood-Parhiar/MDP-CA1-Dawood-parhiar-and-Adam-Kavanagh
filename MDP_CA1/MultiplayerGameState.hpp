@@ -5,6 +5,17 @@
 #include "GameServer.hpp"
 #include "NetworkProtocol.hpp"
 #include "SFML/Network/TcpSocket.hpp"
+#include "SFML/Network/Packet.hpp"
+
+struct NetworkState
+{
+	sf::Vector2f lastPos,    // older snapshot
+		currPos;    // newer snapshot
+	float         lastTime,  // server timestamp of lastPos
+		currTime;  // server timestamp of currPos
+	int           hitpoints,
+		ammo;
+};
 
 class MultiplayerGameState : public State
 {
@@ -31,6 +42,9 @@ private:
 	void HandleUpdateClient(sf::Packet& packet);
 	void HandleSpawnPickup(sf::Packet& packet);
 	void HandlePacket(sf::Int32 packet_type, sf::Packet& packet);
+	void QueueOutgoingPacket(const sf::Packet& packet);
+	void FlushSendQueue();
+	void InterpolateRemoteShips();
 
 private:
 	typedef std::unique_ptr<Player> PlayerPtr;
@@ -68,5 +82,23 @@ private:
 
 	bool m_local_player_spawned = false;
 
+	//chatgpt
+
+	sf::Int32 m_last_server_sequence = -1;
+	std::deque<sf::Packet> m_send_queue;
+
+	std::unordered_map<sf::Int32, NetworkState> m_networkStates;
+	sf::Clock                                   m_clientClock;        // local clock
+	const float                                 m_interpolationDelay = 0.1f;  // 100 ms buffer
+
+	struct PendingInput {
+		sf::Int32 seq;
+		Action    action;
+		bool      enabled;
+	};
+
+	std::deque<PendingInput> m_pendingInputs;
+	sf::Int32                m_nextInputSeq = 0;     // starts at 0
+	sf::Int32                m_lastServerAck = -1;
 };
 

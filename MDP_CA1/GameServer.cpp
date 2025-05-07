@@ -86,11 +86,13 @@ void GameServer::ExecutionThread()
     //Initialisation
     SetListening(true);
 
-    sf::Time frame_rate = sf::seconds(1.f / 60.f);
-    sf::Time frame_time = sf::Time::Zero;
-    sf::Time tick_rate = sf::seconds(1.f / 20.f);
-    sf::Time tick_time = sf::Time::Zero;
-    sf::Clock frame_clock, tick_clock;
+    sf::Time FRAME_RATE = sf::seconds(1.f / 60.f);
+    //sf::Time frame_time = sf::Time::Zero;
+    sf::Time TICK_RATE = sf::seconds(1.f / 20.f);
+
+    sf::Clock clock;
+    sf::Time next_frame = clock.getElapsedTime() + FRAME_RATE;
+    sf:: Time next_tick = clock.getElapsedTime() + TICK_RATE;
 
     while (!m_waiting_thread_end)
     {
@@ -98,27 +100,32 @@ void GameServer::ExecutionThread()
         HandleIncomingConnections();
         HandleIncomingPackets();
 
-        frame_time += frame_clock.getElapsedTime();
-        frame_clock.restart();
-
-        tick_time += tick_clock.getElapsedTime();
-        tick_clock.restart();
-
-        //Fixed time step
-        while (frame_time >= frame_rate)
+        
+        for (auto& peer : m_peers)
         {
-            m_battlefield_rect.top += m_battlefield_scrollspeed * frame_rate.asSeconds();
-            frame_time -= frame_rate;
+            if (peer->m_ready)
+                peer->FlushSendQueue();
         }
 
-        //Fixed time step
-        while (tick_time >= tick_rate)
+
+        sf::Time now = clock.getElapsedTime();
+        //Update rendering scroll in fixed 60HZ steps
+        while (now >= next_frame)
+        {
+	        m_battlefield_rect.top += m_battlefield_scrollspeed * FRAME_RATE.asSeconds();
+            next_frame += FRAME_RATE;
+        }
+
+        //Frun game logic in fixed 20HZ steps
+        while (now >= next_tick)
         {
             Tick();
-            tick_time -= tick_rate;
+            next_tick += TICK_RATE;
         }
-        //sleep
-        sf::sleep(sf::milliseconds(50));
+        //sleep just until the next frame or tick is due
+        sf::Time wakeup_call = std::min(next_frame, next_tick);
+        if (wakeup_call > now)
+            sf::sleep(wakeup_call - now);
     }
 }
 
@@ -160,6 +167,8 @@ void GameServer::Tick()
             ++itr;
         }
     }
+
+
 
     //Check if it is time to spawn enemies
     if (Now() >= m_time_for_next_spawn + m_last_spawn_time)
@@ -246,14 +255,28 @@ void GameServer::PlayerEvent(sf::Packet& packet)
     NotifyPlayerEvent(ship_identifier, action);
 }
 
+// In GameServer.cpp, replace your old RealTimeChange with this:
 void GameServer::RealTimeChange(sf::Packet& packet)
 {
+    // 1) Read the client’s input sequence first:
+    sf::Int32 seq;
     sf::Int32 ship_identifier;
     sf::Int32 action;
-    bool action_enabled;
-    packet >> ship_identifier >> action >> action_enabled;
+    bool      action_enabled;
+
+    packet >> seq
+        >> ship_identifier
+        >> action
+        >> action_enabled;
+
+    // 2) Record which input the server has now processed for this ship
+    auto& info = m_ship_info[ship_identifier];
+    info.m_lastProcessedInput = seq;
+
+    // 3) Broadcast the game action unchanged to all clients
     NotifyPlayerRealtimeChange(ship_identifier, action, action_enabled);
 }
+
 
 
 void GameServer::StateUpdate(sf::Packet& packet)
@@ -277,25 +300,17 @@ void GameServer::StateUpdate(sf::Packet& packet)
 void GameServer::GameEvent(sf::Packet& packet, GameServer::RemotePeer& receiving_peer)
 {
     sf::Int32 action;
-    float x;
-    float y;
+    float x, y;
+    packet >> action >> x >> y;
 
-    packet >> action;
-    packet >> x;
-    packet >> y;
-
-    
-    //Enemy explodes, with a certain probability, drop a pickup
-    //To avoid multiple messages only listen to the first peer (host)
-    if (action == GameActions::kEnemyExplode && Utility::RandomInt(3) == 0 && &receiving_peer == m_peers[0].get())
+    if (action == GameActions::kEnemyExplode
+        && Utility::RandomInt(3) == 0)
     {
-        sf::Packet packet;
-        packet << static_cast<sf::Int32>(Server::PacketType::kSpawnPickup);
-        packet << static_cast<sf::Int32>(Utility::RandomInt(static_cast<int>(PickupType::kPickupCount)));
-        packet << x;
-        packet << y;
-
-        SendToAll(packet);
+        sf::Packet spawnPacket;
+        spawnPacket << static_cast<sf::Int32>(Server::PacketType::kSpawnPickup)
+            << static_cast<sf::Int32>(Utility::RandomInt(static_cast<int>(PickupType::kPickupCount)))
+            << x << y;
+        SendToAll(spawnPacket);
     }
 }
 
@@ -505,10 +520,15 @@ void GameServer::InformWorldState(sf::TcpSocket& socket)
 
         sf::Packet packet;
         // 1) Packet type
-        packet << static_cast<sf::Int32>(Server::PacketType::kInitialState);
+        packet << static_cast<sf::Int32>(Server::PacketType::kInitialState)
+
+        
+            //<< m_packet_sequence++           // sequence #
+            //<< Now().asSeconds()          // server timestamp
+
 
         // 2) World geometry
-        packet << m_world_height
+        << m_world_height
             << (m_battlefield_rect.top + m_battlefield_rect.height);
 
         // 3) How many ships are we actually going to send?
@@ -556,34 +576,45 @@ void GameServer::BroadcastMessage(const std::string& message)
 
 void GameServer::SendToAll(sf::Packet& packet)
 {
-    for (std::size_t i = 0; i < m_connected_players; ++i)
+    for (auto& peer : m_peers)
     {
-        if (m_peers[i]->m_ready)
-        {
-            m_peers[i]->m_socket.send(packet);
-        }
+        if (peer->m_ready)
+            peer->QueuePacket(packet);
     }
 }
 
 void GameServer::UpdateClientState()
 {
-    sf::Packet update_client_state_packet;
+    sf::Packet packet;
 
-    update_client_state_packet << static_cast<sf::Int32>(Server::PacketType::kUpdateClientState);
+    // 1) Header
+    packet << static_cast<sf::Int32>(Server::PacketType::kUpdateClientState)
+           << m_packet_sequence++           // sequence #
+           << Now().asSeconds();            // server timestamp
 
-    update_client_state_packet << static_cast<float>(m_battlefield_rect.top + m_battlefield_rect.height);
-    update_client_state_packet << static_cast<sf::Int32>(m_ship_count);
+    // 2) Scroll + ship count
+    float scrollBottom = m_battlefield_rect.top + m_battlefield_rect.height;
+    packet << scrollBottom
+           << static_cast<sf::Int32>(m_ship_info.size());
 
-    for (const auto& ship : m_ship_info)
+    // 3) Per‐ship state + ack
+    for (const auto& kv : m_ship_info)
     {
-        update_client_state_packet << static_cast<sf::Int32>(ship.first)
-            << ship.second.m_position.x
-            << ship.second.m_position.y
-            << ship.second.m_hitpoints
-            << ship.second.m_missile_ammo;
+        sf::Int32 id   = static_cast<sf::Int32>(kv.first);
+        const auto& s  = kv.second;
+
+        packet << id
+               << s.m_position.x
+               << s.m_position.y
+               << s.m_hitpoints
+               << s.m_missile_ammo
+               << s.m_lastProcessedInput;
     }
-    SendToAll(update_client_state_packet);
+
+    // 4) Broadcast
+    SendToAll(packet);
 }
+
 
 
 //It is essential to set the sockets to non-blocking - m_socket.setBlocking(false)
@@ -594,3 +625,31 @@ GameServer::RemotePeer::RemotePeer() : m_ready(false), m_timed_out(false)
     m_socket.setBlocking(false);
 }
 
+void GameServer::RemotePeer::QueuePacket(const sf::Packet& packet)
+{
+    m_send_queue.push_back(packet);
+}
+
+void GameServer::RemotePeer::FlushSendQueue()
+{
+    while (!m_send_queue.empty())
+    {
+        auto& front = m_send_queue.front();
+        auto status = m_socket.send(front);
+        if (status == sf::Socket::Done)
+        {
+            m_send_queue.pop_front();
+        }
+        else if (status == sf::Socket::Partial || status == sf::Socket::NotReady)
+        {
+            // OS buffer still full — stop and retry later
+            break;
+        }
+        else
+        {
+            // Error or disconnect → mark timed out and drop rest
+            m_timed_out = true;
+            break;
+        }
+    }
+}
