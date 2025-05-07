@@ -40,7 +40,7 @@ void GameServer::NotifyPlayerSpawn(sf::Int32 ship_identifier)
     sf::Packet packet;
     // Use kPlayerConnect for the broadcast; individual connections already get their tailored spawn packet.
     packet << static_cast<sf::Int32>(Server::PacketType::kPlayerConnect);
-    packet << ship_identifier << m_ship_info[ship_identifier].m_position.x << m_ship_info[ship_identifier].m_position.y;
+    packet << ship_identifier << m_ship_info[ship_identifier].m_position.x << m_ship_info[ship_identifier].m_position.y << m_ship_info[ship_identifier].m_hitpoints << m_ship_info[ship_identifier].m_missile_ammo << m_ship_info[ship_identifier].m_cannon_angle;
 
     SendToAll(packet);
 }
@@ -375,6 +375,9 @@ void GameServer::HandlePlayerNameChange(sf::Packet& packet)
 
 void GameServer::HandleIncomingPackets(sf::Packet& packet, RemotePeer& receiving_peer, bool& detected_timeout)
 {
+
+    //use of chatgpt can be seen here
+    // https://chatgpt.com/share/681be6d4-0a6c-800c-977f-f82a6a5ad6f1
     sf::Int32 packet_type;
     packet >> packet_type;
 
@@ -462,7 +465,7 @@ void GameServer::HandleIncomingConnections()
         //Order the new client to spawn its player 
         sf::Int32 newId = m_ship_identifier_counter;
         m_ship_info[newId].m_position = {spawnX,spawnY};
-        m_ship_info[newId].m_hitpoints = 100;
+        m_ship_info[newId].m_hitpoints = 200;
         m_ship_info[newId].m_missile_ammo = 20;
 
 
@@ -470,9 +473,12 @@ void GameServer::HandleIncomingConnections()
         sf::Packet packet;
     	packet << static_cast<sf::Int32>(Server::PacketType::kSpawnSelf);
 
-        packet << m_ship_identifier_counter;
-        packet << m_ship_info[m_ship_identifier_counter].m_position.x;
-        packet << m_ship_info[m_ship_identifier_counter].m_position.y;
+        packet << m_ship_identifier_counter
+            << m_ship_info[m_ship_identifier_counter].m_position.x
+            << m_ship_info[m_ship_identifier_counter].m_position.y
+            << m_ship_info[m_ship_identifier_counter].m_hitpoints
+            << m_ship_info[m_ship_identifier_counter].m_missile_ammo
+            << m_ship_info[m_ship_identifier_counter].m_cannon_angle;
 
         m_peers[m_connected_players]->m_ship_identifiers.emplace_back(m_ship_identifier_counter);
 

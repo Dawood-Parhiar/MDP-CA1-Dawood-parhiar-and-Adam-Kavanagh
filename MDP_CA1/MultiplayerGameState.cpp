@@ -376,7 +376,9 @@ void MultiplayerGameState::HandleSpawnSelf(sf::Packet& packet)
 {
 	sf::Int32 ship_id;
 	sf::Vector2f ship_position;
-	packet >>  ship_id >> ship_position.x >> ship_position.y;
+	sf::Int32 hp , ammo;
+	float cannon_angle;
+	packet >>  ship_id >> ship_position.x >> ship_position.y >> hp >> ammo >> cannon_angle;
 
 	Ship* ship = m_world.AddShip(ship_id);
 	ship->setPosition(ship_position);
@@ -398,7 +400,9 @@ void MultiplayerGameState::HandlePlayerConnect(sf::Packet& packet)
 {
 	sf::Int32 ship_id;
 	sf::Vector2f ship_position;
-	packet >> ship_id >> ship_position.x >> ship_position.y;
+	sf::Int32 hp, ammo;
+	float cannon_angle;
+	packet >> ship_id >> ship_position.x >> ship_position.y >> hp >> ammo >> cannon_angle;
 
 	Ship* aircraft = m_world.AddShip(ship_id);
 	aircraft->setPosition(ship_position);
@@ -636,6 +640,9 @@ void MultiplayerGameState::HandleMissionSuccess(sf::Packet& packet)
 
 void MultiplayerGameState::HandlePacket(sf::Int32 packet_type, sf::Packet& packet)
 {
+	//use of chatgpt can be seen here
+// https://chatgpt.com/share/681be6d4-0a6c-800c-977f-f82a6a5ad6f1
+
 	switch (static_cast<Server::PacketType>(packet_type))
 	{
 		//Send message to all Clients
