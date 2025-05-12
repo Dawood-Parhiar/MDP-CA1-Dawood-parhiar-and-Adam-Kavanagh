@@ -168,6 +168,8 @@
     <ClCompile Include="NetworkNode.cpp" />
     <ClCompile Include="NewMultiplayerGameState.cpp" />
     <ClCompile Include="Obstacle.cpp" />
+    <ClCompile Include="ScoreManager.cpp" />
+    <ClCompile Include="SFML-2.6.1\include\SFML\Graphics\Font.cpp" />
     <ClCompile Include="Ship.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Application.cpp" />
@@ -221,6 +223,7 @@
     <ClInclude Include="NetworkProtocol.hpp" />
     <ClInclude Include="NewMultiplayerGameState.hpp" />
     <ClInclude Include="Obstacle.hpp" />
+    <ClInclude Include="ScoreManager.hpp" />
     <ClInclude Include="Ship.hpp" />
     <ClInclude Include="ShipType.hpp" />
     <ClInclude Include="Animation.hpp" />

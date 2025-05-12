@@ -49,7 +49,7 @@ public:
 
 	bool HasGunner() const { return m_gunner != -1; }
 	sf::Int32 GetPilot() const { return m_pilot; }
-
+	
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
 	virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands) override;
@@ -59,9 +59,6 @@ private:
 	void CheckPickupDrop(CommandQueue& commands);
 	void UpdateRollAnimation(sf::Time dt);
 
-	
-
-
 private:
 	ShipType m_type;
 	sf::Sprite m_sprite;
@@ -70,6 +67,8 @@ private:
 	TextNode* m_health_display;
 	TextNode* m_missile_display;
 	TextNode* m_coins_display;
+	TextNode* m_score_display;
+
 	float m_distance_travelled;
 	int m_directions_index;
 

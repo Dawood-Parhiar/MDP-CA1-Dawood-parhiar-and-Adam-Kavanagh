@@ -44,6 +44,7 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 	, m_health_display(nullptr)
 	, m_missile_display(nullptr)
 	, m_coins_display(nullptr)
+	, m_score_display(nullptr)
 	, m_distance_travelled(0.f)
 	, m_directions_index(0)
 	, m_coins(0)
@@ -122,6 +123,13 @@ Ship::Ship(ShipType type, const TextureHolder& textures, const FontHolder& fonts
 		std::unique_ptr<TextNode> coins_display(new TextNode(fonts, *coins));
 		m_coins_display = coins_display.get();
 		AttachChild(std::move(coins_display));
+
+		//Score display
+		std::string* score = new std::string("");
+		std::unique_ptr<TextNode> score_display(new TextNode(fonts, *score));
+		m_score_display = score_display.get();
+		AttachChild(std::move(score_display));
+
 	}
 
 
@@ -155,6 +163,12 @@ void Ship::IncreaseFireRate()
 void Ship::IncreaseCoins()
 {
 	++m_coins;
+
+	// Update the score display
+	if (m_score_display)
+	{
+		m_score_display->SetString("Score: " + std::to_string(m_coins * 20));
+	}
 }
 
 void Ship::IncreaseFireSpread()
@@ -172,18 +186,21 @@ void Ship::CollectMissile(unsigned int count)
 
 void Ship::UpdateTexts()
 {
-	m_health_display->SetString(std::to_string(GetHitPoints()) + "HP");
-	m_health_display->setPosition(0.f, 70.f);
-	
+	m_health_display->SetString(std::to_string(GetHitPoints()) + " HP");
+
 	if (m_missile_display)
 	{
-		m_missile_display->setPosition(0.f, 90.f);
-		m_missile_display->SetString("M: " + std::to_string(m_missile_ammo));
-		
-		//display coins if missile display is present to a ship
+		m_missile_display->SetString("Ammo: " + std::to_string(m_missile_ammo));
+	}
+
+	if (m_coins_display)
+	{
 		m_coins_display->SetString("Coins: " + std::to_string(m_coins));
-		m_coins_display->setPosition(0.f, 110.f);
-		
+	}
+
+	if (m_score_display)
+	{
+		m_score_display->SetString("Score: " + std::to_string(m_coins * 20)); // Example: Score based on coins
 	}
 }
 
@@ -346,6 +363,7 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 	{
 		CheckPickupDrop(commands);
 		m_explosion.Update(dt);
+
 		// Play explosion sound only once
 		if (!m_explosion_began)
 		{
@@ -356,9 +374,6 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 			}
 			else
 			{
-				/*SoundEffect soundEffect = (Utility::RandomInt(2) == 0) ? SoundEffect::kExplosion1 : SoundEffect::kExplosion2;
-				PlayLocalSound(commands, soundEffect);*/
-
 				sf::Vector2f position = GetWorldPosition();
 
 				Command command;
@@ -375,27 +390,56 @@ void Ship::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 		}
 		return;
 	}
+
+	// Update the cannon
 	if (m_cannon)
 	{
 		m_cannon->UpdateCurrent(dt, commands);
-		//m_cannon_ptr->UpdateCurrent(dt, commands);
 	}
+
+	// Update the ship's movement 
 	Entity::UpdateCurrent(dt, commands);
 	UpdateTexts();
-
 	UpdateMovementPattern(dt);
-
 	UpdateRollAnimation(dt);
 
-	//Check if bullets or misiles are fired
+	// Check if bullets or missiles are fired
 	CheckProjectileLaunch(dt, commands);
-	
+
 	if (m_player_cannon_cooldown > sf::Time::Zero) // Adam
 	{
 		m_player_cannon_cooldown -= dt;
 	}
 
+	// Stop the values from rotating 
+	sf::Vector2f shipPosition = GetWorldPosition();
+
+	if (m_health_display)
+	{
+		m_health_display->setPosition(shipPosition.x, shipPosition.y - 50.f); // Position above the ship
+		m_health_display->setRotation(0.f); // Prevent rotation
+	}
+
+	if (m_missile_display)
+	{
+		m_missile_display->setPosition(shipPosition.x, shipPosition.y - 30.f); // Each is to be lower than the last
+		m_missile_display->setRotation(0.f); 
+	}
+
+	if (m_coins_display)
+	{
+		m_coins_display->setPosition(shipPosition.x, shipPosition.y - 10.f); 
+		m_coins_display->setRotation(0.f); 
+	}
+
+	if (m_score_display)
+	{
+		m_score_display->setPosition(shipPosition.x, shipPosition.y + 10.f);
+		m_score_display->setRotation(0.f); 
+	}
+
 }
+
 
 void Ship::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 {
